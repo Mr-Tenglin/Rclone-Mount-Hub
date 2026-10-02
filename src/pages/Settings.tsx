@@ -25,7 +25,7 @@ import { useSettingsStore } from "../lib/store";
 import { useLogStore } from "../lib/logStore";
 import { useI18n, SUPPORTED_LOCALES } from "../lib/i18n";
 import { Check } from "phosphor-react";
-import type { SpeedProfile, NetworkMode, AppLanguage } from "../lib/types";
+import type { SpeedProfile, NetworkMode, AppLanguage, ScoopBucketSource } from "../lib/types";
 import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
 import { open as openFilePicker } from "@tauri-apps/plugin-dialog";
@@ -153,7 +153,9 @@ export function Settings() {
     setInstallingDrivers(true);
     addLog("info", t("log.installingRclone"), "drivers");
     try {
-      await invoke("install_rclone");
+      await invoke("install_rclone", {
+        scoopBucketSource: settings.scoop_bucket_source,
+      });
       addLog("success", t("log.rcloneInstalledOk"), "drivers");
       toast.success(t("toast.rcloneInstalled"));
       await loadDriverVersions();
@@ -229,7 +231,9 @@ export function Settings() {
     setCheckingUpdates(true);
     addLog("info", t("log.checkingDriverUpdates"), "drivers");
     try {
-      const result = await invoke<string>("check_driver_updates");
+      const result = await invoke<string>("check_driver_updates", {
+        scoopBucketSource: settings.scoop_bucket_source,
+      });
       addLog("success", `✓ ${result}`, "drivers");
       toast.info(result);
     } catch (err) {
@@ -949,6 +953,34 @@ export function Settings() {
                 {SUPPORTED_LOCALES.map((l) => (
                   <option key={l.code} value={l.code}>{l.label}</option>
                 ))}
+              </select>
+            </div>
+          </Card>
+
+          {/* Scoop bucket source (drives rclone install / update source) */}
+          <Card className="p-6">
+            <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
+              <Download size={18} weight="duotone" className="text-accent-green" />
+              {t("settings.scoop.section")}
+            </h2>
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <div className="text-[13px] font-medium text-text-primary mb-0.5">
+                  {t("settings.scoop.label")}
+                </div>
+                <div className="text-[11px] text-text-tertiary">
+                  {t("settings.scoop.hint")}
+                </div>
+              </div>
+              <select
+                value={settings.scoop_bucket_source ?? "github"}
+                onChange={(e) =>
+                  update({ scoop_bucket_source: e.target.value as ScoopBucketSource })
+                }
+                className="bg-bg-overlay border border-border-default rounded-lg px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-accent-blue/60 min-w-[140px]"
+              >
+                <option value="github">{t("settings.scoop.github")}</option>
+                <option value="gitee">{t("settings.scoop.gitee")}</option>
               </select>
             </div>
           </Card>

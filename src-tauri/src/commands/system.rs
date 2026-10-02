@@ -22,57 +22,111 @@ pub struct DriverVersions {
     pub winfsp_version: Option<String>,
 }
 
-// Helper to check if scoop is available, and install it if not
-#[cfg(target_os = "windows")]
-async fn ensure_scoop_installed(app: &tauri::AppHandle) -> Result<(), String> {
-    // Check if scoop is already installed
-    let check_output = app
+// ── Scoop bootstrap ───────────────────────────────────────────────────────────
+
+/// Scoop bucket mirrors. GitHub is the default and authoritative source; the
+/// Gitee mirror is a fallback for networks where GitHub is unreachable
+/// (common in mainland China). The Gitee mirror lags behind GitHub, so a
+/// package missing there means it simply isn't mirrored yet.
+const SCOOP_BUCKET_URLS: &[(&str, &str)] = &[
+    ("github", "https://github.com/ScoopInstaller/Main.git"),
+    ("gitee", "https://gitee.com/ScoopInstaller/Main.git"),
+];
+
+fn scoop_bucket_url(source: &str) -> &'static str {
+    SCOOP_BUCKET_URLS
+        .iter()
+        .find(|(code, _)| code.eq_ignore_ascii_case(source))
+        .map(|(_, url)| *url)
+        .unwrap_or(SCOOP_BUCKET_URLS[0].1)
+}
+
+/// Run a powershell one-liner and return (success, stdout).
+async fn ps1(app: &tauri::AppHandle, cmd: &str) -> (bool, String) {
+    match app
         .shell()
         .command("powershell")
-        .args(["-Command", "scoop --version"])
+        .args(["-Command", cmd])
         .output()
-        .await;
+        .await
+    {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            (output.status.success(), stdout)
+        }
+        Err(_) => (false, String::new()),
+    }
+}
 
-    if let Ok(output) = check_output {
-        if output.status.success() {
-            // Scoop is installed, update it
-            let _ = app
-                .shell()
-                .command("powershell")
-                .args(["-Command", "scoop update"])
-                .output()
-                .await;
-            return Ok(());
+/// Is the Scoop `main` bucket a healthy, current git repo?
+///
+/// The known failure mode (Scoop 0.6.0+): the bucket dir exists but is *not*
+/// a git repo, so `scoop update` aborts with "Failed to remove local 'main'
+/// bucket" / "'main' bucket not found" and `scoop install` can't find
+/// manifests. Detect that here so we can repair it.
+async fn scoop_main_bucket_healthy(app: &tauri::AppHandle) -> bool {
+    let (ok, out) = ps1(
+        app,
+        "scoop bucket list main 2>&1 | Out-String; $exit = $LASTEXITCODE",
+    )
+    .await;
+    // `scoop bucket list main` prints the bucket + its source on success.
+    ok && !out.contains("not found") && !out.contains("Failed to remove")
+}
+
+/// Make sure Scoop itself is present (installing it from get.scoop.sh when
+/// missing), then guarantee the `main` bucket exists from the requested
+/// source. If the existing bucket was built from the *other* source, it is
+/// removed and re-added so `scoop update` actually pulls from the right place.
+#[cfg(target_os = "windows")]
+async fn ensure_scoop_installed(app: &tauri::AppHandle, bucket_source: &str) -> Result<(), String> {
+    // 1. Scoop binary itself — install from the official bootstrap script.
+    let (scoop_ok, _) = ps1(app, "scoop --version").await;
+    if !scoop_ok {
+        let (inst_ok, stderr) = ps1(
+            app,
+            "powershell -NoProfile -Command \"iwr -useb get.scoop.sh | iex\" 2>&1 | Out-String",
+        )
+        .await;
+        if !inst_ok {
+            return Err(format!("Scoop installation failed: {}", stderr.trim()));
         }
     }
 
-    // Scoop not installed, install it
-    let install_output = app
-        .shell()
-        .command("powershell")
-        .args([
-            "-ExecutionPolicy",
-            "RemoteSigned",
-            "-Command",
-            "iwr -useb get.scoop.sh | iex"
-        ])
-        .output()
-        .await
-        .map_err(|e| format!("Failed to install Scoop: {}", e))?;
-
-    if !install_output.status.success() {
-        let stderr = String::from_utf8_lossy(&install_output.stderr);
-        return Err(format!("Scoop installation failed: {}", stderr));
+    // 2. Repair / point the main bucket at the requested source.
+    let url = scoop_bucket_url(bucket_source);
+    let healthy = scoop_main_bucket_healthy(app).await;
+    if !healthy {
+        // Best-effort removal of a broken/directory-only bucket.
+        let _ = ps1(app, "scoop bucket rm main 2>$null | Out-String").await;
+    }
+    // Re-add when missing, or when the recorded source differs from the
+    // requested one. (The URL of the active bucket shows in `bucket list`.)
+    let (_, list) = ps1(app, "scoop bucket list main 2>&1 | Out-String").await;
+    if !healthy || !list.contains(url) {
+        let _ = ps1(app, "scoop bucket rm main 2>$null | Out-String").await;
+        let (add_ok, add_err) =
+            ps1(app, &format!("scoop bucket add main {}", url)).await;
+        if !add_ok {
+            return Err(format!(
+                "Failed to add Scoop main bucket from {} ({}) — check your network: {}",
+                if bucket_source.eq_ignore_ascii_case("gitee") { "Gitee" } else { "GitHub" },
+                url,
+                add_err.trim()
+            ));
+        }
+        let _ = ps1(app, "scoop update 2>&1 | Out-String").await;
+    } else {
+        // Healthy bucket already on the right source — just refresh.
+        let _ = ps1(app, "scoop update 2>&1 | Out-String").await;
     }
 
-    // Update scoop after installation
-    let _ = app
-        .shell()
-        .command("powershell")
-        .args(["-Command", "scoop update"])
-        .output()
-        .await;
+    Ok(())
+}
 
+/// Non-Windows stub: there is no Scoop, so just succeed no-op.
+#[cfg(not(target_os = "windows"))]
+async fn ensure_scoop_installed(_app: &tauri::AppHandle, _bucket_source: &str) -> Result<(), String> {
     Ok(())
 }
 
@@ -167,11 +221,13 @@ pub async fn is_autostart_enabled(_app: tauri::AppHandle) -> Result<bool, String
 }
 
 #[command]
-pub async fn install_rclone(app: tauri::AppHandle) -> Result<(), String> {
+pub async fn install_rclone(app: tauri::AppHandle, scoop_bucket_source: Option<String>) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
-        // Ensure scoop is installed and updated
-        ensure_scoop_installed(&app).await?;
+        // Ensure scoop is installed and its main bucket is healthy / on the
+        // requested source (github or gitee).
+        let src = scoop_bucket_source.as_deref().unwrap_or("github");
+        ensure_scoop_installed(&app, src).await?;
 
         let output = app
             .shell()
@@ -572,16 +628,13 @@ pub async fn uninstall_winfsp(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[command]
-pub async fn check_driver_updates(app: tauri::AppHandle) -> Result<String, String> {
+pub async fn check_driver_updates(app: tauri::AppHandle, scoop_bucket_source: Option<String>) -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
-        // Update scoop first
-        let _ = app
-            .shell()
-            .command("powershell")
-            .args(["-Command", "scoop update"])
-            .output()
-            .await;
+        // Repair + update Scoop's main bucket from the requested source
+        // (github or gitee) before checking package status.
+        let src = scoop_bucket_source.as_deref().unwrap_or("github");
+        let _ = ensure_scoop_installed(&app, src).await;
 
         // Check for updates
         let output = app
@@ -613,7 +666,7 @@ pub async fn check_driver_updates(app: tauri::AppHandle) -> Result<String, Strin
 
 /// Change this to your GitHub releases URL once you publish releases, e.g.:
 /// "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download"
-const UPDATE_FEED_URL: &str = "https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download";
+const UPDATE_FEED_URL: &str = "https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases/latest/download";
 
 #[derive(serde::Serialize)]
 pub struct AppUpdateInfo {
@@ -623,7 +676,7 @@ pub struct AppUpdateInfo {
     pub download_size: Option<u64>,
 }
 
-const GITHUB_API_URL: &str = "https://api.github.com/repos/Bristopher/Rclone-Mount-Hub/releases/latest";
+const GITHUB_API_URL: &str = "https://api.github.com/repos/Mr-Tenglin/Rclone-Mount-Hub/releases/latest";
 
 #[command]
 pub async fn get_app_version() -> String {

@@ -503,6 +503,13 @@
       "en": "English",
       "zh": "简体中文",
       "hint": "界面语言。“跟随系统”将使用 Windows 显示语言。"
+    },
+    "scoop": {
+      "section": "Scoop 仓库源",
+      "label": "Scoop 仓库源",
+      "hint": "驱动安装/更新时从哪里拉取 rclone。GitHub 为官方源；Gitee 为镜像，适用于访问 GitHub 困难的网络（常见于中国大陆）。应用会在安装/更新时自动修复损坏的 Scoop 仓库。",
+      "github": "GitHub（官方）",
+      "gitee": "Gitee（镜像）"
     }
   },
   "export": {

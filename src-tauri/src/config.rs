@@ -182,6 +182,10 @@ pub struct AppSettings {
     pub network_change_mode: NetworkChangeMode,
     #[serde(default)]
     pub cache_dir: Option<String>,
+    #[serde(default)]
+    pub language: String, // "auto" | "en" | "zh-Hans" | ...
+    #[serde(default)]
+    pub scoop_bucket_source: String, // "github" | "gitee"
 }
 
 impl Default for AppSettings {
@@ -196,6 +200,8 @@ impl Default for AppSettings {
             show_notifications: true,
             network_change_mode: NetworkChangeMode::default(),
             cache_dir: None,
+            language: "auto".to_string(),
+            scoop_bucket_source: "github".to_string(),
         }
     }
 }

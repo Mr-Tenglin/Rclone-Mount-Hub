@@ -503,6 +503,13 @@
       "en": "English",
       "zh": "Español",
       "hint": "Idioma de la interfaz. «Sistema» sigue el idioma de visualización de Windows."
+    },
+    "scoop": {
+      "section": "Fuente del bucket de Scoop",
+      "label": "Fuente del bucket",
+      "hint": "De dónde instala/actualiza rclone al instalar o actualizar drivers. GitHub es la fuente oficial; Gitee es un espejo para redes donde GitHub no es alcanzable (común en China continental). La app repara automáticamente un bucket de Scoop dañado al instalar/actualizar.",
+      "github": "GitHub (oficial)",
+      "gitee": "Gitee (espejo)"
     }
   },
   "export": {

@@ -503,6 +503,13 @@
       "en": "English",
       "zh": "繁體中文",
       "hint": "介面語言。「跟隨系統」將使用 Windows 顯示語言。"
+    },
+    "scoop": {
+      "section": "Scoop 倉庫來源",
+      "label": "Scoop 倉庫來源",
+      "hint": "驅動安裝/更新時從哪裡拉取 rclone。GitHub 為官方來源；Gitee 為鏡像，適用於無法存取 GitHub 的網路（常見於中國大陸）。應用程式會在安裝/更新時自動修復損壞的 Scoop 倉庫。",
+      "github": "GitHub（官方）",
+      "gitee": "Gitee（鏡像）"
     }
   },
   "export": {

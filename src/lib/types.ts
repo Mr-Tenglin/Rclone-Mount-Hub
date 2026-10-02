@@ -53,6 +53,9 @@ export interface CacheOverrides {
 
 export type AppLanguage = "auto" | "en" | "zh-Hans" | "zh-Hant" | "ja" | "es" | "ru";
 
+/** Which bucket source the Scoop-based driver installer/updates use. */
+export type ScoopBucketSource = "github" | "gitee";
+
 export interface AppSettings {
   start_with_windows: boolean;
   start_minimized: boolean;
@@ -65,6 +68,7 @@ export interface AppSettings {
   network_change_mode: NetworkChangeMode;
   cache_dir: string;
   language: AppLanguage;
+  scoop_bucket_source: ScoopBucketSource;
 }
 
 export interface SpeedProfileInfo {

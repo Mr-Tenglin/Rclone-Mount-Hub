@@ -503,6 +503,13 @@
       "en": "English",
       "zh": "日本語",
       "hint": "インターフェース言語。「システム」は Windows の表示言語に従います。"
+    },
+    "scoop": {
+      "section": "Scoop バケットソース",
+      "label": "Scoop バケットソース",
+      "hint": "ドライバのインストール/更新で rclone をどこから取得するか。GitHub は公式ソース、Gitee はミラー（GitHub に到達できないネットワーク向け、中国大陸で一般的）。アプリはインストール/更新時に壊れた Scoop バケットを自動修復します。",
+      "github": "GitHub（公式）",
+      "gitee": "Gitee（ミラー）"
     }
   },
   "export": {

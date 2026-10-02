@@ -49,6 +49,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   network_change_mode: "notify",
   cache_dir: "",
   language: "auto",
+  scoop_bucket_source: "github",
 };
 
 // Settings Store

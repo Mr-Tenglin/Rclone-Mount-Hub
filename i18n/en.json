@@ -503,6 +503,13 @@
       "en": "English",
       "zh": "简体中文",
       "hint": "Interface language. \"System\" follows your Windows display language."
+    },
+    "scoop": {
+      "section": "Scoop Bucket Source",
+      "label": "Scoop bucket source",
+      "hint": "Where driver install/update pulls rclone from. GitHub is the official source; Gitee is a mirror for networks where GitHub is unreachable (common in mainland China). The app auto-repairs a broken Scoop bucket on install/update.",
+      "github": "GitHub (official)",
+      "gitee": "Gitee (mirror)"
     }
   },
   "export": {
