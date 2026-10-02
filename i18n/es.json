@@ -507,9 +507,9 @@
     "scoop": {
       "section": "Fuente del bucket de Scoop",
       "label": "Fuente del bucket",
-      "hint": "De dónde instala/actualiza rclone al instalar o actualizar drivers. GitHub es la fuente oficial; Gitee es un espejo para redes donde GitHub no es alcanzable (común en China continental). La app repara automáticamente un bucket de Scoop dañado al instalar/actualizar.",
+      "hint": "De dónde descarga rclone al instalar o actualizar los drivers. GitHub aloja el bucket principal de Scoop (oficial, predeterminado). Gitee es una plataforma de Git popular entre los desarrolladores de China continental; aloja una copia del bucket sincronizada por la comunidad para usarla cuando GitHub es lento o inaccesible. Gitee NO es un espejo de GitHub: el contenido de su bucket se sincroniza de forma independiente y puede estar desactualizado o faltarle paquetes.",
       "github": "GitHub (oficial)",
-      "gitee": "Gitee (espejo)"
+      "gitee": "Gitee (sincronizado por la comunidad)"
     }
   },
   "export": {

@@ -507,9 +507,9 @@
     "scoop": {
       "section": "Scoop Bucket Source",
       "label": "Scoop bucket source",
-      "hint": "Where driver install/update pulls rclone from. GitHub is the official source; Gitee is a mirror for networks where GitHub is unreachable (common in mainland China). The app auto-repairs a broken Scoop bucket on install/update.",
+      "hint": "Where the driver install/update downloads rclone from. GitHub hosts the official Scoop main bucket (default). Gitee is a Git hosting platform popular with mainland-China developers; it hosts a community-synced copy of the bucket for use when GitHub is slow or unreachable. Gitee is NOT a mirror of GitHub — its bucket content is synced separately and may lag behind or be missing some packages.",
       "github": "GitHub (official)",
-      "gitee": "Gitee (mirror)"
+      "gitee": "Gitee (community-synced)"
     }
   },
   "export": {

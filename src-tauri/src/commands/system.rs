@@ -24,10 +24,16 @@ pub struct DriverVersions {
 
 // ── Scoop bootstrap ───────────────────────────────────────────────────────────
 
-/// Scoop bucket mirrors. GitHub is the default and authoritative source; the
-/// Gitee mirror is a fallback for networks where GitHub is unreachable
-/// (common in mainland China). The Gitee mirror lags behind GitHub, so a
-/// package missing there means it simply isn't mirrored yet.
+/// Scoop bucket sources.
+///
+/// `github` — the official, authoritative Scoop main bucket
+///           (github.com/ScoopInstaller/Main). Default choice.
+/// `gitee`  — a community-synced copy of the bucket on Gitee, a Git
+///           hosting platform popular with mainland-China developers.
+///           Use it when GitHub is slow or unreachable from your network.
+///           It is NOT a mirror of GitHub: Gitee hosts its own repositories
+///           that are synced from GitHub by a third party, so the package
+///           list may lag behind GitHub or be missing some entries.
 const SCOOP_BUCKET_URLS: &[(&str, &str)] = &[
     ("github", "https://github.com/ScoopInstaller/Main.git"),
     ("gitee", "https://gitee.com/ScoopInstaller/Main.git"),

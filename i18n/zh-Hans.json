@@ -507,9 +507,9 @@
     "scoop": {
       "section": "Scoop 仓库源",
       "label": "Scoop 仓库源",
-      "hint": "驱动安装/更新时从哪里拉取 rclone。GitHub 为官方源；Gitee 为镜像，适用于访问 GitHub 困难的网络（常见于中国大陆）。应用会在安装/更新时自动修复损坏的 Scoop 仓库。",
+      "hint": "驱动安装/更新时从哪里下载 rclone。GitHub 托管官方 Scoop main 仓库（默认）；Gitee 是中国大陆开发者常用的 Git 平台，上面有一份社区同步的仓库副本，适合 GitHub 访问不畅时使用。注意 Gitee 不是 GitHub 的镜像——其仓库内容独立同步，可能滞后或缺少部分软件包。",
       "github": "GitHub（官方）",
-      "gitee": "Gitee（镜像）"
+      "gitee": "Gitee（社区同步）"
     }
   },
   "export": {
