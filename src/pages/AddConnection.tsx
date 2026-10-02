@@ -21,6 +21,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { useConnectionStore } from "../lib/store";
 import { useLogStore } from "../lib/logStore";
+import { useI18n } from "../lib/i18n";
 import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 import type { Connection, CacheOverrides } from "../lib/types";
@@ -29,66 +30,81 @@ interface AddConnectionProps {
   onNavigate?: (page: string) => void;
 }
 
-// Supported remote types with display info
-const REMOTE_TYPES = [
+type RemoteTypeId = "webdav" | "sftp" | "smb" | "s3" | "ftp";
+
+// Supported remote types with display info (labels resolved via i18n keys)
+const REMOTE_TYPES: {
+  id: RemoteTypeId;
+  icon: React.ElementType;
+  color: string;
+  labelKey: string;
+  descKey: string;
+}[] = [
   {
     id: "webdav",
-    label: "WebDAV",
     icon: Globe,
     color: "accent-blue",
-    desc: "Unraid, Nextcloud, copyparty",
+    labelKey: "shared.remote.webdav",
+    descKey: "shared.remote.webdavDesc",
   },
   {
     id: "sftp",
-    label: "SFTP",
     icon: Desktop,
     color: "accent-purple",
-    desc: "SFTPGo, OpenSSH",
+    labelKey: "shared.remote.sftp",
+    descKey: "shared.remote.sftpDesc",
   },
   {
     id: "smb",
-    label: "SMB / Samba",
     icon: Desktop,
     color: "accent-amber",
-    desc: "Windows shares, NAS",
+    labelKey: "shared.remote.smb",
+    descKey: "shared.remote.smbDesc",
   },
   {
     id: "s3",
-    label: "S3",
     icon: Cloud,
     color: "accent-green",
-    desc: "AWS S3, MinIO, Backblaze",
+    labelKey: "shared.remote.s3",
+    descKey: "shared.remote.s3Desc",
   },
   {
     id: "ftp",
-    label: "FTP",
     icon: Database,
     color: "text-text-tertiary",
-    desc: "Classic FTP server",
+    labelKey: "shared.remote.ftp",
+    descKey: "shared.remote.ftpDesc",
   },
-] as const;
-
-type RemoteTypeId = (typeof REMOTE_TYPES)[number]["id"];
+];
 
 // WebDAV vendor options
 const WEBDAV_VENDORS = [
-  { value: "copyparty", label: "Copyparty (Unraid)" },
-  { value: "nextcloud", label: "Nextcloud" },
-  { value: "owncloud", label: "ownCloud" },
-  { value: "sharepoint", label: "SharePoint" },
-  { value: "other", label: "Other WebDAV" },
+  { value: "copyparty", labelKey: "shared.vendor.webdav.copyparty" },
+  { value: "nextcloud", labelKey: "shared.vendor.webdav.nextcloud" },
+  { value: "owncloud", labelKey: "shared.vendor.webdav.owncloud" },
+  { value: "sharepoint", labelKey: "shared.vendor.webdav.sharepoint" },
+  { value: "other", labelKey: "shared.vendor.webdav.other" },
 ];
 
 // SFTP server software options
 const SFTP_VENDORS = [
-  { value: "sftpgo", label: "SFTPGo" },
-  { value: "openssh", label: "OpenSSH" },
-  { value: "other", label: "Other SFTP Server" },
+  { value: "sftpgo", labelKey: "shared.vendor.sftp.sftpgo" },
+  { value: "openssh", labelKey: "shared.vendor.sftp.openssh" },
+  { value: "other", labelKey: "shared.vendor.sftp.other" },
+];
+
+const S3_PROVIDERS = [
+  { value: "AWS", labelKey: "shared.vendor.s3.aws" },
+  { value: "MinIO", labelKey: "shared.vendor.s3.minio" },
+  { value: "Backblaze", labelKey: "shared.vendor.s3.backblaze" },
+  { value: "Wasabi", labelKey: "shared.vendor.s3.wasabi" },
+  { value: "Other", labelKey: "shared.vendor.s3.other" },
 ];
 
 export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
   const { add } = useConnectionStore();
   const { addLog } = useLogStore();
+  const { t } = useI18n();
 
   const [remoteType, setRemoteType] = useState<RemoteTypeId>("webdav");
   const [testing, setTesting] = useState(false);
@@ -219,19 +235,19 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
 
   const validateForm = () => {
     if (!name.trim()) {
-      toast.error("Connection name is required");
+      toast.error(t("toast.nameRequired"));
       return false;
     }
     if (!driveLetter.trim()) {
-      toast.error("Drive letter is required");
+      toast.error(t("toast.driveLetterRequired"));
       return false;
     }
     if (remoteType !== "s3" && !host.trim()) {
-      toast.error("Host / IP address is required");
+      toast.error(t("toast.hostRequired"));
       return false;
     }
     if (remoteType === "s3" && (!s3AccessKey || !s3SecretKey)) {
-      toast.error("S3 access key and secret key are required");
+      toast.error(t("toast.s3KeysRequired"));
       return false;
     }
     return true;
@@ -245,7 +261,7 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
 
     try {
       if (remoteType === "s3") {
-        toast.success("S3 config looks valid (start mount to verify credentials)");
+        toast.success(t("toast.s3LooksValid"));
         setTestResult("success");
         setTesting(false);
         return;
@@ -256,38 +272,38 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
       let anySuccess = false;
 
       // Test local IP
-      addLog("info", `Testing local ${testHost}:${testPort}...`, "network");
+      addLog("info", t("log.testingLocal", { host: testHost, port: testPort }), "network");
       const localReachable = await invoke<boolean>("ping_port", {
         ip: testHost,
         port: testPort,
         timeoutMs: 3000,
       });
       if (localReachable) {
-        addLog("success", `Local (${testHost}:${testPort}): reachable`, "network");
+        addLog("success", t("log.localReachable", { ip: testHost, port: testPort, err: "" }), "network");
         anySuccess = true;
       } else {
-        addLog("error", `Local (${testHost}:${testPort}): unreachable`, "network");
+        addLog("error", t("log.localUnreachable", { ip: testHost, port: testPort, err: "" }), "network");
       }
 
       // Test tailscale IP if provided
       let tailscaleReachable = false;
       if (tailscaleIp.trim()) {
-        addLog("info", `Testing Tailscale ${tailscaleIp}:${testPort}...`, "network");
+        addLog("info", t("log.testingTailscale", { host: tailscaleIp, port: testPort }), "network");
         tailscaleReachable = await invoke<boolean>("ping_port", {
           ip: tailscaleIp,
           port: testPort,
           timeoutMs: 3000,
         });
         if (tailscaleReachable) {
-          addLog("success", `Tailscale (${tailscaleIp}:${testPort}): reachable`, "network");
+          addLog("success", t("log.tailscaleReachable", { ip: tailscaleIp, port: testPort, err: "" }), "network");
           anySuccess = true;
         } else {
-          addLog("error", `Tailscale (${tailscaleIp}:${testPort}): unreachable`, "network");
+          addLog("error", t("log.tailscaleUnreachable", { ip: tailscaleIp, port: testPort, err: "" }), "network");
         }
       }
 
-      const localLabel = localReachable ? "Local: OK" : "Local: Failed";
-      const tsLabel = tailscaleIp.trim() ? (tailscaleReachable ? "Tailscale: OK" : "Tailscale: Failed") : "";
+      const localLabel = localReachable ? t("test.localOk") : t("test.localFailed");
+      const tsLabel = tailscaleIp.trim() ? (tailscaleReachable ? t("test.tailscaleOk") : t("test.tailscaleFailed")) : "";
       const summary = [localLabel, tsLabel].filter(Boolean).join(", ");
 
       if (anySuccess) {
@@ -300,8 +316,8 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
     } catch (err) {
       setTestResult("error");
       const msg = err instanceof Error ? err.message : String(err);
-      addLog("error", `Test failed: ${msg}`, "network");
-      toast.error(`Test failed: ${msg}`);
+      addLog("error", t("log.testFailed", { msg }), "network");
+      toast.error(t("toast.testFailed", { msg }));
     } finally {
       setTesting(false);
     }
@@ -311,7 +327,7 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
     if (!validateForm()) return;
 
     setCreating(true);
-    addLog("info", `Creating rclone remote "${name}" (${remoteType})...`, "mounts");
+    addLog("info", t("log.creatingRemote", { name, type: remoteType }), "mounts");
 
     try {
       await invoke("create_remote", {
@@ -348,13 +364,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
       };
 
       add(connection);
-      addLog("success", `Remote "${name}" created`, "mounts");
-      toast.success(`Created mount "${name}"`);
+      addLog("success", t("log.remoteCreated", { name }), "mounts");
+      toast.success(t("toast.created", { name }));
       onNavigate?.("dashboard");
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      addLog("error", `Failed to create remote: ${msg}`, "mounts");
-      toast.error(`Failed to create: ${msg}`);
+      addLog("error", t("log.createRemoteFailed", { msg }), "mounts");
+      toast.error(t("toast.createFailed", { msg }));
     } finally {
       setCreating(false);
     }
@@ -370,13 +386,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             className="flex items-center gap-1.5 text-[13px] text-text-tertiary hover:text-text-secondary mb-4 transition-colors"
           >
             <ArrowLeft size={14} weight="bold" />
-            Back to Overview
+            {t("add.back")}
           </button>
           <h1 className="text-2xl font-semibold text-text-primary tracking-tight mb-2">
-            Add New Mount
+            {t("add.title")}
           </h1>
           <p className="text-[13px] text-text-secondary">
-            Connect to a remote storage and mount it as a local drive
+            {t("add.subtitle")}
           </p>
         </div>
 
@@ -411,10 +427,10 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                         isSelected ? "text-accent-blue" : "text-text-primary"
                       }`}
                     >
-                      {type.label}
+                      {t(type.labelKey)}
                     </div>
                     <div className="text-[10px] text-text-tertiary leading-tight">
-                      {type.desc}
+                      {t(type.descKey)}
                     </div>
                   </button>
                 );
@@ -426,20 +442,20 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <HardDrive size={18} weight="duotone" className="text-accent-blue" />
-              Basic Information
+              {t("add.section.basic")}
             </h2>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Connection Name"
-                  placeholder="e.g., Home Server, NAS"
+                  label={t("shared.label.connectionName")}
+                  placeholder={t("shared.placeholder.connectionName")}
                   value={name}
                   onChange={(e) => { setName(e.target.value); setTestResult(null); }}
                 />
                 {/* Drive letter picker */}
                 <div>
                   <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                    Drive Letter
+                    {t("shared.label.driveLetter")}
                   </label>
                   <div className="flex items-center gap-1.5">
                     <button
@@ -466,15 +482,15 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                     </button>
                     {availableLetters.length > 0 && (
                       <span className="text-[11px] text-text-tertiary ml-1">
-                        {availableLetters.length} free
+                        {t("shared.drivesFree", { count: availableLetters.length })}
                       </span>
                     )}
                   </div>
                 </div>
               </div>
               <Input
-                label="Description (optional)"
-                placeholder="e.g., main storage, media share"
+                label={t("shared.label.description")}
+                placeholder={t("shared.placeholder.description")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -486,12 +502,12 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             <Card className="p-6">
               <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Globe size={18} weight="duotone" className="text-accent-purple" />
-                WebDAV Settings
+                {t("add.section.webdav")}
               </h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                    Server Software
+                    {t("shared.label.serverSoftware")}
                   </label>
                   <select
                     value={webdavVendor}
@@ -500,7 +516,7 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                   >
                     {WEBDAV_VENDORS.map((v) => (
                       <option key={v.value} value={v.value}>
-                        {v.label}
+                        {t(v.labelKey)}
                       </option>
                     ))}
                   </select>
@@ -508,15 +524,15 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2">
                     <Input
-                      label="Host / IP (LAN)"
+                      label={t("shared.label.host")}
                       placeholder="192.168.x.x"
                       value={host}
                       onChange={(e) => { setHost(e.target.value); setTestResult(null); }}
-                      hint="Local network address"
+                      hint={t("shared.hint.host")}
                     />
                   </div>
                   <Input
-                    label="Port"
+                    label={t("shared.label.port")}
                     type="number"
                     placeholder="80"
                     value={port}
@@ -524,11 +540,11 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                   />
                 </div>
                 <Input
-                  label="Tailscale IP (optional)"
+                  label={t("shared.label.tailscaleIp")}
                   placeholder="100.x.x.x"
                   value={tailscaleIp}
                   onChange={(e) => setTailscaleIp(e.target.value)}
-                  hint="Used when away from home"
+                  hint={t("shared.hint.tailscaleIp")}
                 />
               </div>
             </Card>
@@ -538,13 +554,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             <Card className="p-6">
               <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Desktop size={18} weight="duotone" className="text-accent-purple" />
-                {remoteType.toUpperCase()} Settings
+                {t(remoteType === "sftp" ? "add.section.sftp" : "add.section.ftp")}
               </h2>
               <div className="space-y-4">
                 {remoteType === "sftp" && (
                   <div>
                     <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                      Server Software
+                      {t("shared.label.serverSoftware")}
                     </label>
                     <select
                       value={sftpVendor}
@@ -553,13 +569,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                     >
                       {SFTP_VENDORS.map((v) => (
                         <option key={v.value} value={v.value}>
-                          {v.label}
+                          {t(v.labelKey)}
                         </option>
                       ))}
                     </select>
                     {sftpVendor === "sftpgo" && (
                       <p className="text-[11px] text-text-tertiary mt-1.5">
-                        Add custom rclone flags in Advanced Settings below (e.g. --sftp-set-modtime=false for object-storage backends).
+                        {t("add.sftpgoHint")}
                       </p>
                     )}
                   </div>
@@ -567,15 +583,15 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2">
                     <Input
-                      label="Host / IP (LAN)"
+                      label={t("shared.label.host")}
                       placeholder="192.168.x.x"
                       value={host}
                       onChange={(e) => { setHost(e.target.value); setTestResult(null); }}
-                      hint="Local network address"
+                      hint={t("shared.hint.host")}
                     />
                   </div>
                   <Input
-                    label="Port"
+                    label={t("shared.label.port")}
                     type="number"
                     placeholder={remoteType === "sftp" ? "22" : "21"}
                     value={port}
@@ -583,11 +599,11 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                   />
                 </div>
                 <Input
-                  label="Tailscale IP (optional)"
+                  label={t("shared.label.tailscaleIp")}
                   placeholder="100.x.x.x"
                   value={tailscaleIp}
                   onChange={(e) => setTailscaleIp(e.target.value)}
-                  hint="Used when away from home"
+                  hint={t("shared.hint.tailscaleIp")}
                 />
               </div>
             </Card>
@@ -597,17 +613,17 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             <Card className="p-6">
               <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Desktop size={18} weight="duotone" className="text-accent-amber" />
-                SMB / Samba Settings
+                {t("add.section.smb")}
               </h2>
               <div className="space-y-4">
                 <Input
-                  label="Host / IP"
-                  placeholder="192.168.1.x or \\\\SERVER\\share"
+                  label={t("shared.label.hostIp")}
+                  placeholder={t("shared.placeholder.host")}
                   value={host}
                   onChange={(e) => { setHost(e.target.value); setTestResult(null); }}
                 />
                 <Input
-                  label="Tailscale IP (optional)"
+                  label={t("shared.label.tailscaleIp")}
                   placeholder="100.x.x.x"
                   value={tailscaleIp}
                   onChange={(e) => setTailscaleIp(e.target.value)}
@@ -620,32 +636,32 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             <Card className="p-6">
               <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Cloud size={18} weight="duotone" className="text-accent-green" />
-                S3 Settings
+                {t("add.section.s3")}
               </h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                    Provider
+                    {t("shared.label.provider")}
                   </label>
                   <select
                     value={s3Provider}
                     onChange={(e) => setS3Provider(e.target.value)}
                     className="w-full bg-bg-overlay border border-border-default rounded-lg px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-accent-blue/60"
                   >
-                    {["AWS", "MinIO", "Backblaze", "Wasabi", "Other"].map((p) => (
-                      <option key={p} value={p}>{p}</option>
+                    {S3_PROVIDERS.map((p) => (
+                      <option key={p.value} value={p.value}>{t(p.labelKey)}</option>
                     ))}
                   </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Access Key ID"
+                    label={t("shared.label.accessKeyId")}
                     placeholder="AKIAIOSFODNN7EXAMPLE"
                     value={s3AccessKey}
                     onChange={(e) => setS3AccessKey(e.target.value)}
                   />
                   <Input
-                    label="Secret Access Key"
+                    label={t("shared.label.secretAccessKey")}
                     type="password"
                     placeholder="••••••••"
                     value={s3SecretKey}
@@ -654,24 +670,24 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Region"
+                    label={t("shared.label.region")}
                     placeholder="us-east-1"
                     value={s3Region}
                     onChange={(e) => setS3Region(e.target.value)}
                   />
                   <Input
-                    label="Bucket"
+                    label={t("shared.label.bucket")}
                     placeholder="my-bucket"
                     value={s3Bucket}
                     onChange={(e) => setS3Bucket(e.target.value)}
                   />
                 </div>
                 <Input
-                  label="Custom Endpoint (optional)"
+                  label={t("shared.label.customEndpoint")}
                   placeholder="https://s3.example.com"
                   value={s3Endpoint}
                   onChange={(e) => setS3Endpoint(e.target.value)}
-                  hint="For MinIO or other S3-compatible services"
+                  hint={t("shared.hint.customEndpoint")}
                 />
               </div>
             </Card>
@@ -682,18 +698,18 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             <Card className="p-6">
               <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Lock size={18} weight="duotone" className="text-accent-amber" />
-                Authentication
+                {t("add.section.auth")}
               </h2>
               <div className="space-y-4">
                 <Input
-                  label="Username"
+                  label={t("shared.label.username")}
                   placeholder="admin"
                   icon={User}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
                 <Input
-                  label="Password"
+                  label={t("shared.label.password")}
                   type="password"
                   placeholder="••••••••"
                   icon={Lock}
@@ -708,17 +724,17 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Globe size={18} weight="duotone" className="text-accent-purple" />
-              Network Mode
+              {t("add.section.networkMode")}
             </h2>
             <div className="grid grid-cols-3 gap-2">
-              {[
-                { value: "auto", label: "Auto", desc: "Smart switching" },
-                { value: "local", label: "LAN Only", desc: "Local network" },
-                { value: "tailscale", label: "Tailscale", desc: "Remote access" },
-              ].map((mode) => (
+              {([
+                { value: "auto" as const, labelKey: "shared.mode.auto", descKey: "shared.mode.autoDesc" },
+                { value: "local" as const, labelKey: "shared.mode.lan", descKey: "shared.mode.lanDesc" },
+                { value: "tailscale" as const, labelKey: "shared.mode.tailscale", descKey: "shared.mode.tailscaleDesc" },
+              ]).map((mode) => (
                 <button
                   key={mode.value}
-                  onClick={() => setNetworkMode(mode.value as typeof networkMode)}
+                  onClick={() => setNetworkMode(mode.value)}
                   className={`p-3 rounded-lg border transition-all duration-150 text-left ${
                     networkMode === mode.value
                       ? "bg-accent-blue/10 border-accent-blue/40"
@@ -731,13 +747,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                         networkMode === mode.value ? "text-accent-blue" : "text-text-primary"
                       }`}
                     >
-                      {mode.label}
+                      {t(mode.labelKey)}
                     </span>
                     {networkMode === mode.value && (
                       <Check size={14} weight="bold" className="text-accent-blue" />
                     )}
                   </div>
-                  <span className="text-[11px] text-text-tertiary">{mode.desc}</span>
+                  <span className="text-[11px] text-text-tertiary">{t(mode.descKey)}</span>
                 </button>
               ))}
             </div>
@@ -747,17 +763,32 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Lightning size={18} weight="duotone" className="text-accent-green" />
-              Performance Profile
+              {t("add.section.performanceProfile")}
             </h2>
             <div className="grid grid-cols-3 gap-3">
-              {[
-                { value: "max", label: "Max Speed", cache: "500 GB", desc: "10Gbps LAN, Fiber" },
-                { value: "balanced", label: "Balanced", cache: "200 GB", desc: "Daily use (Recommended)" },
-                { value: "low", label: "Low Resource", cache: "50 GB", desc: "Battery, slow WiFi" },
-              ].map((profile) => (
+              {([
+                {
+                  value: "max" as const,
+                  labelKey: "shared.profile.max",
+                  cache: "500 GB",
+                  descKey: "shared.profile.maxDesc",
+                },
+                {
+                  value: "balanced" as const,
+                  labelKey: "shared.profile.balanced",
+                  cache: "200 GB",
+                  descKey: "shared.profile.balancedDesc",
+                },
+                {
+                  value: "low" as const,
+                  labelKey: "shared.profile.low",
+                  cache: "50 GB",
+                  descKey: "shared.profile.lowDesc",
+                },
+              ]).map((profile) => (
                 <button
                   key={profile.value}
-                  onClick={() => setSpeedProfile(profile.value as typeof speedProfile)}
+                  onClick={() => setSpeedProfile(profile.value)}
                   className={`p-4 rounded-lg border transition-all duration-150 text-left ${
                     speedProfile === profile.value
                       ? "bg-accent-green/10 border-accent-green/40"
@@ -770,14 +801,16 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                         speedProfile === profile.value ? "text-accent-green" : "text-text-primary"
                       }`}
                     >
-                      {profile.label}
+                      {t(profile.labelKey)}
                     </span>
                     {speedProfile === profile.value && (
                       <Check size={14} weight="bold" className="text-accent-green" />
                     )}
                   </div>
-                  <div className="text-[11px] text-text-tertiary mb-1">Cache: {profile.cache}</div>
-                  <div className="text-[11px] text-text-tertiary">{profile.desc}</div>
+                  <div className="text-[11px] text-text-tertiary mb-1">
+                    {t("add.cachePrefix", { cache: profile.cache })}
+                  </div>
+                  <div className="text-[11px] text-text-tertiary">{t(profile.descKey)}</div>
                 </button>
               ))}
             </div>
@@ -791,12 +824,12 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             >
               <h2 className="text-base font-semibold text-text-primary flex items-center gap-2">
                 <Gear size={18} weight="duotone" className="text-text-tertiary" />
-                Advanced Cache Settings
+                {t("add.section.advancedCache")}
               </h2>
               <div className="flex items-center gap-2">
                 {!showAdvanced && (
                   <span className="text-[11px] text-text-tertiary">
-                    Using {speedProfile} profile defaults
+                    {t("add.usingProfileDefaults", { profile: speedProfile })}
                   </span>
                 )}
                 <CaretDown
@@ -809,43 +842,43 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             {showAdvanced && (
               <div className="mt-4 space-y-4">
                 <p className="text-[11px] text-text-tertiary">
-                  Leave blank to use the speed profile defaults. Dir Cache Time: how long directory listings are cached (0 = always fresh). Poll Interval: how often rclone checks for remote changes.
+                  {t("add.advancedHint")}
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Dir Cache Time"
+                    label={t("shared.label.dirCacheTime")}
                     placeholder={speedProfile === "low" ? "30s" : "0"}
                     value={cacheOverrides.dir_cache_time || ""}
                     onChange={(e) => setCacheOverrides({ ...cacheOverrides, dir_cache_time: e.target.value || undefined })}
-                    hint="0 = always fresh on navigate"
+                    hint={t("shared.hint.dirCacheTime")}
                   />
                   <Input
-                    label="Poll Interval"
+                    label={t("shared.label.pollInterval")}
                     placeholder={speedProfile === "low" ? "10m" : "5m"}
                     value={cacheOverrides.poll_interval || ""}
                     onChange={(e) => setCacheOverrides({ ...cacheOverrides, poll_interval: e.target.value || undefined })}
-                    hint="Background check interval"
+                    hint={t("shared.hint.pollInterval")}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                      VFS Cache Mode
+                      {t("shared.label.vfsCacheMode")}
                     </label>
                     <select
                       value={cacheOverrides.vfs_cache_mode || ""}
                       onChange={(e) => setCacheOverrides({ ...cacheOverrides, vfs_cache_mode: e.target.value || undefined })}
                       className="w-full bg-bg-overlay border border-border-default rounded-lg px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-accent-blue/60"
                     >
-                      <option value="">Default (full)</option>
-                      <option value="full">Full</option>
-                      <option value="writes">Writes</option>
-                      <option value="minimal">Minimal</option>
-                      <option value="off">Off</option>
+                      <option value="">{t("shared.vfsCacheMode.default")}</option>
+                      <option value="full">{t("shared.vfsCacheMode.full")}</option>
+                      <option value="writes">{t("shared.vfsCacheMode.writes")}</option>
+                      <option value="minimal">{t("shared.vfsCacheMode.minimal")}</option>
+                      <option value="off">{t("shared.vfsCacheMode.off")}</option>
                     </select>
                   </div>
                   <Input
-                    label="VFS Cache Size"
+                    label={t("shared.label.vfsCacheSize")}
                     placeholder={speedProfile === "max" ? "500G" : speedProfile === "balanced" ? "200G" : "50G"}
                     value={cacheOverrides.vfs_cache_max_size || ""}
                     onChange={(e) => setCacheOverrides({ ...cacheOverrides, vfs_cache_max_size: e.target.value || undefined })}
@@ -853,13 +886,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Read Ahead"
+                    label={t("shared.label.readAhead")}
                     placeholder={speedProfile === "max" ? "512M" : speedProfile === "balanced" ? "128M" : "32M"}
                     value={cacheOverrides.vfs_read_ahead || ""}
                     onChange={(e) => setCacheOverrides({ ...cacheOverrides, vfs_read_ahead: e.target.value || undefined })}
                   />
                   <Input
-                    label="Buffer Size"
+                    label={t("shared.label.bufferSize")}
                     placeholder={speedProfile === "max" ? "512M" : speedProfile === "balanced" ? "256M" : "64M"}
                     value={cacheOverrides.buffer_size || ""}
                     onChange={(e) => setCacheOverrides({ ...cacheOverrides, buffer_size: e.target.value || undefined })}
@@ -867,14 +900,14 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Input
-                    label="Transfers"
+                    label={t("shared.label.transfers")}
                     type="number"
                     placeholder={speedProfile === "max" ? "16" : speedProfile === "balanced" ? "8" : "4"}
                     value={cacheOverrides.transfers?.toString() || ""}
                     onChange={(e) => setCacheOverrides({ ...cacheOverrides, transfers: e.target.value ? parseInt(e.target.value) : undefined })}
                   />
                   <Input
-                    label="Multi-thread Streams"
+                    label={t("shared.label.multiThreadStreams")}
                     type="number"
                     placeholder={speedProfile === "max" ? "16" : speedProfile === "balanced" ? "8" : "4"}
                     value={cacheOverrides.multi_thread_streams?.toString() || ""}
@@ -887,23 +920,23 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                   onClick={() => { setCacheOverrides({}); setCustomFlags(""); }}
                   className="text-text-tertiary"
                 >
-                  Reset to Defaults
+                  {t("shared.resetDefaults")}
                 </Button>
 
                 {/* Custom rclone flags */}
                 <div className="pt-3 border-t border-white/[0.06]">
                   <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                    Extra Rclone Flags
+                    {t("shared.label.extraFlags")}
                   </label>
                   <textarea
                     value={customFlags}
                     onChange={(e) => setCustomFlags(e.target.value)}
-                    placeholder="--sftp-set-modtime=false&#10;--sftp-disable-hashcheck&#10;--checkers 8"
+                    placeholder={t("shared.extraFlagsPlaceholder")}
                     rows={3}
                     className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-blue/50 font-mono resize-y"
                   />
                   <p className="text-[11px] text-text-tertiary mt-1">
-                    One flag per line. Appended to the rclone mount command after all other settings.
+                    {t("shared.extraFlagsHint")}
                   </p>
                 </div>
               </div>
@@ -914,10 +947,10 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
           <Card className="p-5 flex items-center justify-between">
             <div>
               <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                Auto-mount on startup
+                {t("add.autoMountTitle")}
               </div>
               <div className="text-[11px] text-text-tertiary">
-                Automatically connect this drive when the app starts
+                {t("add.autoMountDesc")}
               </div>
             </div>
             <button
@@ -939,10 +972,10 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
             <div className="flex items-center justify-between mb-0">
               <div>
                 <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                  Dual Mount (Archive)
+                  {t("add.dualMountTitle")}
                 </div>
                 <div className="text-[11px] text-text-tertiary">
-                  Mount a second read-only drive with 24h cached listings — fast browsing for grabbing old files
+                  {t("add.dualMountDesc")}
                 </div>
               </div>
               <button
@@ -963,18 +996,18 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
               <div className="mt-4 pt-4 border-t border-white/[0.06]">
                 <div className="grid grid-cols-2 gap-4 items-start">
                   <div>
-                    <div className="text-[11px] font-medium text-text-secondary mb-2 uppercase tracking-wide">Live Mount</div>
+                    <div className="text-[11px] font-medium text-text-secondary mb-2 uppercase tracking-wide">{t("add.liveMountLabel")}</div>
                     <div className="flex items-center gap-2">
                       <div className="w-10 h-9 flex items-center justify-center rounded-lg bg-accent-blue/10 border border-accent-blue/20 text-[15px] font-semibold text-accent-blue">
                         {driveLetter}
                       </div>
                       <div className="text-[11px] text-text-tertiary leading-tight">
-                        Always up-to-date<br />normal speed profile
+                        {t("add.liveMountLine1")}<br />{t("add.liveMountLine2")}
                       </div>
                     </div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-medium text-text-secondary mb-2 uppercase tracking-wide">Archive Mount</div>
+                    <div className="text-[11px] font-medium text-text-secondary mb-2 uppercase tracking-wide">{t("add.archiveMountLabel")}</div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -997,13 +1030,13 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
                         <CaretRight size={13} weight="bold" />
                       </button>
                       <div className="text-[11px] text-text-tertiary leading-tight">
-                        Read-only, 24h<br />dir cache
+                        {t("add.archiveMountLine1")}<br />{t("add.archiveMountLine2")}
                       </div>
                     </div>
                   </div>
                 </div>
                 <p className="text-[11px] text-text-tertiary mt-3">
-                  The archive mount has aggressive directory caching (24h) and polls for changes only hourly. Use it to browse and grab files — uploads and edits should use the live mount.
+                  {t("add.dualMountNote")}
                 </p>
               </div>
             )}
@@ -1018,7 +1051,7 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
               onClick={() => onNavigate?.("dashboard")}
               disabled={creating}
             >
-              Cancel
+              {t("shared.action.cancel")}
             </Button>
             <Button
               variant="default"
@@ -1040,7 +1073,11 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
               ) : (
                 <Globe size={16} weight="bold" />
               )}
-              {testing ? "Testing..." : testResult === "success" ? "Reachable" : "Test Connection"}
+              {testing
+                ? t("shared.action.testing")
+                : testResult === "success"
+                ? t("shared.action.testReached")
+                : t("shared.action.testConnection")}
             </Button>
             <Button
               variant="primary"
@@ -1054,7 +1091,7 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
               ) : (
                 <Check size={16} weight="bold" />
               )}
-              {creating ? "Creating..." : "Create Mount"}
+              {creating ? t("add.creating") : t("add.createMount")}
             </Button>
           </div>
         </div>

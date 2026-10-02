@@ -1,0 +1,640 @@
+{
+  "app": {
+    "name": "Rclone Mount Hub",
+    "sidebarTitle": "掛載中心"
+  },
+  "titlebar": {
+    "appName": "Rclone Mount Hub"
+  },
+  "sidebar": {
+    "activeCount": "{count} 個已掛載",
+    "section": {
+      "drives": "磁碟機",
+      "tools": "工具",
+      "rclone": "Rclone"
+    },
+    "nav": {
+      "overview": "總覽",
+      "addConnection": "新增連線",
+      "speedTest": "速度測試",
+      "export": "匯出",
+      "settings": "設定"
+    },
+    "rcloneWebUi": "Rclone 網頁介面",
+    "drivers": {
+      "checking": "正在檢查驅動程式...",
+      "rclone": "rclone {version}",
+      "rcloneMissing": "缺少 rclone",
+      "winfsp": "WinFsp {version}",
+      "winfspMissing": "缺少 WinFsp"
+    }
+  },
+  "status": {
+    "mountsActive": "{count} 個掛載點已啟用",
+    "mountsActivePlural": "{count} 個掛載點已啟用",
+    "network": {
+      "lan": "區域網路",
+      "tailscale": "Tailscale",
+      "offline": "離線"
+    },
+    "showLogs": "顯示日誌",
+    "hideLogs": "隱藏日誌"
+  },
+  "logPanel": {
+    "title": "系統日誌",
+    "clear": "清除",
+    "minimize": "最小化",
+    "empty": "尚無日誌",
+    "emptyFiltered": "沒有{filter}日誌",
+    "filter": {
+      "all": "全部",
+      "drivers": "驅動程式",
+      "mounts": "掛載",
+      "network": "網路",
+      "system": "系統"
+    }
+  },
+  "shared": {
+    "action": {
+      "cancel": "取消",
+      "testConnection": "測試連線",
+      "testing": "測試中...",
+      "testReached": "可達",
+      "refresh": "重新整理"
+    },
+    "remote": {
+      "webdav": "WebDAV",
+      "webdavDesc": "Unraid、Nextcloud、Copyparty",
+      "sftp": "SFTP",
+      "sftpDesc": "SFTPGo、OpenSSH",
+      "smb": "SMB / Samba",
+      "smbDesc": "Windows 分享、NAS",
+      "s3": "S3",
+      "s3Desc": "AWS S3、MinIO、Backblaze",
+      "ftp": "FTP",
+      "ftpDesc": "傳統 FTP 伺服器"
+    },
+    "vendor": {
+      "webdav": {
+        "copyparty": "Copyparty (Unraid)",
+        "nextcloud": "Nextcloud",
+        "owncloud": "ownCloud",
+        "sharepoint": "SharePoint",
+        "other": "其他 WebDAV"
+      },
+      "sftp": {
+        "sftpgo": "SFTPGo",
+        "openssh": "OpenSSH",
+        "other": "其他 SFTP 伺服器"
+      },
+      "s3": {
+        "aws": "AWS",
+        "minio": "MinIO",
+        "backblaze": "Backblaze",
+        "wasabi": "Wasabi",
+        "other": "其他"
+      }
+    },
+    "mode": {
+      "auto": "自動",
+      "autoDesc": "智慧切換",
+      "lan": "僅區域網路",
+      "lanDesc": "本機網路",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "遠端存取"
+    },
+    "profile": {
+      "max": "極速",
+      "maxDesc": "10Gbps 區域網路、光纖",
+      "balanced": "平衡",
+      "balancedDesc": "日常使用（推薦）",
+      "low": "低資源",
+      "lowDesc": "行動裝置、慢速 WiFi"
+    },
+    "label": {
+      "dirCacheTime": "目錄快取時間",
+      "pollInterval": "輪詢間隔",
+      "vfsCacheMode": "VFS 快取模式",
+      "vfsCacheSize": "VFS 快取大小",
+      "readAhead": "預讀取",
+      "bufferSize": "緩衝區大小",
+      "transfers": "傳輸數",
+      "multiThreadStreams": "多執行緒串流",
+      "extraFlags": "額外 Rclone 參數",
+      "connectionName": "連線名稱",
+      "driveLetter": "磁碟機代號",
+      "description": "說明（選填）",
+      "serverSoftware": "伺服器軟體",
+      "host": "主機 / IP（區域網路）",
+      "hostIp": "主機 / IP",
+      "port": "埠",
+      "tailscaleIp": "Tailscale IP（選填）",
+      "username": "使用者名稱",
+      "password": "密碼",
+      "provider": "服務商",
+      "accessKeyId": "存取金鑰 ID",
+      "secretAccessKey": "秘密存取金鑰",
+      "region": "區域",
+      "bucket": "儲存桶",
+      "customEndpoint": "自訂端點（選填）"
+    },
+    "placeholder": {
+      "connectionName": "例如：家庭伺服器、NAS",
+      "description": "例如：主要儲存、媒體分享",
+      "host": "192.168.1.x 或 \\\\SERVER\\share"
+    },
+    "hint": {
+      "host": "本機網路位址",
+      "tailscaleIp": "不在家時使用",
+      "customEndpoint": "適用於 MinIO 或其他相容 S3 的服務",
+      "dirCacheTime": "0 = 每次進入都重新整理",
+      "pollInterval": "背景檢查間隔"
+    },
+    "vfsCacheMode": {
+      "default": "預設（完整）",
+      "full": "完整",
+      "writes": "僅寫入",
+      "minimal": "最小",
+      "off": "關閉"
+    },
+    "extraFlagsPlaceholder": "--sftp-set-modtime=false\n--sftp-disable-hashcheck\n--checkers 8",
+    "extraFlagsHint": "每行一個參數。附加在所有其他設定之後的 rclone mount 命令中。",
+    "resetDefaults": "復為預設",
+    "drivesFree": "剩餘 {count} 個"
+  },
+  "dashboard": {
+    "title": "總覽",
+    "subtitle": "管理你的 rclone 磁碟機掛載",
+    "updated": "{timeSince}更新",
+    "time": {
+      "justNow": "剛剛",
+      "secondsAgo": "{count} 秒前",
+      "minutesAgo": "{count} 分鐘前"
+    },
+    "action": {
+      "directUpload": "直接上傳",
+      "directUploadTipEnabled": "直接上傳檔案 — 略過 VFS 快取",
+      "directUploadTipDisabled": "請先掛載一個磁碟機",
+      "newMount": "新增掛載",
+      "import": "匯入",
+      "mount": "掛載",
+      "unmount": "卸載"
+    },
+    "tip": {
+      "test": "測試連線",
+      "edit": "編輯連線",
+      "delete": "刪除連線"
+    },
+    "driverWarning": {
+      "title": "缺少必要驅動程式",
+      "body": "掛載磁碟機前必須先安裝 Rclone 與 WinFsp。",
+      "action": "在設定中安裝驅動程式"
+    },
+    "stat": {
+      "totalMounts": "掛載總數",
+      "active": "已啟用",
+      "network": "網路",
+      "online": "線上",
+      "offline": "離線"
+    },
+    "section": {
+      "managed": "受管連線",
+      "external": "外部掛載（在本應用程式之外執行）",
+      "rcloneRemotes": "Rclone 遠端（位於 rclone 設定中，此處未管理）"
+    },
+    "remotesDescription": "存在於 rclone 設定中但此處未管理 — 可匯入後編輯並掛載",
+    "empty": {
+      "title": "尚未設定任何掛載",
+      "body": "連結你的 Unraid 伺服器、NAS 或雲端儲存。磁碟機會像本機磁碟一樣顯示在 Windows 資源管理器中。",
+      "cta": "新增第一個掛載"
+    },
+    "badge": {
+      "mountedWarning": "已掛載（有警告）",
+      "mounted": "已掛載",
+      "unmounted": "未掛載",
+      "external": "外部",
+      "mountedAt": "已掛載至 {mountPoint}"
+    },
+    "unknown": "不明",
+    "drivePoint": "磁碟機 {point}",
+    "mountPointUnknown": "掛載點不明",
+    "cardProfileSuffix": "{profile} 效能設定",
+    "profileSuffix": " {profile} 效能設定",
+    "confirm": {
+      "deleteConnectionTitle": "刪除連線",
+      "deleteConnection": "確定刪除連線「{name}」嗎？此操作無法復原。",
+      "deleteRemoteTitle": "刪除遠端",
+      "deleteRemote": "確定刪除 rclone 遠端「{name}」嗎？將從 rclone 設定中移除。"
+    },
+    "importedDescription": "已從 rclone 設定匯入"
+  },
+  "toast": {
+    "webUiLaunched": "Rclone 網頁介面已啟動",
+    "webUiLaunchFailed": "啟動網頁介面失敗：{msg}",
+    "mounted": "已將 {name} 掛載至 {letter}: 磁碟機（{mode}）",
+    "mountedWarning": "{name} 已透過 {mode}（{url}）掛載，但有警告：{error}",
+    "mountFailed": "掛載 {name} 失敗",
+    "unmounted": "已卸載 {name}",
+    "unmountFailed": "卸載 {name} 失敗",
+    "switchedTo": "{name} 已切換至 {mode}",
+    "switchAvailable": "{name}：可切換至 {mode}",
+    "deleted": "已刪除 {name}",
+    "remoteDeleted": "已刪除遠端 {name}",
+    "imported": "已將「{name}」匯入應用程式。請編輯以完成設定。",
+    "importFailed": "匯入失敗：{msg}",
+    "created": "已建立掛載「{name}」",
+    "createFailed": "建立失敗：{msg}",
+    "saved": "已儲存「{name}」的變更",
+    "saveFailed": "儲存失敗：{msg}",
+    "testFailed": "測試失敗：{msg}",
+    "nameRequired": "請填寫連線名稱",
+    "driveLetterRequired": "請選擇磁碟機代號",
+    "hostRequired": "請填寫主機 / IP 位址",
+    "s3KeysRequired": "請填寫 S3 存取金鑰與秘密金鑰",
+    "s3LooksValid": "S3 設定看來有效（啟動掛載以驗證憑證）",
+    "exportSaved": "匯出檔案已儲存並加密成功",
+    "exportFailed": "匯出失敗：{err}",
+    "copied": "已複製到剪貼簿",
+    "copyFailed": "複製到剪貼簿失敗",
+    "invalidJson": "檔案不是有效的 JSON",
+    "wrongPassword": "密碼錯誤或檔案已損毀",
+    "missingField": "缺少必填欄位：{field}",
+    "importSkipped": "已跳過：{name}（未提供密碼）",
+    "importRemoteFailed": "為 {name} 建立遠端失敗：{err}",
+    "importedCount": "已匯入 {count} 個連線",
+    "noImport": "未匯入任何連線",
+    "scriptSaved": "腳本已儲存：{name}",
+    "speedTestDone": "速度測試完成",
+    "speedTestFailed": "速度測試失敗",
+    "targetIpRequired": "請輸入目標 IP 位址",
+    "pathAnalyzed": "網路路徑分析完成",
+    "pathAnalysisFailed": "路徑分析失敗",
+    "diskBenchmarkDone": "磁碟基準測試完成",
+    "diskBenchmarkFailed": "磁碟基準測試失敗",
+    "autostartEnabled": "已開啟開機自啟",
+    "autostartDisabled": "已關閉開機自啟",
+    "autostartToggleFailed": "切換開機自啟失敗",
+    "configPathUpdated": "Rclone 設定路徑已更新",
+    "configPathReset": "已重設為 rclone 預設設定路徑",
+    "cacheDirUpdated": "快取目錄已更新",
+    "cacheDirReset": "已重設為 rclone 預設快取目錄",
+    "startMenuAdded": "已加入開始選單 — 通知將顯示「Rclone Mount Hub」",
+    "startMenuAddFailed": "加入開始選單失敗",
+    "startMenuRemoved": "已從開始選單移除",
+    "startMenuRemoveFailed": "從開始選單移除失敗",
+    "rcloneInstalled": "Rclone 安裝成功",
+    "rcloneInstallFailed": "Rclone 安裝失敗",
+    "winfspLaunched": "WinFsp {version} 安裝程式已啟動 — 完成向導後點擊繼續",
+    "winfspDownloadFailed": "WinFsp 下載失敗",
+    "winfspReady": "WinFsp 已安裝就緒！",
+    "winfspNotDetected": "尚未偵測到 WinFsp。請先完成安裝程式。",
+    "rcloneUninstalled": "Rclone 已解除安裝",
+    "rcloneUninstallFailed": "Rclone 解除安裝失敗",
+    "winfspUninstalled": "WinFsp 已解除安裝",
+    "winfspUninstallFailed": "WinFsp 解除安裝失敗",
+    "checkUpdatesFailed": "檢查更新失敗",
+    "applyUpdateFailed": "套用更新失敗"
+  },
+  "notif": {
+    "mountedTitle": "磁碟機已掛載",
+    "mountedBody": "{name} 已透過 {mode} 連線",
+    "unmountedTitle": "磁碟機已卸載",
+    "unmountedBody": "{name} 已中斷",
+    "networkChangedTitle": "網路已變更",
+    "networkChangedBodyReconnected": "{name} 已透過 {mode} 重新連線",
+    "networkChangedBody": "{name} 可能需要切換至 {mode}"
+  },
+  "test": {
+    "localOk": "本機：正常",
+    "tailscaleOk": "Tailscale：正常",
+    "localFailed": "本機：失敗",
+    "tailscaleFailed": "Tailscale：失敗",
+    "noIps": "未設定可測試的 IP"
+  },
+  "log": {
+    "networkRemounting": "網路已變更：正在將 {name} 重新掛載至 {mode}...",
+    "reconnectedVia": "{name} 已透過 {mode} 重新連線",
+    "reconnectFailed": "重新連線 {name} 失敗：{msg}",
+    "networkSuggestSwitch": "網路已變更：{name} 目前為 {mode}，但 {newMode} 現已可用。建議重新連線。",
+    "mounting": "正在將 {name} 掛載至 {letter}: 磁碟機...",
+    "mountedOk": "{name} 已掛載至 {letter}:（{mode}，{url}）",
+    "mountFailed": "掛載失敗：{msg}",
+    "unmounting": "正在卸載 {name}...",
+    "unmounted": "{name} 已成功卸載",
+    "unmountFailed": "卸載失敗：{msg}",
+    "externalUnmounting": "正在卸載外部掛載 {name}（PID {pid}）...",
+    "externalUnmounted": "外部掛載 {name} 已卸載",
+    "externalUnmountFailed": "卸載外部掛載失敗：{msg}",
+    "testingConnection": "正在測試 {name} 的連線...",
+    "testFailed": "測試失敗：{msg}",
+    "localReachable": "本機（{ip}:{port}）：可達",
+    "localUnreachable": "本機（{ip}:{port}）：無法連線 — {err}",
+    "tailscaleReachable": "Tailscale（{ip}:{port}）：可達",
+    "tailscaleUnreachable": "Tailscale（{ip}:{port}）：無法連線 — {err}",
+    "activeReachable": "啟用中的掛載（{url}）：可達",
+    "activeUnreachable": "啟用中的掛載（{url}）：無法連線",
+    "imported": "已匯入「{name}」 — 請編輯以設定 IP、磁碟機代號及其他參數",
+    "testingLocal": "正在測試本機 {host}:{port}...",
+    "testingTailscale": "正在測試 Tailscale {host}:{port}...",
+    "creatingRemote": "正在建立 rclone 遠端「{name}」（{type}）...",
+    "remoteCreated": "遠端「{name}」已建立",
+    "createRemoteFailed": "建立遠端失敗：{msg}",
+    "connectionUpdated": "連線「{name}」已更新",
+    "saveFailed": "儲存失敗：{msg}",
+    "installingRclone": "正在透過 Scoop 安裝 Rclone...",
+    "rcloneInstalledOk": "✓ Rclone 安裝成功",
+    "rcloneInstallFailed": "✗ {msg}",
+    "fetchingWinfsp": "正在從 GitHub 取得最新 WinFsp 版本...",
+    "winfspDownloaded": "✓ WinFsp {version} 安裝程式已下載並啟動",
+    "winfspWizard": "完成安裝向導後，點擊「我已安裝 WinFsp」",
+    "verifyingWinfsp": "正在驗證 WinFsp 安裝...",
+    "winfspDetected": "✓ 已偵測到 WinFsp，就緒！",
+    "winfspNotDetectedLog": "尚未偵測到 WinFsp — 請完成安裝向導後重試",
+    "winfspVerifyFailed": "✗ 驗證 WinFsp 失敗",
+    "checkingDriverUpdates": "正在檢查驅動程式更新...",
+    "checkDriverUpdatesFailed": "✗ {msg}",
+    "appUpdateCheckFailed": "✗ 更新檢查失敗：{msg}"
+  },
+  "add": {
+    "back": "返回總覽",
+    "title": "新增掛載",
+    "subtitle": "連結遠端儲存並掛載為本機磁碟機",
+    "section": {
+      "basic": "基本資訊",
+      "webdav": "WebDAV 設定",
+      "sftp": "SFTP 設定",
+      "ftp": "FTP 設定",
+      "smb": "SMB / Samba 設定",
+      "s3": "S3 設定",
+      "auth": "驗證",
+      "networkMode": "網路模式",
+      "performanceProfile": "效能設定",
+      "advancedCache": "進階快取設定"
+    },
+    "sftpgoHint": "可在下方進階設定中加入自訂 rclone 參數（例如物件儲存後端可加 --sftp-set-modtime=false）。",
+    "cachePrefix": "快取：{cache}",
+    "usingProfileDefaults": "使用 {profile} 效能設定預設值",
+    "advancedHint": "留空則使用效能設定預設值。目錄快取時間：目錄清單的快取時長（0 = 始终刷新）。輪詢間隔：rclone 檢查遠端變化的頻率。",
+    "autoMountTitle": "啟動時自動掛載",
+    "autoMountDesc": "應用程式啟動時自動連線此磁碟機",
+    "dualMountTitle": "雙掛載（檔案庫）",
+    "dualMountDesc": "掛載第二個唯讀磁碟機，目錄清單快取 24 小時 — 快速瀏覽擷取舊檔案",
+    "liveMountLabel": "即時掛載",
+    "liveMountLine1": "始終最新",
+    "liveMountLine2": "標準效能設定",
+    "archiveMountLabel": "檔案庫掛載",
+    "archiveMountLine1": "唯讀，24 小時",
+    "archiveMountLine2": "目錄快取",
+    "dualMountNote": "檔案庫掛載使用激進的目錄快取（24 小時），每小時輪詢一次變化。用於瀏覽與取得檔案 — 上傳與編輯請使用即時掛載。",
+    "creating": "建立中...",
+    "createMount": "建立掛載"
+  },
+  "edit": {
+    "title": "編輯連線",
+    "subtitle": "{remoteType} 連線 • 建立於 {date}",
+    "remoteSettings": "{type} 設定",
+    "newPassword": "新密碼（留空則保留目前密碼）",
+    "passwordStoredHint": "密碼加密儲存在 rclone 設定中",
+    "nameChangedNote": "注意：修改名稱需重新輸入密碼以更新 rclone 設定。",
+    "saving": "儲存中...",
+    "saveChanges": "儲存變更"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "設定應用程式偏好與預設值",
+    "startup": {
+      "section": "啟動行為",
+      "startWithWindows": "隨 Windows 啟動",
+      "startWithWindowsDesc": "電腦啟動時自動執行 Rclone Mounter",
+      "startMinimized": "最小化啟動",
+      "startMinimizedDesc": "啟動至系統匣而非顯示視窗",
+      "closeToTray": "關閉至系統匣",
+      "closeToTrayDesc": "關閉時最小化至系統匣而非完全結束",
+      "addToStartMenu": "加入開始選單",
+      "addToStartMenuDesc": "建立開始選單捷徑並註冊應用程式，使通知顯示「Rclone Mount Hub」而非「Windows PowerShell」",
+      "addToStartMenuBtn": "加入開始選單",
+      "remove": "移除"
+    },
+    "perf": {
+      "section": "預設效能設定",
+      "sharedHint": "新連線預設使用，除非另行修改",
+      "max": "極速",
+      "maxDesc": "10Gbps 區域網路",
+      "balanced": "平衡",
+      "balancedDesc": "日常使用",
+      "low": "低資源",
+      "lowDesc": "電池模式"
+    },
+    "network": {
+      "section": "預設網路模式",
+      "sharedHint": "新連線預設使用，除非另行修改",
+      "auto": "自動",
+      "autoDesc": "智慧切換",
+      "lan": "僅區域網路",
+      "lanDesc": "本機網路",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "遠端存取"
+    },
+    "notifications": {
+      "section": "通知",
+      "show": "顯示掛載/卸載通知",
+      "showDesc": "磁碟機連線或中斷時顯示系統通知"
+    },
+    "networkChange": {
+      "section": "網路變更行為",
+      "intro": "當網路變化（例如在家 WiFi 與行動網路之間切換）時，應用程式透過 Windows 網路事件自動偵測（零輪詢、不耗電）。",
+      "notify": "僅通知",
+      "notifyDesc": "當已掛載磁碟機應在區域網路與 Tailscale 之間切換時顯示通知，由你決定何時重連。",
+      "autoReconnect": "自動重連",
+      "autoReconnectDesc": "自動將磁碟機重新掛載到正確的 IP。切換時會有約 2-3 秒的中斷。"
+    },
+    "config": {
+      "section": "Rclone 設定檔",
+      "intro": "預設情況下 rclone 使用其自身的設定檔位置。如使用其他設定檔，請設定自訂路徑。",
+      "reset": "重設為 rclone 預設",
+      "usingDefault": "使用預設：{path}"
+    },
+    "cache": {
+      "section": "VFS 快取目錄",
+      "intro": "rclone 預設將檔案寫入快取到系統碟。指向空間更大的磁碟機，可避免複製大檔案（例如虛擬機器映像）時塞滿 C:\\。",
+      "reset": "重設為預設"
+    },
+    "drivers": {
+      "section": "驅動程式管理",
+      "rclone": "Rclone",
+      "winfsp": "WinFsp",
+      "installed": "已安裝",
+      "notInstalled": "未安裝",
+      "uninstall": "解除安裝",
+      "installRclone": "安裝 Rclone（Scoop）",
+      "installing": "安裝中...",
+      "installWinfsp": "下載並安裝 WinFsp",
+      "downloading": "下載中...",
+      "verifiedWinfsp": "我已安裝 WinFsp",
+      "verifying": "驗證中...",
+      "checkUpdates": "檢查更新",
+      "checking": "檢查中...",
+      "loadFailed": "無法載入驅動程式資訊。"
+    },
+    "about": {
+      "section": "關於與更新",
+      "appName": "Rclone Mount Hub",
+      "version": "v{version}",
+      "upToDate": "已是最新",
+      "updateAvailable": "v{version} 可用",
+      "updateRestart": "更新並重啟",
+      "checking": "檢查中…",
+      "updating": "更新中…",
+      "checkUpdates": "檢查更新"
+    },
+    "troubleshoot": {
+      "title": "故障排除",
+      "installerTitle": "安裝程式報錯「無法移除現有應用程式目錄」：",
+      "installerBody": "執行安裝程式前，請確保 Rclone Mount Hub 已完全關閉（檢查系統匣）且所有 rclone 程序已停止。應用程式結束時會自動卸載磁碟機，但若之前曾當機，請先終端機執行 taskkill /F /IM rclone.exe。",
+      "driveTitle": "資源管理器顯示磁碟機但無法連線：",
+      "driveBody": "rclone 掛載程序已啟動但遠端連線失敗。請卸載後檢查憑證與伺服器位址，再重試。"
+    },
+    "resetDefaults": "復為預設",
+    "savedNote": "設定將自動儲存",
+    "language": {
+      "section": "語言",
+      "label": "語言",
+      "auto": "跟隨系統",
+      "en": "English",
+      "zh": "繁體中文",
+      "hint": "介面語言。「跟隨系統」將使用 Windows 顯示語言。"
+    }
+  },
+  "export": {
+    "title": "匯出與匯入",
+    "subtitle": "備份連線或產生獨立腳本",
+    "section": {
+      "export": "匯出連線",
+      "import": "匯入連線",
+      "powershell": "PowerShell 腳本"
+    },
+    "encryptionNote": "匯出檔案使用 AES-256-GCM 加密。儲存前需輸入密碼。包含全部連線資料、使用者名稱及應用程式設定。",
+    "btn": {
+      "exportJson": "匯出為 JSON",
+      "copyPlain": "複製純文字 JSON",
+      "importJson": "匯入 JSON 檔案",
+      "downloadScript": "下載腳本"
+    },
+    "previewLabel": "預覽（將包含在匯出內容中）",
+    "noConnections": "沒有可匯出的連線",
+    "importNote": "從加密或純文字 JSON 匯出檔匯入。加密檔案會提示輸入密碼。每個連線都需要輸入 WebDAV 密碼。",
+    "powershellNote": "為每個連線產生獨立掛載腳本",
+    "psNoConnections": "暫無可用連線。請先新增一個連線。",
+    "psDriveLine": "磁碟機 {letter} • {mode} 模式",
+    "modal": {
+      "exportTitle": "加密匯出",
+      "importTitle": "解密匯入",
+      "exportDesc": "你的連線（包含使用者名稱與全部設定）將以 AES-256-GCM 加密。匯入此檔案時需要該密碼。",
+      "importDesc": "請輸入建立此匯出檔時使用的密碼。",
+      "passwordPlaceholder": "密碼",
+      "passwordTooShort": "密碼至少需要 4 個字元",
+      "exportCta": "加密並儲存",
+      "importCta": "解密並匯入"
+    },
+    "promptPassword": "請輸入「{name}」的 WebDAV 密碼："
+  },
+  "speed": {
+    "title": "速度測試與診斷",
+    "subtitle": "測試傳輸速度，找出效能瓶頸",
+    "section": {
+      "run": "執行速度測試"
+    },
+    "btn": {
+      "run": "開始測試",
+      "running": "測試中..."
+    },
+    "label": {
+      "driveLetter": "磁碟機代號",
+      "fileSize": "測試檔案大小"
+    },
+    "size": {
+      "quickLabel": "10 MB",
+      "quickDesc": "快速測試",
+      "recLabel": "100 MB",
+      "recDesc": "推薦",
+      "thoroughLabel": "1 GB",
+      "thoroughDesc": "詳盡測試"
+    },
+    "results": {
+      "title": "測試結果",
+      "upload": "上傳",
+      "download": "下載",
+      "latency": "延遲",
+      "bottleneck": "瓶頸",
+      "unitMbs": "MB/s",
+      "unitMs": "ms"
+    },
+    "badge": {
+      "local": "區域網路",
+      "tailscale": "Tailscale VPN"
+    },
+    "path": {
+      "title": "網路路徑分析",
+      "label": "目標 IP 位址",
+      "analyzing": "分析中...",
+      "btn": "分析路徑",
+      "badgeLocal": "區域網路",
+      "badgeVpn": "VPN",
+      "hops": "網路跳數"
+    },
+    "disk": {
+      "title": "本機磁碟基準測試",
+      "intro": "測試本機磁碟的讀寫效能",
+      "benchmarking": "測試中...",
+      "btn": "基準測試本機磁碟",
+      "speed": "磁碟速度"
+    }
+  },
+  "upload": {
+    "title": "直接上傳",
+    "intro": "將檔案直接上傳至遠端，不經過已掛載的磁碟機。資料直接流到伺服器 — 無需本機 VFS 快取。",
+    "label": {
+      "source": "來源",
+      "destinationRemote": "目標遠端",
+      "destinationPath": "目標路徑"
+    },
+    "emptySource": "未選擇檔案或資料夾",
+    "btn": {
+      "file": "檔案",
+      "folder": "資料夾",
+      "cancelUpload": "取消上傳",
+      "close": "關閉",
+      "upload": "上傳"
+    },
+    "placeholder": {
+      "connection": "選擇已掛載的連線..."
+    },
+    "hint": {
+      "destinationPath": "檔案上傳到遠端的路徑（例如 /Chris-disk10/Backups）"
+    },
+    "state": {
+      "uploading": "上傳中...",
+      "done": "上傳完成",
+      "error": "上傳失敗"
+    },
+    "progress": "{transferred} / {total} ({percent}%)",
+    "eta": "預計 {eta}"
+  },
+  "dialog": {
+    "selectConfigFile": "選擇 Rclone 設定檔",
+    "configFilter": "Rclone 設定",
+    "selectCacheDir": "選擇 VFS 快取目錄",
+    "selectFileUpload": "選擇要上傳的檔案",
+    "selectFolderUpload": "選擇要上傳的資料夾"
+  },
+  "update": {
+    "versionAvailable": "v{version} 可用",
+    "updateRestart": "更新並重啟",
+    "restarting": "正在重新啟動...",
+    "downloading": "正在下載..."
+  },
+  "quit": {
+    "title": "正在離開 Rclone Mount Hub",
+    "subtitle": "Ctrl + 關閉"
+  }
+}

@@ -1,0 +1,640 @@
+{
+  "app": {
+    "name": "Rclone Mount Hub",
+    "sidebarTitle": "Монтажный хаб"
+  },
+  "titlebar": {
+    "appName": "Rclone Mount Hub"
+  },
+  "sidebar": {
+    "activeCount": "{count} активно",
+    "section": {
+      "drives": "Диски",
+      "tools": "Инструменты",
+      "rclone": "Rclone"
+    },
+    "nav": {
+      "overview": "Обзор",
+      "addConnection": "Добавить соединение",
+      "speedTest": "Тест скорости",
+      "export": "Экспорт",
+      "settings": "Настройки"
+    },
+    "rcloneWebUi": "Rclone Web UI",
+    "drivers": {
+      "checking": "Проверка драйверов...",
+      "rclone": "rclone {version}",
+      "rcloneMissing": "rclone отсутствует",
+      "winfsp": "WinFsp {version}",
+      "winfspMissing": "WinFsp отсутствует"
+    }
+  },
+  "status": {
+    "mountsActive": "монтирован {count} диск(а)",
+    "mountsActivePlural": "монтировано {count} дисков",
+    "network": {
+      "lan": "ЛВС",
+      "tailscale": "Tailscale",
+      "offline": "Не в сети"
+    },
+    "showLogs": "Показать логи",
+    "hideLogs": "Скрыть логи"
+  },
+  "logPanel": {
+    "title": "Системные журналы",
+    "clear": "Очистить",
+    "minimize": "Свернуть",
+    "empty": "Записей в журнале пока нет",
+    "emptyFiltered": "Нет логов: {filter}",
+    "filter": {
+      "all": "Все",
+      "drivers": "Драйверы",
+      "mounts": "Монтирование",
+      "network": "Сеть",
+      "system": "Система"
+    }
+  },
+  "shared": {
+    "action": {
+      "cancel": "Отмена",
+      "testConnection": "Тест соединения",
+      "testing": "Тестирование...",
+      "testReached": "Доступно",
+      "refresh": "Обновить"
+    },
+    "remote": {
+      "webdav": "WebDAV",
+      "webdavDesc": "Unraid, Nextcloud, Copyparty",
+      "sftp": "SFTP",
+      "sftpDesc": "SFTPGo, OpenSSH",
+      "smb": "SMB / Samba",
+      "smbDesc": "Сетевые папки Windows, NAS",
+      "s3": "S3",
+      "s3Desc": "AWS S3, MinIO, Backblaze",
+      "ftp": "FTP",
+      "ftpDesc": "Классический FTP-сервер"
+    },
+    "vendor": {
+      "webdav": {
+        "copyparty": "Copyparty (Unraid)",
+        "nextcloud": "Nextcloud",
+        "owncloud": "ownCloud",
+        "sharepoint": "SharePoint",
+        "other": "Другой WebDAV"
+      },
+      "sftp": {
+        "sftpgo": "SFTPGo",
+        "openssh": "OpenSSH",
+        "other": "Другой SFTP-сервер"
+      },
+      "s3": {
+        "aws": "AWS",
+        "minio": "MinIO",
+        "backblaze": "Backblaze",
+        "wasabi": "Wasabi",
+        "other": "Другое"
+      }
+    },
+    "mode": {
+      "auto": "Авто",
+      "autoDesc": "Умное переключение",
+      "lan": "Только ЛВС",
+      "lanDesc": "Локальная сеть",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "Доступ издалека"
+    },
+    "profile": {
+      "max": "Максимальная скорость",
+      "maxDesc": "10Gbps ЛВС, оптоволокно",
+      "balanced": "Сбалансированный",
+      "balancedDesc": "Ежедневное использование (рекомендуется)",
+      "low": "Экономный",
+      "lowDesc": "Батарея, медленный Wi-Fi"
+    },
+    "label": {
+      "dirCacheTime": "Время кэша каталогов",
+      "pollInterval": "Интервал опроса",
+      "vfsCacheMode": "Режим VFS-кэша",
+      "vfsCacheSize": "Размер VFS-кэша",
+      "readAhead": "Предварительная выборка",
+      "bufferSize": "Размер буфера",
+      "transfers": "Пересылки",
+      "multiThreadStreams": "Потоков многопоточности",
+      "extraFlags": "Дополнительные флаги Rclone",
+      "connectionName": "Имя соединения",
+      "driveLetter": "Буква диска",
+      "description": "Описание (необязательно)",
+      "serverSoftware": "Серверное ПО",
+      "host": "Хост / IP (ЛВС)",
+      "hostIp": "Хост / IP",
+      "port": "Порт",
+      "tailscaleIp": "Tailscale IP (необязательно)",
+      "username": "Имя пользователя",
+      "password": "Пароль",
+      "provider": "Провайдер",
+      "accessKeyId": "Идентификатор ключа доступа",
+      "secretAccessKey": "Секретный ключ доступа",
+      "region": "Регион",
+      "bucket": "Бакет",
+      "customEndpoint": "Свой endpoint (необязательно)"
+    },
+    "placeholder": {
+      "connectionName": "напр., домашний сервер, NAS",
+      "description": "напр., основное хранилище, медиа-папка",
+      "host": "192.168.1.x или \\\\SERVER\\share"
+    },
+    "hint": {
+      "host": "Адрес локальной сети",
+      "tailscaleIp": "Используется вдали от дома",
+      "customEndpoint": "Для MinIO или других S3-совместимых сервисов",
+      "dirCacheTime": "0 = всегда свежие данные",
+      "pollInterval": "Интервал фоновой проверки"
+    },
+    "vfsCacheMode": {
+      "default": "По умолчанию (полный)",
+      "full": "Полный",
+      "writes": "Записи",
+      "minimal": "Минимальный",
+      "off": "Выключен"
+    },
+    "extraFlagsPlaceholder": "--sftp-set-modtime=false\n--sftp-disable-hashcheck\n--checkers 8",
+    "extraFlagsHint": "По одному флагу в строке. Добавляются в команду rclone mount после всех остальных настроек.",
+    "resetDefaults": "Сбросить к значениям по умолчанию",
+    "drivesFree": "Свободно: {count}"
+  },
+  "dashboard": {
+    "title": "Обзор",
+    "subtitle": "Управление точками монтирования rclone",
+    "updated": "Обновлено: {timeSince}",
+    "time": {
+      "justNow": "только что",
+      "secondsAgo": "{count} сек. назад",
+      "minutesAgo": "{count} мин. назад"
+    },
+    "action": {
+      "directUpload": "Прямой загрузить",
+      "directUploadTipEnabled": "Загрузить файлы напрямую — без VFS-кэша",
+      "directUploadTipDisabled": "Сначала смонтируйте диск",
+      "newMount": "Новый том",
+      "import": "Импорт",
+      "mount": "Смонтировать",
+      "unmount": "Размонтировать"
+    },
+    "tip": {
+      "test": "Проверить соединение",
+      "edit": "Изменить соединение",
+      "delete": "Удалить соединение"
+    },
+    "driverWarning": {
+      "title": "Требуемые драйверы не установлены",
+      "body": "Перед монтированием дисков установите Rclone и WinFsp.",
+      "action": "Установить драйверы в настройках"
+    },
+    "stat": {
+      "totalMounts": "Всего томов",
+      "active": "Активные",
+      "network": "Сеть",
+      "online": "В сети",
+      "offline": "Не в сети"
+    },
+    "section": {
+      "managed": "Управляемые соединения",
+      "external": "Внешние тома (запущены вне этого приложения)",
+      "rcloneRemotes": "Rclone-удалённые (в конфиге rclone, не управляются здесь)"
+    },
+    "remotesDescription": "Есть в конфиге rclone, но не управляется здесь — импортируйте для редактирования и монтирования",
+    "empty": {
+      "title": "Тома не настроены",
+      "body": "Подключитесь к Unraid-серверу, NAS или облачному хранилищу. Диски появятся в Проводнике Windows как локальные.",
+      "cta": "Добавить первый том"
+    },
+    "badge": {
+      "mountedWarning": "Смонтирован (с предупреждением)",
+      "mounted": "Смонтирован",
+      "unmounted": "Размонтирован",
+      "external": "Внешний",
+      "mountedAt": "Смонтирован в {mountPoint}"
+    },
+    "unknown": "Неизвестно",
+    "drivePoint": "Диск {point}",
+    "mountPointUnknown": "Точка монтирования неизвестна",
+    "cardProfileSuffix": "профиль {profile}",
+    "profileSuffix": " профиль {profile}",
+    "confirm": {
+      "deleteConnectionTitle": "Удалить соединение",
+      "deleteConnection": "Удалить соединение «{name}»? Это нельзя отменить.",
+      "deleteRemoteTitle": "Удалить удалённое",
+      "deleteRemote": "Удалить rclone-удалённое «{name}»? Оно будет удалено из конфига rclone."
+    },
+    "importedDescription": "Импортировано из конфига rclone"
+  },
+  "toast": {
+    "webUiLaunched": "Rclone Web UI запущен",
+    "webUiLaunchFailed": "Не удалось запустить Web UI: {msg}",
+    "mounted": "{name} смонтирован на диск {letter} через {mode}",
+    "mountedWarning": "{name} смонтирован через {mode} ({url}) с предупреждением: {error}",
+    "mountFailed": "Не удалось смонтировать {name}",
+    "unmounted": "{name} размонтирован",
+    "unmountFailed": "Не удалось размонтировать {name}",
+    "switchedTo": "{name} переключён на {mode}",
+    "switchAvailable": "{name}: можно переключиться на {mode}",
+    "deleted": "{name} удалено",
+    "remoteDeleted": "Удалённое {name} удалено",
+    "imported": "«{name}» импортировано в приложение. Отредактируйте для полной настройки.",
+    "importFailed": "Ошибка импорта: {msg}",
+    "created": "Том «{name}» создан",
+    "createFailed": "Не удалось создать: {msg}",
+    "saved": "Изменения «{name}» сохранены",
+    "saveFailed": "Не удалось сохранить: {msg}",
+    "testFailed": "Ошибка теста: {msg}",
+    "nameRequired": "Укажите имя соединения",
+    "driveLetterRequired": "Укажите букву диска",
+    "hostRequired": "Укажите хост / IP-адрес",
+    "s3KeysRequired": "Укажите ключ доступа и секретный ключ S3",
+    "s3LooksValid": "Конфиг S3 выглядит валидным (запустите монтирование для проверки учётных данных)",
+    "exportSaved": "Экспорт сохранён и зашифрован",
+    "exportFailed": "Ошибка экспорта: {err}",
+    "copied": "Скопировано в буфер обмена",
+    "copyFailed": "Не удалось скопировать в буфер обмена",
+    "invalidJson": "Файл не является корректным JSON",
+    "wrongPassword": "Неверный пароль или повреждённый файл",
+    "missingField": "Отсутствует обязательное поле: {field}",
+    "importSkipped": "Пропущено: {name} (пароль не задан)",
+    "importRemoteFailed": "Не удалось создать удалённое для {name}: {err}",
+    "importedCount": "Импортировано соединений: {count}",
+    "noImport": "Никакие соединения не импортированы",
+    "scriptSaved": "Скрипт сохранён: {name}",
+    "speedTestDone": "Тест скорости завершён",
+    "speedTestFailed": "Ошибка теста скорости",
+    "targetIpRequired": "Введите целевой IP-адрес",
+    "pathAnalyzed": "Путь в сети проанализирован",
+    "pathAnalysisFailed": "Ошибка анализа пути",
+    "diskBenchmarkDone": "Бенчмарк диска завершён",
+    "diskBenchmarkFailed": "Ошибка бенчмарка диска",
+    "autostartEnabled": "Автозапуск включён",
+    "autostartDisabled": "Автозапуск выключен",
+    "autostartToggleFailed": "Не удалось переключить автозапуск",
+    "configPathUpdated": "Путь к конфигу rclone обновлён",
+    "configPathReset": "Сброшен путь к конфигу rclone по умолчанию",
+    "cacheDirUpdated": "Каталог кэша обновлён",
+    "cacheDirReset": "Сброшен каталог кэша rclone по умолчанию",
+    "startMenuAdded": "Добавлено в «Пуск» — уведомления будут отображать «Rclone Mount Hub»",
+    "startMenuAddFailed": "Не удалось добавить в «Пуск»",
+    "startMenuRemoved": "Удалено из «Пуск»",
+    "startMenuRemoveFailed": "Не удалось удалить из «Пуск»",
+    "rcloneInstalled": "Rclone успешно установлен",
+    "rcloneInstallFailed": "Не удалось установить Rclone",
+    "winfspLaunched": "Запущен установщик WinFsp {version} — завершите мастер и нажмите Продолжить",
+    "winfspDownloadFailed": "Не удалось скачать WinFsp",
+    "winfspReady": "WinFsp установлен и готов!",
+    "winfspNotDetected": "WinFsp пока не обнаружен. Сначала завершите установщик.",
+    "rcloneUninstalled": "Rclone удалён",
+    "rcloneUninstallFailed": "Не удалось удалить Rclone",
+    "winfspUninstalled": "WinFsp удалён",
+    "winfspUninstallFailed": "Не удалось удалить WinFsp",
+    "checkUpdatesFailed": "Не удалось проверить обновления",
+    "applyUpdateFailed": "Не удалось применить обновление"
+  },
+  "notif": {
+    "mountedTitle": "Диск смонтирован",
+    "mountedBody": "{name} подключён через {mode}",
+    "unmountedTitle": "Диск размонтирован",
+    "unmountedBody": "{name} отключён",
+    "networkChangedTitle": "Сеть изменена",
+    "networkChangedBodyReconnected": "{name} переподключён через {mode}",
+    "networkChangedBody": "{name} следует переключить на {mode}"
+  },
+  "test": {
+    "localOk": "Локально: OK",
+    "tailscaleOk": "Tailscale: OK",
+    "localFailed": "Локально: сбой",
+    "tailscaleFailed": "Tailscale: сбой",
+    "noIps": "Нет IP для тестирования"
+  },
+  "log": {
+    "networkRemounting": "Сеть изменилась: перемонтирование {name} в {mode}...",
+    "reconnectedVia": "{name} переподключён через {mode}",
+    "reconnectFailed": "Не удалось переподключить {name}: {msg}",
+    "networkSuggestSwitch": "Сеть изменилась: {name} работает через {mode}, но доступен {newMode}. Рассмотрите переподключение.",
+    "mounting": "Монтирование {name} на диск {letter}...",
+    "mountedOk": "{name} смонтирован на {letter} через {mode} ({url})",
+    "mountFailed": "Ошибка монтирования: {msg}",
+    "unmounting": "Размонтирование {name}...",
+    "unmounted": "{name} успешно размонтирован",
+    "unmountFailed": "Ошибка размонтирования: {msg}",
+    "externalUnmounting": "Размонтирование внешнего тома {name} (PID {pid})...",
+    "externalUnmounted": "Внешний том {name} размонтирован",
+    "externalUnmountFailed": "Не удалось размонтировать внешний: {msg}",
+    "testingConnection": "Тестирование соединения {name}...",
+    "testFailed": "Ошибка теста: {msg}",
+    "localReachable": "Локально ({ip}:{port}): доступно",
+    "localUnreachable": "Локально ({ip}:{port}): недоступно — {err}",
+    "tailscaleReachable": "Tailscale ({ip}:{port}): доступно",
+    "tailscaleUnreachable": "Tailscale ({ip}:{port}): недоступно — {err}",
+    "activeReachable": "Активный том ({url}): доступно",
+    "activeUnreachable": "Активный том ({url}): недоступно",
+    "imported": "«{name}» импортировано — отредактируйте IP, букву диска и другие параметры",
+    "testingLocal": "Тест локального {host}:{port}...",
+    "testingTailscale": "Тест Tailscale {host}:{port}...",
+    "creatingRemote": "Создание rclone-удалённого «{name}» ({type})...",
+    "remoteCreated": "Удалённое «{name}» создано",
+    "createRemoteFailed": "Не удалось создать удалённое: {msg}",
+    "connectionUpdated": "Соединение «{name}» обновлено",
+    "saveFailed": "Ошибка сохранения: {msg}",
+    "installingRclone": "Установка Rclone через Scoop...",
+    "rcloneInstalledOk": "✓ Rclone успешно установлен",
+    "rcloneInstallFailed": "✗ {msg}",
+    "fetchingWinfsp": "Получение последнего релиза WinFsp с GitHub...",
+    "winfspDownloaded": "✓ Установщик WinFsp {version} загружен и запущен",
+    "winfspWizard": "Завершите мастер установки, затем нажмите «Я установил WinFsp»",
+    "verifyingWinfsp": "Проверка установки WinFsp...",
+    "winfspDetected": "✓ WinFsp обнаружен и готов!",
+    "winfspNotDetectedLog": "WinFsp пока не обнаружен — завершите мастер установщика и повторите",
+    "winfspVerifyFailed": "✗ Не удалось проверить WinFsp",
+    "checkingDriverUpdates": "Проверка обновлений драйверов...",
+    "checkDriverUpdatesFailed": "✗ {msg}",
+    "appUpdateCheckFailed": "✗ Не удалось проверить обновления: {msg}"
+  },
+  "add": {
+    "back": "К обзору",
+    "title": "Добавить новый том",
+    "subtitle": "Подключитесь к удалённому хранилищу и смонтируйте его как локальный диск",
+    "section": {
+      "basic": "Основная информация",
+      "webdav": "Настройки WebDAV",
+      "sftp": "Настройки SFTP",
+      "ftp": "Настройки FTP",
+      "smb": "Настройки SMB / Samba",
+      "s3": "Настройки S3",
+      "auth": "Аутентификация",
+      "networkMode": "Режим сети",
+      "performanceProfile": "Профиль производительности",
+      "advancedCache": "Расширенные настройки кэша"
+    },
+    "sftpgoHint": "Добавьте собственные флаги rclone в расширенных настройках ниже (напр., --sftp-set-modtime=false для объектных хранилищ).",
+    "cachePrefix": "Кэш: {cache}",
+    "usingProfileDefaults": "Используются значения профиля {profile} по умолчанию",
+    "advancedHint": "Оставьте пустым, чтобы использовать значения профиля скорости. Время кэша каталогов: как долго кэшируются списки каталогов (0 = всегда свежие). Интервал опроса: как часто rclone проверяет изменения на удалённом.",
+    "autoMountTitle": "Авто-монтирование при запуске",
+    "autoMountDesc": "Подключать этот диск автоматически при запуске приложения",
+    "dualMountTitle": "Двойное монтирование (архив)",
+    "dualMountDesc": "Смонтировать второй диск только для чтения с кэшем списков на 24 ч — быстрый просмотр старых файлов",
+    "liveMountLabel": "Живой том",
+    "liveMountLine1": "Всегда в актуальном состоянии",
+    "liveMountLine2": "обычный профиль скорости",
+    "archiveMountLabel": "Архивный том",
+    "archiveMountLine1": "Только чтение, 24 ч",
+    "archiveMountLine2": "кэш каталогов",
+    "dualMountNote": "Архивный том использует агрессивное кэширование каталогов (24 ч) и опрашивает изменения раз в час. Используйте его для просмотра и получения файлов — загрузки и правки выполняйте через живой том.",
+    "creating": "Создание...",
+    "createMount": "Создать том"
+  },
+  "edit": {
+    "title": "Редактирование соединения",
+    "subtitle": "Соединение {remoteType} • создано {date}",
+    "remoteSettings": "Настройки {type}",
+    "newPassword": "Новый пароль (оставьте пустым, чтобы сохранить текущий)",
+    "passwordStoredHint": "Пароль хранится в конфиге rclone в зашифрованном виде",
+    "nameChangedNote": "Примечание: смена имени требует повторного ввода пароля для обновления конфига rclone.",
+    "saving": "Сохранение...",
+    "saveChanges": "Сохранить изменения"
+  },
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Пользовательские параметры и значения по умолчанию",
+    "startup": {
+      "section": "Поведение при запуске",
+      "startWithWindows": "Запускать с Windows",
+      "startWithWindowsDesc": "Запускать Rclone Mounter при старте компьютера",
+      "startMinimized": "Запускать свёрнутым",
+      "startMinimizedDesc": "Открывать в системном лотке, а не показывать окно",
+      "closeToTray": "Скрывать в лоток при закрытии",
+      "closeToTrayDesc": "Минимизировать в лоток, а не закрывать полностью",
+      "addToStartMenu": "Добавить в меню «Пуск»",
+      "addToStartMenuDesc": "Создаёт ярлык в меню «Пуск» и регистрирует приложение, чтобы уведомления показывали «Rclone Mount Hub», а не «Windows PowerShell»",
+      "addToStartMenuBtn": "Добавить в меню «Пуск»",
+      "remove": "Удалить"
+    },
+    "perf": {
+      "section": "Профиль производительности по умолчанию",
+      "sharedHint": "Используется для новых соединений, если не изменено",
+      "max": "Максимальная скорость",
+      "maxDesc": "10Gbps ЛВС",
+      "balanced": "Сбалансированный",
+      "balancedDesc": "Ежедневное использование",
+      "low": "Экономный",
+      "lowDesc": "Режим батареи"
+    },
+    "network": {
+      "section": "Режим сети по умолчанию",
+      "sharedHint": "Используется для новых соединений, если не изменено",
+      "auto": "Авто",
+      "autoDesc": "Умное переключение",
+      "lan": "Только ЛВС",
+      "lanDesc": "Локальная сеть",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "Доступ издалека"
+    },
+    "notifications": {
+      "section": "Уведомления",
+      "show": "Показывать уведомления о монтировании/размонтировании",
+      "showDesc": "Показывать системные уведомления при подключении или отключении дисков"
+    },
+    "networkChange": {
+      "section": "Поведение при смене сети",
+      "intro": "При смене сети (например, переход между домашним Wi-Fi и мобильным) приложение определяет это через события сети Windows (без опроса, без расхода батареи).",
+      "notify": "Только уведомлять",
+      "notifyDesc": "Показывает уведомление, когда смонтированный диск следует переключить между ЛВС и Tailscale. Вы решаете, когда переподключаться.",
+      "autoReconnect": "Авто-переподключение",
+      "autoReconnectDesc": "Автоматически перемонтирует диски на правильный IP. Кратковременное перекрытие ~2–3 секунды при переключении."
+    },
+    "config": {
+      "section": "Файл конфигурации Rclone",
+      "intro": "По умолчанию rclone использует собственное место для конфига. Укажите свой путь, если используете другой файл конфигурации.",
+      "reset": "Сброс к стандартному rclone",
+      "usingDefault": "Используется стандартный: {path}"
+    },
+    "cache": {
+      "section": "Каталог VFS-кэша",
+      "intro": "По умолчанию rclone кэширует записи на системный диск. Укажите диск с большим свободным местом, чтобы не заполнить C:\\ при копировании больших файлов (например, образов ВМ).",
+      "reset": "Сбросить к стандартному"
+    },
+    "drivers": {
+      "section": "Управление драйверами",
+      "rclone": "Rclone",
+      "winfsp": "WinFsp",
+      "installed": "Установлен",
+      "notInstalled": "Не установлен",
+      "uninstall": "Удалить",
+      "installRclone": "Установить Rclone (Scoop)",
+      "installing": "Установка...",
+      "installWinfsp": "Скачать и установить WinFsp",
+      "downloading": "Загрузка...",
+      "verifiedWinfsp": "WinFsp установлен",
+      "verifying": "Проверка...",
+      "checkUpdates": "Проверить обновления",
+      "checking": "Проверка...",
+      "loadFailed": "Не удалось получить сведения о драйверах."
+    },
+    "about": {
+      "section": "О программе и обновления",
+      "appName": "Rclone Mount Hub",
+      "version": "v{version}",
+      "upToDate": "Актуальная версия",
+      "updateAvailable": "Доступна v{version}",
+      "updateRestart": "Обновить и перезапустить",
+      "checking": "Проверка…",
+      "updating": "Обновление…",
+      "checkUpdates": "Проверить обновления"
+    },
+    "troubleshoot": {
+      "title": "Устранение неполадок",
+      "installerTitle": "Ошибка установщика «Не удалось удалить существующий каталог приложения»:",
+      "installerBody": "Перед запуском установщика убедитесь, что Rclone Mount Hub полностью закрыт (проверьте системный лоток) и остановлены все процессы rclone. Приложение автоматически размонтирует диски при выходе, но если оно аварийно завершилось, сначала выполните taskkill /F /IM rclone.exe в терминале.",
+      "driveTitle": "Диск виден в Проводнике, но не подключается:",
+      "driveBody": "Процесс монтирования rclone запустился, но удалённое соединение не удалось. Размонтируйте, проверьте учётные данные и адрес сервера, затем повторите."
+    },
+    "resetDefaults": "Сбросить к значениям по умолчанию",
+    "savedNote": "Настройки сохраняются автоматически",
+    "language": {
+      "section": "Язык",
+      "label": "Язык",
+      "auto": "Системный",
+      "en": "English",
+      "zh": "Русский",
+      "hint": "Язык интерфейса. «Системный» следует отображаемому языку Windows."
+    }
+  },
+  "export": {
+    "title": "Экспорт и импорт",
+    "subtitle": "Резервное копирование соединений или генерация автономных скриптов",
+    "section": {
+      "export": "Экспорт соединений",
+      "import": "Импорт соединений",
+      "powershell": "Скрипты PowerShell"
+    },
+    "encryptionNote": "Экспорт шифруется AES-256-GCM. Перед сохранением введите пароль. Включает все данные соединений, имена пользователей и настройки приложения.",
+    "btn": {
+      "exportJson": "Экспорт в JSON",
+      "copyPlain": "Копировать обычный JSON",
+      "importJson": "Импорт из JSON",
+      "downloadScript": "Скачать скрипт"
+    },
+    "previewLabel": "Предпросмотр (что войдёт в экспорт)",
+    "noConnections": "Нет соединений для экспорта",
+    "importNote": "Импорт из зашифрованного или обычного JSON. Для зашифрованных файлов потребуется пароль. Для каждого соединения нужно будет ввести пароль WebDAV.",
+    "powershellNote": "Создаёт автономные скрипты монтирования для каждого соединения",
+    "psNoConnections": "Нет доступных соединений. Сначала добавьте соединение.",
+    "psDriveLine": "Диск {letter} • режим {mode}",
+    "modal": {
+      "exportTitle": "Шифровать экспорт",
+      "importTitle": "Расшифровать импорт",
+      "exportDesc": "Ваши соединения (включая имена пользователей и все настройки) будут зашифрованы AES-256-GCM. Этот пароль понадобится для импорта файла.",
+      "importDesc": "Введите пароль, использованный при создании этого экспорта.",
+      "passwordPlaceholder": "Пароль",
+      "passwordTooShort": "Пароль должен быть не короче 4 символов",
+      "exportCta": "Зашифровать и сохранить",
+      "importCta": "Расшифровать и импортировать"
+    },
+    "promptPassword": "Введите пароль WebDAV для «{name}\":"
+  },
+  "speed": {
+    "title": "Тест скорости и диагностика",
+    "subtitle": "Проверьте скорость передачи и найдите узкие места",
+    "section": {
+      "run": "Запустить тест скорости"
+    },
+    "btn": {
+      "run": "Запустить тест",
+      "running": "Тестирование..."
+    },
+    "label": {
+      "driveLetter": "Буква диска",
+      "fileSize": "Размер тестового файла"
+    },
+    "size": {
+      "quickLabel": "10 МБ",
+      "quickDesc": "Быстрый тест",
+      "recLabel": "100 МБ",
+      "recDesc": "Рекомендуется",
+      "thoroughLabel": "1 ГБ",
+      "thoroughDesc": "Тщательный"
+    },
+    "results": {
+      "title": "Результаты теста",
+      "upload": "Загрузка",
+      "download": "Скачивание",
+      "latency": "Задержка",
+      "bottleneck": "Узкое место",
+      "unitMbs": "МБ/с",
+      "unitMs": "мс"
+    },
+    "badge": {
+      "local": "Локальная сеть",
+      "tailscale": "Tailscale VPN"
+    },
+    "path": {
+      "title": "Анализ пути в сети",
+      "label": "Целевой IP-адрес",
+      "analyzing": "Анализ...",
+      "btn": "Анализировать путь",
+      "badgeLocal": "Локальная сеть",
+      "badgeVpn": "VPN",
+      "hops": "Сетевые прыжки"
+    },
+    "disk": {
+      "title": "Бенчмарк локального диска",
+      "intro": "Тестируйте скорость чтения/записи локального диска",
+      "benchmarking": "Бенчмарк...",
+      "btn": "Бенчмарк локального диска",
+      "speed": "Скорость диска"
+    }
+  },
+  "upload": {
+    "title": "Прямая загрузка",
+    "intro": "Загружайте файлы напрямую на удалённый сервер, минуя смонтированный диск. Поток идёт прямо на сервер — без локального VFS-кэша.",
+    "label": {
+      "source": "Источник",
+      "destinationRemote": "Удалённое назначение",
+      "destinationPath": "Путь назначения"
+    },
+    "emptySource": "Файл или папка не выбраны",
+    "btn": {
+      "file": "Файл",
+      "folder": "Папка",
+      "cancelUpload": "Отменить загрузку",
+      "close": "Закрыть",
+      "upload": "Загрузить"
+    },
+    "placeholder": {
+      "connection": "Выберите смонтированное соединение..."
+    },
+    "hint": {
+      "destinationPath": "Путь на удалённом, куда будут загружены файлы (напр., /Chris-disk10/Backups)"
+    },
+    "state": {
+      "uploading": "Загрузка...",
+      "done": "Загрузка завершена",
+      "error": "Ошибка загрузки"
+    },
+    "progress": "{transferred} / {total} ({percent}%)",
+    "eta": "Осталось {eta}"
+  },
+  "dialog": {
+    "selectConfigFile": "Выбрать файл конфигурации Rclone",
+    "configFilter": "Конфигурация Rclone",
+    "selectCacheDir": "Выбрать каталог VFS-кэша",
+    "selectFileUpload": "Выбрать файл для загрузки",
+    "selectFolderUpload": "Выбрать папку для загрузки"
+  },
+  "update": {
+    "versionAvailable": "Доступна v{version}",
+    "updateRestart": "Обновить и перезапустить",
+    "restarting": "Перезапуск...",
+    "downloading": "Загрузка..."
+  },
+  "quit": {
+    "title": "Выход из Rclone Mount Hub",
+    "subtitle": "Ctrl + закрытие"
+  }
+}

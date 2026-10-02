@@ -1,6 +1,7 @@
 import { clsx } from "clsx";
 import { CaretUp, CaretDown, Terminal } from "phosphor-react";
 import { useLogStore } from "../../lib/logStore";
+import { useI18n } from "../../lib/i18n";
 import { getVersion } from "@tauri-apps/api/app";
 import { useState, useEffect } from "react";
 
@@ -11,6 +12,7 @@ interface StatusBarProps {
 
 export function StatusBar({ mountedCount, networkStatus }: StatusBarProps) {
   const { isOpen, toggleOpen, logs, filter } = useLogStore();
+  const { t } = useI18n();
   const filteredLogs = filter === "all"
     ? logs
     : logs.filter(log => log.category === filter);
@@ -21,7 +23,9 @@ export function StatusBar({ mountedCount, networkStatus }: StatusBarProps) {
     <div className="h-[26px] px-3 bg-bg-base/80 backdrop-blur-md border-t border-white/[0.06] flex items-center justify-between text-[11px] text-text-tertiary select-none">
       <div className="flex items-center gap-3">
         <span>
-          {mountedCount} {mountedCount === 1 ? "mount" : "mounts"} active
+          {mountedCount === 1
+            ? t("status.mountsActive", { count: mountedCount })
+            : t("status.mountsActivePlural", { count: mountedCount })}
         </span>
         <div className="w-px h-3 bg-white/[0.08]" />
         <div className="flex items-center gap-1.5">
@@ -36,9 +40,9 @@ export function StatusBar({ mountedCount, networkStatus }: StatusBarProps) {
             )}
           />
           <span>
-            {networkStatus === "local" && "LAN"}
-            {networkStatus === "tailscale" && "Tailscale"}
-            {networkStatus === "offline" && "Offline"}
+            {networkStatus === "local" && t("status.network.lan")}
+            {networkStatus === "tailscale" && t("status.network.tailscale")}
+            {networkStatus === "offline" && t("status.network.offline")}
           </span>
         </div>
       </div>
@@ -51,7 +55,7 @@ export function StatusBar({ mountedCount, networkStatus }: StatusBarProps) {
         >
           <Terminal size={12} weight="duotone" className="text-accent-blue" />
           <span className="group-hover:text-text-primary transition-colors">
-            {isOpen ? "Hide Logs" : "Show Logs"}
+            {isOpen ? t("status.hideLogs") : t("status.showLogs")}
           </span>
           {!isOpen && logs.length > 0 && (
             <span className="px-1.5 py-0.5 rounded-full bg-accent-blue/20 text-accent-blue text-[10px] font-bold">

@@ -11,23 +11,13 @@ import {
 import { clsx } from "clsx";
 import { invoke } from "@tauri-apps/api/core";
 import { useMountSummaryStore } from "../../lib/store";
+import { useI18n } from "../../lib/i18n";
 import { toast } from "sonner";
 
 interface SidebarProps {
   currentPage: string;
   onNavigate: (page: string) => void;
 }
-
-const mainNav = [
-  { id: "dashboard", label: "Overview", icon: CirclesFour },
-  { id: "add", label: "Add Connection", icon: Plus },
-];
-
-const toolsNav = [
-  { id: "speedtest", label: "Speed Test", icon: Gauge },
-  { id: "export", label: "Export", icon: Export },
-  { id: "settings", label: "Settings", icon: GearSix },
-];
 
 function NavButton({
   item,
@@ -83,6 +73,18 @@ interface DriverVersions {
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const [driverVersions, setDriverVersions] = useState<DriverVersions | null>(null);
   const { mountedCount } = useMountSummaryStore();
+  const { t } = useI18n();
+
+  const mainNav = [
+    { id: "dashboard", label: t("sidebar.nav.overview"), icon: CirclesFour },
+    { id: "add", label: t("sidebar.nav.addConnection"), icon: Plus },
+  ];
+
+  const toolsNav = [
+    { id: "speedtest", label: t("sidebar.nav.speedTest"), icon: Gauge },
+    { id: "export", label: t("sidebar.nav.export"), icon: Export },
+    { id: "settings", label: t("sidebar.nav.settings"), icon: GearSix },
+  ];
 
   useEffect(() => {
     loadDriverVersions();
@@ -100,10 +102,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const handleOpenWebUI = async () => {
     try {
       await invoke("open_rclone_web_ui");
-      toast.success("Rclone Web UI launched");
+      toast.success(t("toast.webUiLaunched"));
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error(`Failed to launch Web UI: ${msg}`);
+      toast.error(t("toast.webUiLaunchFailed", { msg }));
     }
   };
 
@@ -117,10 +119,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           </div>
           <div className="min-w-0">
             <h2 className="text-[13px] font-semibold text-text-primary leading-tight truncate">
-              Mount Hub
+              {t("app.sidebarTitle")}
             </h2>
             <p className="text-[11px] text-text-tertiary leading-tight">
-              {mountedCount} active
+              {t("sidebar.activeCount", { count: mountedCount })}
             </p>
           </div>
         </div>
@@ -131,7 +133,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-2.5 pt-2 pb-3 sidebar-scroll">
-        <SectionLabel>Drives</SectionLabel>
+        <SectionLabel>{t("sidebar.section.drives")}</SectionLabel>
         <nav className="flex flex-col gap-0.5">
           {mainNav.map((item) => (
             <NavButton
@@ -143,7 +145,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           ))}
         </nav>
 
-        <SectionLabel>Tools</SectionLabel>
+        <SectionLabel>{t("sidebar.section.tools")}</SectionLabel>
         <nav className="flex flex-col gap-0.5">
           {toolsNav.map((item) => (
             <NavButton
@@ -155,7 +157,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           ))}
         </nav>
 
-        <SectionLabel>Rclone</SectionLabel>
+        <SectionLabel>{t("sidebar.section.rclone")}</SectionLabel>
         <nav className="flex flex-col gap-0.5">
           <button
             onClick={handleOpenWebUI}
@@ -170,7 +172,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               weight="regular"
               className="flex-shrink-0 text-text-tertiary transition-colors duration-150"
             />
-            Rclone Web UI
+            {t("sidebar.rcloneWebUi")}
           </button>
         </nav>
       </div>
@@ -190,8 +192,8 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               />
               <span className="text-[11px] text-text-tertiary">
                 {driverVersions.rclone_installed
-                  ? `rclone ${driverVersions.rclone_version || "installed"}`
-                  : "rclone missing"}
+                  ? t("sidebar.drivers.rclone", { version: driverVersions.rclone_version || "installed" })
+                  : t("sidebar.drivers.rcloneMissing")}
               </span>
             </div>
             <div className="flex items-center gap-2 mt-1">
@@ -205,13 +207,13 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               />
               <span className="text-[11px] text-text-tertiary">
                 {driverVersions.winfsp_installed
-                  ? `WinFsp ${driverVersions.winfsp_version || "ready"}`
-                  : "WinFsp missing"}
+                  ? t("sidebar.drivers.winfsp", { version: driverVersions.winfsp_version || "ready" })
+                  : t("sidebar.drivers.winfspMissing")}
               </span>
             </div>
           </>
         ) : (
-          <span className="text-[11px] text-text-tertiary">Checking drivers...</span>
+          <span className="text-[11px] text-text-tertiary">{t("sidebar.drivers.checking")}</span>
         )}
       </div>
     </div>

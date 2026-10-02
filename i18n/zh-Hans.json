@@ -1,0 +1,640 @@
+{
+  "app": {
+    "name": "Rclone Mount Hub",
+    "sidebarTitle": "挂载中心"
+  },
+  "titlebar": {
+    "appName": "Rclone Mount Hub"
+  },
+  "sidebar": {
+    "activeCount": "{count} 个已挂载",
+    "section": {
+      "drives": "驱动器",
+      "tools": "工具",
+      "rclone": "Rclone"
+    },
+    "nav": {
+      "overview": "概览",
+      "addConnection": "添加连接",
+      "speedTest": "速度测试",
+      "export": "导出",
+      "settings": "设置"
+    },
+    "rcloneWebUi": "Rclone 网页界面",
+    "drivers": {
+      "checking": "正在检查驱动...",
+      "rclone": "rclone {version}",
+      "rcloneMissing": "rclone 缺失",
+      "winfsp": "WinFsp {version}",
+      "winfspMissing": "WinFsp 缺失"
+    }
+  },
+  "status": {
+    "mountsActive": "{count} 个挂载点已激活",
+    "mountsActivePlural": "{count} 个挂载点已激活",
+    "network": {
+      "lan": "局域网",
+      "tailscale": "Tailscale",
+      "offline": "离线"
+    },
+    "showLogs": "显示日志",
+    "hideLogs": "隐藏日志"
+  },
+  "logPanel": {
+    "title": "系统日志",
+    "clear": "清除",
+    "minimize": "最小化",
+    "empty": "暂无日志",
+    "emptyFiltered": "没有{filter}日志",
+    "filter": {
+      "all": "全部",
+      "drivers": "驱动",
+      "mounts": "挂载",
+      "network": "网络",
+      "system": "系统"
+    }
+  },
+  "shared": {
+    "action": {
+      "cancel": "取消",
+      "testConnection": "测试连接",
+      "testing": "测试中...",
+      "testReached": "可达",
+      "refresh": "刷新"
+    },
+    "remote": {
+      "webdav": "WebDAV",
+      "webdavDesc": "Unraid、Nextcloud、Copyparty",
+      "sftp": "SFTP",
+      "sftpDesc": "SFTPGo、OpenSSH",
+      "smb": "SMB / Samba",
+      "smbDesc": "Windows 共享、NAS",
+      "s3": "S3",
+      "s3Desc": "AWS S3、MinIO、Backblaze",
+      "ftp": "FTP",
+      "ftpDesc": "传统 FTP 服务器"
+    },
+    "vendor": {
+      "webdav": {
+        "copyparty": "Copyparty (Unraid)",
+        "nextcloud": "Nextcloud",
+        "owncloud": "ownCloud",
+        "sharepoint": "SharePoint",
+        "other": "其他 WebDAV"
+      },
+      "sftp": {
+        "sftpgo": "SFTPGo",
+        "openssh": "OpenSSH",
+        "other": "其他 SFTP 服务器"
+      },
+      "s3": {
+        "aws": "AWS",
+        "minio": "MinIO",
+        "backblaze": "Backblaze",
+        "wasabi": "Wasabi",
+        "other": "其他"
+      }
+    },
+    "mode": {
+      "auto": "自动",
+      "autoDesc": "智能切换",
+      "lan": "仅局域网",
+      "lanDesc": "本地网络",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "远程访问"
+    },
+    "profile": {
+      "max": "极速",
+      "maxDesc": "10Gbps 局域网、光纤",
+      "balanced": "均衡",
+      "balancedDesc": "日常使用（推荐）",
+      "low": "低资源",
+      "lowDesc": "笔记本、慢速 WiFi"
+    },
+    "label": {
+      "dirCacheTime": "目录缓存时间",
+      "pollInterval": "轮询间隔",
+      "vfsCacheMode": "VFS 缓存模式",
+      "vfsCacheSize": "VFS 缓存大小",
+      "readAhead": "预读取",
+      "bufferSize": "缓冲区大小",
+      "transfers": "传输数",
+      "multiThreadStreams": "多线程流",
+      "extraFlags": "额外 Rclone 参数",
+      "connectionName": "连接名称",
+      "driveLetter": "驱动器号",
+      "description": "描述（可选）",
+      "serverSoftware": "服务器软件",
+      "host": "主机 / IP（局域网）",
+      "hostIp": "主机 / IP",
+      "port": "端口",
+      "tailscaleIp": "Tailscale IP（可选）",
+      "username": "用户名",
+      "password": "密码",
+      "provider": "服务商",
+      "accessKeyId": "访问密钥 ID",
+      "secretAccessKey": "私有访问密钥",
+      "region": "区域",
+      "bucket": "存储桶",
+      "customEndpoint": "自定义端点（可选）"
+    },
+    "placeholder": {
+      "connectionName": "例如：家庭服务器、NAS",
+      "description": "例如：主存储、媒体共享",
+      "host": "192.168.1.x 或 \\\\SERVER\\share"
+    },
+    "hint": {
+      "host": "本地网络地址",
+      "tailscaleIp": "远离家中时使用",
+      "customEndpoint": "适用于 MinIO 或其他兼容 S3 的服务",
+      "dirCacheTime": "0 = 每次进入都刷新",
+      "pollInterval": "后台检查间隔"
+    },
+    "vfsCacheMode": {
+      "default": "默认（完整）",
+      "full": "完整",
+      "writes": "仅写入",
+      "minimal": "最小",
+      "off": "关闭"
+    },
+    "extraFlagsPlaceholder": "--sftp-set-modtime=false\n--sftp-disable-hashcheck\n--checkers 8",
+    "extraFlagsHint": "每行一个参数。追加在所有其他设置之后的 rclone mount 命令中。",
+    "resetDefaults": "恢复默认",
+    "drivesFree": "剩余 {count} 个"
+  },
+  "dashboard": {
+    "title": "概览",
+    "subtitle": "管理你的 rclone 驱动器挂载",
+    "updated": "{timeSince}更新",
+    "time": {
+      "justNow": "刚刚",
+      "secondsAgo": "{count} 秒前",
+      "minutesAgo": "{count} 分钟前"
+    },
+    "action": {
+      "directUpload": "直接上传",
+      "directUploadTipEnabled": "直接上传文件 — 绕过 VFS 缓存",
+      "directUploadTipDisabled": "请先挂载一个驱动器",
+      "newMount": "新建挂载",
+      "import": "导入",
+      "mount": "挂载",
+      "unmount": "卸载"
+    },
+    "tip": {
+      "test": "测试连接",
+      "edit": "编辑连接",
+      "delete": "删除连接"
+    },
+    "driverWarning": {
+      "title": "缺少必要驱动",
+      "body": "挂载驱动器前必须先安装 Rclone 和 WinFsp。",
+      "action": "在设置中安装驱动"
+    },
+    "stat": {
+      "totalMounts": "挂载总数",
+      "active": "已激活",
+      "network": "网络",
+      "online": "在线",
+      "offline": "离线"
+    },
+    "section": {
+      "managed": "受管连接",
+      "external": "外部挂载（在本应用之外运行）",
+      "rcloneRemotes": "Rclone 远程（位于 rclone 配置中，此处未管理）"
+    },
+    "remotesDescription": "存在于 rclone 配置中但此处未管理 — 可导入后编辑并挂载",
+    "empty": {
+      "title": "尚未配置任何挂载",
+      "body": "连接你的 Unraid 服务器、NAS 或云存储。驱动器将像本地磁盘一样显示在 Windows 资源管理器中。",
+      "cta": "添加第一个挂载"
+    },
+    "badge": {
+      "mountedWarning": "已挂载（有警告）",
+      "mounted": "已挂载",
+      "unmounted": "未挂载",
+      "external": "外部",
+      "mountedAt": "已挂载至 {mountPoint}"
+    },
+    "unknown": "未知",
+    "drivePoint": "驱动器 {point}",
+    "mountPointUnknown": "挂载点未知",
+    "cardProfileSuffix": "{profile} 性能配置",
+    "profileSuffix": " {profile} 性能配置",
+    "confirm": {
+      "deleteConnectionTitle": "删除连接",
+      "deleteConnection": "确定删除连接“{name}”吗？此操作无法撤销。",
+      "deleteRemoteTitle": "删除远程",
+      "deleteRemote": "确定删除 rclone 远程“{name}”吗？将从 rclone 配置中移除。"
+    },
+    "importedDescription": "已从 rclone 配置导入"
+  },
+  "toast": {
+    "webUiLaunched": "Rclone 网页界面已启动",
+    "webUiLaunchFailed": "启动网页界面失败：{msg}",
+    "mounted": "已将 {name} 挂载到 {letter}: 驱动器（{mode}）",
+    "mountedWarning": "{name} 已通过 {mode}（{url}）挂载，但存在警告：{error}",
+    "mountFailed": "挂载 {name} 失败",
+    "unmounted": "已卸载 {name}",
+    "unmountFailed": "卸载 {name} 失败",
+    "switchedTo": "{name} 已切换到 {mode}",
+    "switchAvailable": "{name}：可切换到 {mode}",
+    "deleted": "已删除 {name}",
+    "remoteDeleted": "已删除远程 {name}",
+    "imported": "已将“{name}”导入到应用。请编辑以完成配置。",
+    "importFailed": "导入失败：{msg}",
+    "created": "已创建挂载“{name}”",
+    "createFailed": "创建失败：{msg}",
+    "saved": "已保存“{name}”的更改",
+    "saveFailed": "保存失败：{msg}",
+    "testFailed": "测试失败：{msg}",
+    "nameRequired": "请填写连接名称",
+    "driveLetterRequired": "请选择驱动器号",
+    "hostRequired": "请填写主机 / IP 地址",
+    "s3KeysRequired": "请填写 S3 访问密钥和私有密钥",
+    "s3LooksValid": "S3 配置看起来有效（启动挂载以验证凭据）",
+    "exportSaved": "导出文件已保存并加密成功",
+    "exportFailed": "导出失败：{err}",
+    "copied": "已复制到剪贴板",
+    "copyFailed": "复制到剪贴板失败",
+    "invalidJson": "文件不是有效的 JSON",
+    "wrongPassword": "密码错误或文件已损坏",
+    "missingField": "缺少必填字段：{field}",
+    "importSkipped": "已跳过：{name}（未提供密码）",
+    "importRemoteFailed": "为 {name} 创建远程失败：{err}",
+    "importedCount": "已导入 {count} 个连接",
+    "noImport": "未导入任何连接",
+    "scriptSaved": "脚本已保存：{name}",
+    "speedTestDone": "速度测试完成",
+    "speedTestFailed": "速度测试失败",
+    "targetIpRequired": "请输入目标 IP 地址",
+    "pathAnalyzed": "网络路径分析完成",
+    "pathAnalysisFailed": "路径分析失败",
+    "diskBenchmarkDone": "磁盘基准测试完成",
+    "diskBenchmarkFailed": "磁盘基准测试失败",
+    "autostartEnabled": "已开启开机自启",
+    "autostartDisabled": "已关闭开机自启",
+    "autostartToggleFailed": "切换开机自启失败",
+    "configPathUpdated": "Rclone 配置路径已更新",
+    "configPathReset": "已重置为 rclone 默认配置路径",
+    "cacheDirUpdated": "缓存目录已更新",
+    "cacheDirReset": "已重置为 rclone 默认缓存目录",
+    "startMenuAdded": "已添加到开始菜单 — 通知将显示“Rclone Mount Hub”",
+    "startMenuAddFailed": "添加到开始菜单失败",
+    "startMenuRemoved": "已从开始菜单移除",
+    "startMenuRemoveFailed": "从开始菜单移除失败",
+    "rcloneInstalled": "Rclone 安装成功",
+    "rcloneInstallFailed": "Rclone 安装失败",
+    "winfspLaunched": "WinFsp {version} 安装程序已启动 — 完成向导后点击继续",
+    "winfspDownloadFailed": "WinFsp 下载失败",
+    "winfspReady": "WinFsp 已安装就绪！",
+    "winfspNotDetected": "尚未检测到 WinFsp。请先完成安装程序。",
+    "rcloneUninstalled": "Rclone 已卸载",
+    "rcloneUninstallFailed": "Rclone 卸载失败",
+    "winfspUninstalled": "WinFsp 已卸载",
+    "winfspUninstallFailed": "WinFsp 卸载失败",
+    "checkUpdatesFailed": "检查更新失败",
+    "applyUpdateFailed": "应用更新失败"
+  },
+  "notif": {
+    "mountedTitle": "驱动器已挂载",
+    "mountedBody": "{name} 已通过 {mode} 连接",
+    "unmountedTitle": "驱动器已卸载",
+    "unmountedBody": "{name} 已断开",
+    "networkChangedTitle": "网络已变更",
+    "networkChangedBodyReconnected": "{name} 已通过 {mode} 重新连接",
+    "networkChangedBody": "{name} 可能需要切换到 {mode}"
+  },
+  "test": {
+    "localOk": "本地：正常",
+    "tailscaleOk": "Tailscale：正常",
+    "localFailed": "本地：失败",
+    "tailscaleFailed": "Tailscale：失败",
+    "noIps": "未配置可测试的 IP"
+  },
+  "log": {
+    "networkRemounting": "网络已变更：正在将 {name} 重新挂载到 {mode}...",
+    "reconnectedVia": "{name} 已通过 {mode} 重新连接",
+    "reconnectFailed": "重新连接 {name} 失败：{msg}",
+    "networkSuggestSwitch": "网络已变更：{name} 当前为 {mode}，但 {newMode} 现已可用。建议重新连接。",
+    "mounting": "正在将 {name} 挂载到 {letter}: 驱动器...",
+    "mountedOk": "{name} 已挂载到 {letter}:（{mode}，{url}）",
+    "mountFailed": "挂载失败：{msg}",
+    "unmounting": "正在卸载 {name}...",
+    "unmounted": "{name} 已成功卸载",
+    "unmountFailed": "卸载失败：{msg}",
+    "externalUnmounting": "正在卸载外部挂载 {name}（PID {pid}）...",
+    "externalUnmounted": "外部挂载 {name} 已卸载",
+    "externalUnmountFailed": "卸载外部挂载失败：{msg}",
+    "testingConnection": "正在测试 {name} 的连接...",
+    "testFailed": "测试失败：{msg}",
+    "localReachable": "本地（{ip}:{port}）：可达",
+    "localUnreachable": "本地（{ip}:{port}）：不可达 — {err}",
+    "tailscaleReachable": "Tailscale（{ip}:{port}）：可达",
+    "tailscaleUnreachable": "Tailscale（{ip}:{port}）：不可达 — {err}",
+    "activeReachable": "活动挂载（{url}）：可达",
+    "activeUnreachable": "活动挂载（{url}）：不可达",
+    "imported": "已导入“{name}” — 请编辑以设置 IP、驱动器号及其他参数",
+    "testingLocal": "正在测试本地 {host}:{port}...",
+    "testingTailscale": "正在测试 Tailscale {host}:{port}...",
+    "creatingRemote": "正在创建 rclone 远程“{name}”（{type}）...",
+    "remoteCreated": "远程“{name}”已创建",
+    "createRemoteFailed": "创建远程失败：{msg}",
+    "connectionUpdated": "连接“{name}”已更新",
+    "saveFailed": "保存失败：{msg}",
+    "installingRclone": "正在通过 Scoop 安装 Rclone...",
+    "rcloneInstalledOk": "✓ Rclone 安装成功",
+    "rcloneInstallFailed": "✗ {msg}",
+    "fetchingWinfsp": "正在从 GitHub 获取最新 WinFsp 发行版...",
+    "winfspDownloaded": "✓ WinFsp {version} 安装程序已下载并启动",
+    "winfspWizard": "完成安装向导后，点击“我已安装 WinFsp”",
+    "verifyingWinfsp": "正在验证 WinFsp 安装...",
+    "winfspDetected": "✓ 检测到 WinFsp，已就绪！",
+    "winfspNotDetectedLog": "尚未检测到 WinFsp — 请完成安装向导后重试",
+    "winfspVerifyFailed": "✗ 验证 WinFsp 失败",
+    "checkingDriverUpdates": "正在检查驱动更新...",
+    "checkDriverUpdatesFailed": "✗ {msg}",
+    "appUpdateCheckFailed": "✗ 更新检查失败：{msg}"
+  },
+  "add": {
+    "back": "返回概览",
+    "title": "添加新挂载",
+    "subtitle": "连接远程存储并将其挂载为本地驱动器",
+    "section": {
+      "basic": "基本信息",
+      "webdav": "WebDAV 设置",
+      "sftp": "SFTP 设置",
+      "ftp": "FTP 设置",
+      "smb": "SMB / Samba 设置",
+      "s3": "S3 设置",
+      "auth": "身份验证",
+      "networkMode": "网络模式",
+      "performanceProfile": "性能配置",
+      "advancedCache": "高级缓存设置"
+    },
+    "sftpgoHint": "可在下方的高级设置中添加自定义 rclone 参数（例如对象存储后端可加 --sftp-set-modtime=false）。",
+    "cachePrefix": "缓存：{cache}",
+    "usingProfileDefaults": "使用 {profile} 性能配置默认值",
+    "advancedHint": "留空则使用性能配置默认值。目录缓存时间：目录列表的缓存时长（0 = 始终刷新）。轮询间隔：rclone 检查远程变化的频率。",
+    "autoMountTitle": "启动时自动挂载",
+    "autoMountDesc": "应用启动时自动连接此驱动器",
+    "dualMountTitle": "双挂载（归档）",
+    "dualMountDesc": "挂载第二个只读驱动器，目录列表缓存 24 小时 — 快速浏览取旧文件",
+    "liveMountLabel": "实时挂载",
+    "liveMountLine1": "始终最新",
+    "liveMountLine2": "常规性能配置",
+    "archiveMountLabel": "归档挂载",
+    "archiveMountLine1": "只读，24 小时",
+    "archiveMountLine2": "目录缓存",
+    "dualMountNote": "归档挂载使用激进的目录缓存（24 小时），每小时轮询一次变化。用于浏览和获取文件 — 上传和编辑请使用实时挂载。",
+    "creating": "创建中...",
+    "createMount": "创建挂载"
+  },
+  "edit": {
+    "title": "编辑连接",
+    "subtitle": "{remoteType} 连接 • 创建于 {date}",
+    "remoteSettings": "{type} 设置",
+    "newPassword": "新密码（留空则保留当前密码）",
+    "passwordStoredHint": "密码加密存储于 rclone 配置中",
+    "nameChangedNote": "注意：修改名称需重新输入密码以更新 rclone 配置。",
+    "saving": "保存中...",
+    "saveChanges": "保存更改"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "配置应用偏好与默认值",
+    "startup": {
+      "section": "启动行为",
+      "startWithWindows": "随 Windows 启动",
+      "startWithWindowsDesc": "电脑启动时自动运行 Rclone Mounter",
+      "startMinimized": "最小化启动",
+      "startMinimizedDesc": "启动到系统托盘而非显示窗口",
+      "closeToTray": "关闭到托盘",
+      "closeToTrayDesc": "关闭时最小化到托盘而非完全退出",
+      "addToStartMenu": "添加到开始菜单",
+      "addToStartMenuDesc": "创建开始菜单快捷方式并注册应用，使通知显示“Rclone Mount Hub”而非“Windows PowerShell”",
+      "addToStartMenuBtn": "添加到开始菜单",
+      "remove": "移除"
+    },
+    "perf": {
+      "section": "默认性能配置",
+      "sharedHint": "新连接默认使用，除非另行修改",
+      "max": "极速",
+      "maxDesc": "10Gbps 局域网",
+      "balanced": "均衡",
+      "balancedDesc": "日常使用",
+      "low": "低资源",
+      "lowDesc": "电池模式"
+    },
+    "network": {
+      "section": "默认网络模式",
+      "sharedHint": "新连接默认使用，除非另行修改",
+      "auto": "自动",
+      "autoDesc": "智能切换",
+      "lan": "仅局域网",
+      "lanDesc": "本地网络",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "远程访问"
+    },
+    "notifications": {
+      "section": "通知",
+      "show": "显示挂载/卸载通知",
+      "showDesc": "驱动器连接或断开时显示系统通知"
+    },
+    "networkChange": {
+      "section": "网络变更行为",
+      "intro": "当网络变化（例如在家 WiFi 与移动网络之间切换）时，应用通过 Windows 网络事件自动检测（零轮询、不耗电池）。",
+      "notify": "仅通知",
+      "notifyDesc": "当已挂载驱动器应在局域网与 Tailscale 之间切换时显示通知，由你决定何时重连。",
+      "autoReconnect": "自动重连",
+      "autoReconnectDesc": "自动将驱动器重新挂载到正确的 IP。切换时会有约 2-3 秒的中断。"
+    },
+    "config": {
+      "section": "Rclone 配置文件",
+      "intro": "默认情况下 rclone 使用其自身的配置文件位置。如使用其他配置文件，请设置自定义路径。",
+      "reset": "重置为 rclone 默认",
+      "usingDefault": "使用默认：{path}"
+    },
+    "cache": {
+      "section": "VFS 缓存目录",
+      "intro": "rclone 默认将文件写入缓存到系统盘。指向空间更大的驱动器，可避免复制大文件（如虚拟机镜像）时塞满 C:\\。",
+      "reset": "重置为默认"
+    },
+    "drivers": {
+      "section": "驱动管理",
+      "rclone": "Rclone",
+      "winfsp": "WinFsp",
+      "installed": "已安装",
+      "notInstalled": "未安装",
+      "uninstall": "卸载",
+      "installRclone": "安装 Rclone（Scoop）",
+      "installing": "安装中...",
+      "installWinfsp": "下载并安装 WinFsp",
+      "downloading": "下载中...",
+      "verifiedWinfsp": "我已安装 WinFsp",
+      "verifying": "验证中...",
+      "checkUpdates": "检查更新",
+      "checking": "检查中...",
+      "loadFailed": "无法加载驱动信息。"
+    },
+    "about": {
+      "section": "关于与更新",
+      "appName": "Rclone Mount Hub",
+      "version": "v{version}",
+      "upToDate": "已是最新",
+      "updateAvailable": "v{version} 可用",
+      "updateRestart": "更新并重启",
+      "checking": "检查中…",
+      "updating": "更新中…",
+      "checkUpdates": "检查更新"
+    },
+    "troubleshoot": {
+      "title": "故障排查",
+      "installerTitle": "安装程序报错“无法移除现有应用目录”：",
+      "installerBody": "运行安装程序前，请确保 Rclone Mount Hub 已完全关闭（检查系统托盘）且所有 rclone 进程已停止。应用退出时会自动卸载驱动器，但若之前崩溃过，请先在终端执行 taskkill /F /IM rclone.exe。",
+      "driveTitle": "资源管理器中显示驱动器但无法连接：",
+      "driveBody": "rclone 挂载进程已启动但远程连接失败。请卸载后检查凭据和服务器地址，再重试。"
+    },
+    "resetDefaults": "恢复默认",
+    "savedNote": "设置将自动保存",
+    "language": {
+      "section": "语言",
+      "label": "语言",
+      "auto": "跟随系统",
+      "en": "English",
+      "zh": "简体中文",
+      "hint": "界面语言。“跟随系统”将使用 Windows 显示语言。"
+    }
+  },
+  "export": {
+    "title": "导出与导入",
+    "subtitle": "备份连接或生成独立脚本",
+    "section": {
+      "export": "导出连接",
+      "import": "导入连接",
+      "powershell": "PowerShell 脚本"
+    },
+    "encryptionNote": "导出文件使用 AES-256-GCM 加密。保存前需输入密码。包含全部连接数据、用户名及应用设置。",
+    "btn": {
+      "exportJson": "导出为 JSON",
+      "copyPlain": "复制明文 JSON",
+      "importJson": "导入 JSON 文件",
+      "downloadScript": "下载脚本"
+    },
+    "previewLabel": "预览（将包含在导出内容中）",
+    "noConnections": "没有可导出的连接",
+    "importNote": "从加密或明文 JSON 导出文件导入。加密文件会提示输入密码。每个连接都需要输入 WebDAV 密码。",
+    "powershellNote": "为每个连接生成独立挂载脚本",
+    "psNoConnections": "暂无可用连接。请先添加一个连接。",
+    "psDriveLine": "驱动器 {letter} • {mode} 模式",
+    "modal": {
+      "exportTitle": "加密导出",
+      "importTitle": "解密导入",
+      "exportDesc": "你的连接（包括用户名和全部设置）将以 AES-256-GCM 加密。导入此文件时需要该密码。",
+      "importDesc": "请输入创建此导出文件时使用的密码。",
+      "passwordPlaceholder": "密码",
+      "passwordTooShort": "密码至少需要 4 个字符",
+      "exportCta": "加密并保存",
+      "importCta": "解密并导入"
+    },
+    "promptPassword": "请输入“{name}”的 WebDAV 密码："
+  },
+  "speed": {
+    "title": "速度测试与诊断",
+    "subtitle": "测试传输速度，找出性能瓶颈",
+    "section": {
+      "run": "运行速度测试"
+    },
+    "btn": {
+      "run": "开始测试",
+      "running": "测试中..."
+    },
+    "label": {
+      "driveLetter": "驱动器号",
+      "fileSize": "测试文件大小"
+    },
+    "size": {
+      "quickLabel": "10 MB",
+      "quickDesc": "快速测试",
+      "recLabel": "100 MB",
+      "recDesc": "推荐",
+      "thoroughLabel": "1 GB",
+      "thoroughDesc": "详尽测试"
+    },
+    "results": {
+      "title": "测试结果",
+      "upload": "上传",
+      "download": "下载",
+      "latency": "延迟",
+      "bottleneck": "瓶颈",
+      "unitMbs": "MB/s",
+      "unitMs": "ms"
+    },
+    "badge": {
+      "local": "本地网络",
+      "tailscale": "Tailscale VPN"
+    },
+    "path": {
+      "title": "网络路径分析",
+      "label": "目标 IP 地址",
+      "analyzing": "分析中...",
+      "btn": "分析路径",
+      "badgeLocal": "本地网络",
+      "badgeVpn": "VPN",
+      "hops": "网络跳数"
+    },
+    "disk": {
+      "title": "本地磁盘基准测试",
+      "intro": "测试本地磁盘的读写性能",
+      "benchmarking": "测试中...",
+      "btn": "基准测试本地磁盘",
+      "speed": "磁盘速度"
+    }
+  },
+  "upload": {
+    "title": "直接上传",
+    "intro": "将文件直接上传到远程，不经过已挂载的驱动器。数据直接流到服务器 — 无需本地 VFS 缓存。",
+    "label": {
+      "source": "来源",
+      "destinationRemote": "目标远程",
+      "destinationPath": "目标路径"
+    },
+    "emptySource": "未选择文件或文件夹",
+    "btn": {
+      "file": "文件",
+      "folder": "文件夹",
+      "cancelUpload": "取消上传",
+      "close": "关闭",
+      "upload": "上传"
+    },
+    "placeholder": {
+      "connection": "选择已挂载的连接..."
+    },
+    "hint": {
+      "destinationPath": "文件上传到远程的路径（例如 /Chris-disk10/Backups）"
+    },
+    "state": {
+      "uploading": "上传中...",
+      "done": "上传完成",
+      "error": "上传失败"
+    },
+    "progress": "{transferred} / {total} ({percent}%)",
+    "eta": "预计 {eta}"
+  },
+  "dialog": {
+    "selectConfigFile": "选择 Rclone 配置文件",
+    "configFilter": "Rclone 配置",
+    "selectCacheDir": "选择 VFS 缓存目录",
+    "selectFileUpload": "选择要上传的文件",
+    "selectFolderUpload": "选择要上传的文件夹"
+  },
+  "update": {
+    "versionAvailable": "v{version} 可用",
+    "updateRestart": "更新并重启",
+    "restarting": "正在重启...",
+    "downloading": "正在下载..."
+  },
+  "quit": {
+    "title": "正在退出 Rclone Mount Hub",
+    "subtitle": "Ctrl + 关闭"
+  }
+}

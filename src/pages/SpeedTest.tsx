@@ -15,6 +15,7 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Badge } from "../components/ui/Badge";
+import { useI18n } from "../lib/i18n";
 import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ interface NetworkPathResult {
 }
 
 export function SpeedTest() {
+  const { t } = useI18n();
   const [selectedDrive, setSelectedDrive] = useState("Z");
   const [fileSize, setFileSize] = useState<10 | 100 | 1000>(100);
   const [loading, setLoading] = useState(false);
@@ -55,9 +57,9 @@ export function SpeedTest() {
         fileSizeMb: fileSize,
       });
       setResult(res);
-      toast.success("Speed test completed");
+      toast.success(t("toast.speedTestDone"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Speed test failed");
+      toast.error(err instanceof Error ? err.message : t("toast.speedTestFailed"));
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ export function SpeedTest() {
   // Analyze network path
   const handleAnalyzePath = async () => {
     if (!targetIp.trim()) {
-      toast.error("Please enter a target IP address");
+      toast.error(t("toast.targetIpRequired"));
       return;
     }
     setAnalyzingPath(true);
@@ -76,9 +78,9 @@ export function SpeedTest() {
         targetIp,
       });
       setPathResult(res);
-      toast.success("Network path analyzed");
+      toast.success(t("toast.pathAnalyzed"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Path analysis failed");
+      toast.error(err instanceof Error ? err.message : t("toast.pathAnalysisFailed"));
     } finally {
       setAnalyzingPath(false);
     }
@@ -91,9 +93,9 @@ export function SpeedTest() {
     try {
       const speed = await invoke<number>("test_local_disk_speed");
       setDiskSpeed(speed);
-      toast.success("Disk benchmark completed");
+      toast.success(t("toast.diskBenchmarkDone"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Disk benchmark failed");
+      toast.error(err instanceof Error ? err.message : t("toast.diskBenchmarkFailed"));
     } finally {
       setBenchmarkingDisk(false);
     }
@@ -119,10 +121,10 @@ export function SpeedTest() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-text-primary tracking-tight mb-2 flex items-center gap-3">
             <Gauge size={28} weight="duotone" className="text-accent-blue" />
-            Speed Test & Diagnostics
+            {t("speed.title")}
           </h1>
           <p className="text-[13px] text-text-secondary">
-            Test transfer speeds and identify performance bottlenecks
+            {t("speed.subtitle")}
           </p>
         </div>
 
@@ -131,13 +133,13 @@ export function SpeedTest() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Play size={18} weight="duotone" className="text-accent-green" />
-              Run Speed Test
+              {t("speed.section.run")}
             </h2>
             <div className="space-y-4">
               {/* Drive Letter */}
               <div>
                 <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                  Drive Letter
+                  {t("speed.label.driveLetter")}
                 </label>
                 <Input
                   placeholder="Z"
@@ -150,14 +152,14 @@ export function SpeedTest() {
               {/* File Size */}
               <div>
                 <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                  Test File Size
+                  {t("speed.label.fileSize")}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { value: 10, label: "10 MB", desc: "Quick test" },
-                    { value: 100, label: "100 MB", desc: "Recommended" },
-                    { value: 1000, label: "1 GB", desc: "Thorough" },
-                  ].map((size) => (
+                  {([
+                    { value: 10, labelKey: "speed.size.quickLabel", descKey: "speed.size.quickDesc" },
+                    { value: 100, labelKey: "speed.size.recLabel", descKey: "speed.size.recDesc" },
+                    { value: 1000, labelKey: "speed.size.thoroughLabel", descKey: "speed.size.thoroughDesc" },
+                  ] as const).map((size) => (
                     <button
                       key={size.value}
                       onClick={() => setFileSize(size.value as 10 | 100 | 1000)}
@@ -178,14 +180,14 @@ export function SpeedTest() {
                               : "text-text-primary"
                           }`}
                         >
-                          {size.label}
+                          {t(size.labelKey)}
                         </span>
                         {fileSize === size.value && (
                           <Check size={14} weight="bold" className="text-accent-green" />
                         )}
                       </div>
                       <span className="text-[11px] text-text-tertiary">
-                        {size.desc}
+                        {t(size.descKey)}
                       </span>
                     </button>
                   ))}
@@ -203,12 +205,12 @@ export function SpeedTest() {
                 {loading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Running Test...
+                    {t("speed.btn.running")}
                   </>
                 ) : (
                   <>
                     <Play size={16} weight="bold" />
-                    Run Speed Test
+                    {t("speed.section.run")}
                   </>
                 )}
               </Button>
@@ -220,7 +222,7 @@ export function SpeedTest() {
             <Card className="p-6">
               <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
                 <Gauge size={18} weight="duotone" className="text-accent-blue" />
-                Test Results
+                {t("speed.results.title")}
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 {/* Upload Speed */}
@@ -228,12 +230,12 @@ export function SpeedTest() {
                   <div className="flex items-center gap-2 mb-2">
                     <ArrowUp size={16} className="text-accent-green" weight="bold" />
                     <span className="text-[13px] font-medium text-text-secondary">
-                      Upload
+                      {t("speed.results.upload")}
                     </span>
                   </div>
                   <div className="text-2xl font-semibold text-text-primary">
                     {result.upload_mbps.toFixed(1)}
-                    <span className="text-base text-text-tertiary ml-1">MB/s</span>
+                    <span className="text-base text-text-tertiary ml-1">{t("speed.results.unitMbs")}</span>
                   </div>
                 </div>
 
@@ -242,12 +244,12 @@ export function SpeedTest() {
                   <div className="flex items-center gap-2 mb-2">
                     <ArrowDown size={16} className="text-accent-blue" weight="bold" />
                     <span className="text-[13px] font-medium text-text-secondary">
-                      Download
+                      {t("speed.results.download")}
                     </span>
                   </div>
                   <div className="text-2xl font-semibold text-text-primary">
                     {result.download_mbps.toFixed(1)}
-                    <span className="text-base text-text-tertiary ml-1">MB/s</span>
+                    <span className="text-base text-text-tertiary ml-1">{t("speed.results.unitMbs")}</span>
                   </div>
                 </div>
 
@@ -256,12 +258,12 @@ export function SpeedTest() {
                   <div className="flex items-center gap-2 mb-2">
                     <Timer size={16} className="text-accent-amber" weight="bold" />
                     <span className="text-[13px] font-medium text-text-secondary">
-                      Latency
+                      {t("speed.results.latency")}
                     </span>
                   </div>
                   <div className="text-2xl font-semibold text-text-primary">
                     {result.latency_ms}
-                    <span className="text-base text-text-tertiary ml-1">ms</span>
+                    <span className="text-base text-text-tertiary ml-1">{t("speed.results.unitMs")}</span>
                   </div>
                 </div>
 
@@ -270,7 +272,7 @@ export function SpeedTest() {
                   <div className="flex items-center gap-2 mb-2">
                     <Warning size={16} className="text-accent-red" weight="bold" />
                     <span className="text-[13px] font-medium text-text-secondary">
-                      Bottleneck
+                      {t("speed.results.bottleneck")}
                     </span>
                   </div>
                   <div className={`text-lg font-semibold capitalize ${getBottleneckColor(result.bottleneck)}`}>
@@ -282,7 +284,9 @@ export function SpeedTest() {
               {/* Network Type Badge */}
               <div className="mt-4 pt-4 border-t border-white/[0.06]">
                 <Badge variant={result.network_type === "local" ? "local" : "tailscale"}>
-                  {result.network_type === "local" ? "Local Network" : "Tailscale VPN"}
+                  {result.network_type === "local"
+                    ? t("speed.badge.local")
+                    : t("speed.badge.tailscale")}
                 </Badge>
               </div>
             </Card>
@@ -292,11 +296,11 @@ export function SpeedTest() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <GitBranch size={18} weight="duotone" className="text-accent-purple" />
-              Network Path Analysis
+              {t("speed.path.title")}
             </h2>
             <div className="space-y-4">
               <Input
-                label="Target IP Address"
+                label={t("speed.path.label")}
                 placeholder="192.168.x.x"
                 value={targetIp}
                 onChange={(e) => setTargetIp(e.target.value)}
@@ -311,12 +315,12 @@ export function SpeedTest() {
                 {analyzingPath ? (
                   <>
                     <div className="w-4 h-4 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
-                    Analyzing...
+                    {t("speed.path.analyzing")}
                   </>
                 ) : (
                   <>
                     <GitBranch size={16} weight="bold" />
-                    Analyze Path
+                    {t("speed.path.btn")}
                   </>
                 )}
               </Button>
@@ -324,13 +328,13 @@ export function SpeedTest() {
               {pathResult && (
                 <div className="pt-2">
                   <div className="flex items-center gap-2 mb-3">
-                    {pathResult.is_local && <Badge variant="local">Local Network</Badge>}
-                    {pathResult.is_vpn && <Badge variant="tailscale">VPN</Badge>}
+                    {pathResult.is_local && <Badge variant="local">{t("speed.path.badgeLocal")}</Badge>}
+                    {pathResult.is_vpn && <Badge variant="tailscale">{t("speed.path.badgeVpn")}</Badge>}
                   </div>
                   {pathResult.hops.length > 0 && (
                     <div>
                       <div className="text-[13px] font-medium text-text-secondary mb-2">
-                        Network Hops
+                        {t("speed.path.hops")}
                       </div>
                       <div className="space-y-2">
                         {pathResult.hops.map((hop, idx) => (
@@ -342,7 +346,8 @@ export function SpeedTest() {
                               {hop.ip}
                             </span>
                             <span className="text-[13px] text-text-tertiary">
-                              {hop.latency_ms}ms
+                              {hop.latency_ms}
+                              {t("speed.results.unitMs")}
                             </span>
                           </div>
                         ))}
@@ -358,11 +363,11 @@ export function SpeedTest() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <HardDrive size={18} weight="duotone" className="text-accent-amber" />
-              Local Disk Benchmark
+              {t("speed.disk.title")}
             </h2>
             <div className="space-y-4">
               <p className="text-[13px] text-text-secondary">
-                Test your local disk's read/write performance
+                {t("speed.disk.intro")}
               </p>
               <Button
                 variant="default"
@@ -374,12 +379,12 @@ export function SpeedTest() {
                 {benchmarkingDisk ? (
                   <>
                     <div className="w-4 h-4 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
-                    Benchmarking...
+                    {t("speed.disk.benchmarking")}
                   </>
                 ) : (
                   <>
                     <CloudArrowUp size={16} weight="bold" />
-                    Benchmark Local Disk
+                    {t("speed.disk.btn")}
                   </>
                 )}
               </Button>
@@ -389,12 +394,12 @@ export function SpeedTest() {
                   <div className="flex items-center gap-2 mb-2">
                     <HardDrive size={16} className="text-accent-amber" weight="bold" />
                     <span className="text-[13px] font-medium text-text-secondary">
-                      Disk Speed
+                      {t("speed.disk.speed")}
                     </span>
                   </div>
                   <div className="text-2xl font-semibold text-text-primary">
                     {diskSpeed.toFixed(1)}
-                    <span className="text-base text-text-tertiary ml-1">MB/s</span>
+                    <span className="text-base text-text-tertiary ml-1">{t("speed.results.unitMbs")}</span>
                   </div>
                 </div>
               )}

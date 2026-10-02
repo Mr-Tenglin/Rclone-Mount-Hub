@@ -11,6 +11,7 @@ import {
 import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { useSettingsStore } from "../lib/store";
+import { useI18n } from "../lib/i18n";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open as openPicker } from "@tauri-apps/plugin-dialog";
@@ -46,6 +47,7 @@ export function DirectUploadModal({
   mountedConnections,
 }: DirectUploadModalProps) {
   const { settings } = useSettingsStore();
+  const { t } = useI18n();
   const [sourcePath, setSourcePath] = useState("");
   const [isDirectory, setIsDirectory] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState("");
@@ -126,7 +128,7 @@ export function DirectUploadModal({
 
   const handlePickFile = async () => {
     const selected = await openPicker({
-      title: "Select File to Upload",
+      title: t("dialog.selectFileUpload"),
       multiple: false,
     });
     if (selected && typeof selected === "string") {
@@ -137,7 +139,7 @@ export function DirectUploadModal({
 
   const handlePickFolder = async () => {
     const selected = await openPicker({
-      title: "Select Folder to Upload",
+      title: t("dialog.selectFolderUpload"),
       directory: true,
     });
     if (selected && typeof selected === "string") {
@@ -219,7 +221,7 @@ export function DirectUploadModal({
           <div className="flex items-center gap-2">
             <CloudArrowUp size={20} weight="duotone" className="text-accent-blue" />
             <h2 className="text-base font-semibold text-text-primary">
-              Direct Upload
+              {t("upload.title")}
             </h2>
           </div>
           <button
@@ -234,13 +236,13 @@ export function DirectUploadModal({
         {/* Body */}
         <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
           <p className="text-[12px] text-text-tertiary">
-            Upload files directly to your remote without going through the mounted drive. Streams straight to the server — no local VFS cache needed.
+            {t("upload.intro")}
           </p>
 
           {/* Source picker */}
           <div className="space-y-2">
             <label className="text-[12px] font-medium text-text-secondary">
-              Source
+              {t("upload.label.source")}
             </label>
             <div className="flex items-center gap-2">
               <div className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary font-mono min-h-[36px] flex items-center overflow-hidden">
@@ -254,7 +256,7 @@ export function DirectUploadModal({
                     <span className="truncate">{sourcePath}</span>
                   </span>
                 ) : (
-                  <span className="text-text-tertiary">No file or folder selected</span>
+                  <span className="text-text-tertiary">{t("upload.emptySource")}</span>
                 )}
               </div>
               <Button
@@ -264,7 +266,7 @@ export function DirectUploadModal({
                 disabled={uploadState === "uploading"}
               >
                 <File size={14} weight="bold" />
-                File
+                {t("upload.btn.file")}
               </Button>
               <Button
                 variant="ghost"
@@ -273,7 +275,7 @@ export function DirectUploadModal({
                 disabled={uploadState === "uploading"}
               >
                 <FolderOpen size={14} weight="bold" />
-                Folder
+                {t("upload.btn.folder")}
               </Button>
             </div>
           </div>
@@ -281,7 +283,7 @@ export function DirectUploadModal({
           {/* Target connection */}
           <div className="space-y-2">
             <label className="text-[12px] font-medium text-text-secondary">
-              Destination Remote
+              {t("upload.label.destinationRemote")}
             </label>
             <select
               value={selectedConnection}
@@ -289,7 +291,7 @@ export function DirectUploadModal({
               disabled={uploadState === "uploading"}
               className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary focus:outline-none focus:border-accent-blue/50"
             >
-              <option value="">Select a mounted connection...</option>
+              <option value="">{t("upload.placeholder.connection")}</option>
               {mountedConnections.map((c) => (
                 <option key={c.id} value={c.name}>
                   {c.name}
@@ -301,7 +303,7 @@ export function DirectUploadModal({
           {/* Destination path */}
           <div className="space-y-2">
             <label className="text-[12px] font-medium text-text-secondary">
-              Destination Path
+              {t("upload.label.destinationPath")}
             </label>
             <input
               type="text"
@@ -312,7 +314,7 @@ export function DirectUploadModal({
               className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-blue/50 font-mono"
             />
             <p className="text-[11px] text-text-tertiary">
-              Path on the remote where files will be uploaded (e.g. /Chris-disk10/Backups)
+              {t("upload.hint.destinationPath")}
             </p>
           </div>
 
@@ -332,13 +334,17 @@ export function DirectUploadModal({
                     {uploadState === "error" && (
                       <WarningCircle size={14} className="text-accent-red" weight="fill" />
                     )}
-                    {uploadState === "uploading" && "Uploading..."}
-                    {uploadState === "done" && "Upload complete"}
-                    {uploadState === "error" && "Upload failed"}
+                    {uploadState === "uploading" && t("upload.state.uploading")}
+                    {uploadState === "done" && t("upload.state.done")}
+                    {uploadState === "error" && t("upload.state.error")}
                   </span>
                   {progress && (
                     <span className="text-text-tertiary font-mono">
-                      {progress.transferred} / {progress.total} ({progress.percent}%)
+                      {t("upload.progress", {
+                        transferred: progress.transferred,
+                        total: progress.total,
+                        percent: progress.percent,
+                      })}
                     </span>
                   )}
                 </div>
@@ -357,7 +363,7 @@ export function DirectUploadModal({
                 {progress && uploadState === "uploading" && (
                   <div className="flex justify-between text-[11px] text-text-tertiary font-mono">
                     <span>{progress.speed}</span>
-                    <span>ETA {progress.eta}</span>
+                    <span>{t("upload.eta", { eta: progress.eta })}</span>
                   </div>
                 )}
               </div>
@@ -390,16 +396,16 @@ export function DirectUploadModal({
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-white/[0.06]">
           {uploadState === "uploading" ? (
             <Button variant="danger" size="sm" onClick={handleCancel}>
-              Cancel Upload
+              {t("upload.btn.cancelUpload")}
             </Button>
           ) : uploadState === "done" || uploadState === "error" ? (
             <Button variant="default" size="sm" onClick={handleClose}>
-              Close
+              {t("upload.btn.close")}
             </Button>
           ) : (
             <>
               <Button variant="ghost" size="sm" onClick={handleClose}>
-                Cancel
+                {t("shared.action.cancel")}
               </Button>
               <Button
                 variant="primary"
@@ -409,7 +415,7 @@ export function DirectUploadModal({
                 className="gap-1.5"
               >
                 <CloudArrowUp size={15} weight="bold" />
-                Upload
+                {t("upload.btn.upload")}
               </Button>
             </>
           )}

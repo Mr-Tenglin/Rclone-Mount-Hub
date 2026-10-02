@@ -10,10 +10,12 @@ import {
 } from "phosphor-react";
 import { Button } from "./ui/Button";
 import { useLogStore } from "../lib/logStore";
+import { useI18n } from "../lib/i18n";
 import type { LogEntry, LogCategory } from "../lib/logStore";
 
 export function LogPanel() {
   const { logs, isOpen, filter, toggleOpen, clearLogs, setFilter } = useLogStore();
+  const { t } = useI18n();
   const logEndRef = useRef<HTMLDivElement>(null);
 
   // Filter logs based on selected category
@@ -95,7 +97,7 @@ export function LogPanel() {
           <div className="flex items-center gap-2">
             <Terminal size={16} weight="duotone" className="text-accent-blue" />
             <span className="text-[13px] font-medium text-text-primary">
-              System Logs
+              {t("logPanel.title")}
             </span>
             {logs.length > 0 && (
               <span className="text-[11px] text-text-tertiary">
@@ -116,7 +118,9 @@ export function LogPanel() {
                     : "text-text-tertiary hover:text-text-primary hover:bg-white/[0.05]"
                 }`}
               >
-                {cat === "all" ? "All" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {cat === "all"
+                ? t("logPanel.filter.all")
+                : t(`logPanel.filter.${cat}`)}
               </button>
             ))}
           </div>
@@ -131,7 +135,7 @@ export function LogPanel() {
             disabled={logs.length === 0}
           >
             <Trash size={14} weight="bold" />
-            Clear
+            {t("logPanel.clear")}
           </Button>
           {/* Minimize Button with Chevron */}
           <Button
@@ -141,7 +145,7 @@ export function LogPanel() {
             className="gap-1.5"
           >
             <CaretDown size={14} weight="bold" />
-            Minimize
+            {t("logPanel.minimize")}
           </Button>
         </div>
       </div>
@@ -151,7 +155,9 @@ export function LogPanel() {
         <div className="p-4 font-mono text-[12px] space-y-1">
           {filteredLogs.length === 0 ? (
             <div className="text-text-tertiary text-center py-8">
-              {filter === "all" ? "No log entries yet" : `No ${filter} logs`}
+              {filter === "all"
+                ? t("logPanel.empty")
+                : t("logPanel.emptyFiltered", { filter: t(`logPanel.filter.${filter}`) })}
             </div>
           ) : (
             filteredLogs.map((log) => (

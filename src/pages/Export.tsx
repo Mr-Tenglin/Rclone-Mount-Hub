@@ -14,6 +14,7 @@ import {
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { useConnectionStore, useSettingsStore } from "../lib/store";
+import { useI18n } from "../lib/i18n";
 import { invoke } from "@tauri-apps/api/core";
 import { save as saveDialog, open as openDialog } from "@tauri-apps/plugin-dialog";
 import { downloadDir } from "@tauri-apps/api/path";
@@ -93,6 +94,7 @@ function PasswordModal({
 }) {
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
+  const { t } = useI18n();
 
   return (
     <div
@@ -116,20 +118,20 @@ function PasswordModal({
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <LockKey size={22} weight="duotone" style={{ color: "#a78bfa" }} />
           <span style={{ color: "#fff", fontWeight: 600, fontSize: 15 }}>
-            {mode === "export" ? "Encrypt Export" : "Decrypt Import"}
+            {mode === "export" ? t("export.modal.exportTitle") : t("export.modal.importTitle")}
           </span>
         </div>
 
         <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, lineHeight: 1.6, margin: 0 }}>
           {mode === "export"
-            ? "Your connections (including usernames and all settings) will be encrypted with AES-256-GCM. You'll need this password to import the file."
-            : "Enter the password used when this export was created."}
+            ? t("export.modal.exportDesc")
+            : t("export.modal.importDesc")}
         </p>
 
         <div style={{ position: "relative" }}>
           <input
             type={show ? "text" : "password"}
-            placeholder="Password"
+            placeholder={t("export.modal.passwordPlaceholder")}
             value={pw}
             onChange={e => setPw(e.target.value)}
             onKeyDown={e => e.key === "Enter" && pw.length >= 4 && onConfirm(pw)}
@@ -156,7 +158,7 @@ function PasswordModal({
 
         {mode === "export" && pw.length > 0 && pw.length < 4 && (
           <p style={{ color: "#f87171", fontSize: 11, margin: 0 }}>
-            Password must be at least 4 characters
+            {t("export.modal.passwordTooShort")}
           </p>
         )}
 
@@ -168,7 +170,7 @@ function PasswordModal({
               background: "transparent", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: 13,
             }}
           >
-            Cancel
+            {t("shared.action.cancel")}
           </button>
           <button
             onClick={() => pw.length >= 4 && onConfirm(pw)}
@@ -180,7 +182,7 @@ function PasswordModal({
               cursor: pw.length >= 4 ? "pointer" : "not-allowed", fontSize: 13, fontWeight: 600,
             }}
           >
-            {mode === "export" ? "Encrypt & Save" : "Decrypt & Import"}
+            {mode === "export" ? t("export.modal.exportCta") : t("export.modal.importCta")}
           </button>
         </div>
       </div>
@@ -193,6 +195,7 @@ function PasswordModal({
 export function Export() {
   const { connections, setAll } = useConnectionStore();
   const { settings } = useSettingsStore();
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string>("");
   const [showPasswordModal, setShowPasswordModal] = useState<"export" | "import" | null>(null);
@@ -238,9 +241,9 @@ export function Export() {
       if (!filePath) return; // user cancelled
 
       await invoke("write_text_file", { path: filePath, content: fileContent });
-      toast.success("Export saved and encrypted successfully");
+      toast.success(t("toast.exportSaved"));
     } catch (err) {
-      toast.error(`Export failed: ${err}`);
+      toast.error(t("toast.exportFailed", { err: String(err) }));
     }
   };
 
@@ -249,9 +252,9 @@ export function Export() {
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(jsonPreview);
-      toast.success("Copied to clipboard");
+      toast.success(t("toast.copied"));
     } catch {
-      toast.error("Failed to copy to clipboard");
+      toast.error(t("toast.copyFailed"));
     }
   };
 
@@ -274,7 +277,7 @@ export function Export() {
       try {
         parsed = JSON.parse(text);
       } catch {
-        throw new Error("File is not valid JSON");
+        throw new Error(t("toast.invalidJson"));
       }
 
       const obj = parsed as Record<string, unknown>;
@@ -303,7 +306,7 @@ export function Export() {
       const obj = JSON.parse(decrypted) as Record<string, unknown>;
       await processImport(obj);
     } catch {
-      const msg = "Wrong password or corrupted file";
+      const msg = t("toast.wrongPassword");
       setImportError(msg);
       toast.error(msg);
     } finally {
@@ -334,15 +337,15 @@ export function Export() {
     const requiredFields = ["id", "name", "local_ip", "port", "drive_letter"];
     for (const conn of data) {
       for (const field of requiredFields) {
-        if (!(field in conn)) throw new Error(`Missing required field: ${field}`);
+        if (!(field in conn)) throw new Error(t("toast.missingField", { field }));
       }
     }
 
     const importedConnections: Connection[] = [];
     for (const conn of data) {
-      const password = prompt(`Enter WebDAV password for "${conn.name}":`);
+      const password = prompt(t("export.promptPassword", { name: conn.name }));
       if (!password) {
-        toast.warning(`Skipped: ${conn.name} (no password provided)`);
+        toast.warning(t("toast.importSkipped", { name: conn.name }));
         continue;
       }
 
@@ -354,16 +357,16 @@ export function Export() {
         });
         importedConnections.push(conn);
       } catch (err) {
-        toast.error(`Failed to create remote for ${conn.name}: ${err}`);
+        toast.error(t("toast.importRemoteFailed", { name: conn.name, err: String(err) }));
       }
     }
 
     if (importedConnections.length > 0) {
       setAll([...connections, ...importedConnections]);
       setImportError("");
-      toast.success(`Imported ${importedConnections.length} connection(s)`);
+      toast.success(t("toast.importedCount", { count: importedConnections.length }));
     } else {
-      toast.warning("No connections were imported");
+      toast.warning(t("toast.noImport"));
     }
   };
 
@@ -430,7 +433,7 @@ ${protocolFlags} \`
 
     if (!filePath) return;
     await invoke("write_text_file", { path: filePath, content: script });
-    toast.success(`Script saved: ${conn.name}`);
+    toast.success(t("toast.scriptSaved", { name: conn.name }));
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -441,10 +444,10 @@ ${protocolFlags} \`
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-text-primary tracking-tight mb-2 flex items-center gap-3">
             <ExportIcon size={28} weight="duotone" className="text-accent-blue" />
-            Export & Import
+            {t("export.title")}
           </h1>
           <p className="text-[13px] text-text-secondary">
-            Backup your connections or generate standalone scripts
+            {t("export.subtitle")}
           </p>
         </div>
 
@@ -453,14 +456,13 @@ ${protocolFlags} \`
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Download size={18} weight="duotone" className="text-accent-green" />
-              Export Connections
+              {t("export.section.export")}
             </h2>
             <div className="space-y-4">
               <div className="p-3 rounded-lg bg-accent-purple/10 border border-accent-purple/20 flex items-start gap-2">
                 <LockKey size={15} className="text-accent-purple mt-0.5" weight="bold" />
                 <p className="text-[12px] text-accent-purple">
-                  Export is encrypted with AES-256-GCM. You'll enter a password before saving.
-                  Includes all connection data, usernames, and app settings.
+                  {t("export.encryptionNote")}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -472,7 +474,7 @@ ${protocolFlags} \`
                   className="gap-2"
                 >
                   <FileArrowDown size={16} weight="bold" />
-                  Export as JSON
+                  {t("export.btn.exportJson")}
                 </Button>
                 <Button
                   variant="ghost"
@@ -482,17 +484,17 @@ ${protocolFlags} \`
                   className="gap-2"
                 >
                   <Copy size={16} weight="bold" />
-                  Copy Plain JSON
+                  {t("export.btn.copyPlain")}
                 </Button>
               </div>
 
               <div>
                 <label className="block text-[13px] font-medium text-text-secondary mb-2">
-                  Preview (what will be included in the export)
+                  {t("export.previewLabel")}
                 </label>
                 <textarea
                   readOnly
-                  value={connections.length === 0 ? "No connections to export" : jsonPreview}
+                  value={connections.length === 0 ? t("export.noConnections") : jsonPreview}
                   className="w-full h-48 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[12px] text-text-primary font-mono resize-none focus:outline-none"
                 />
               </div>
@@ -503,12 +505,11 @@ ${protocolFlags} \`
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Upload size={18} weight="duotone" className="text-accent-purple" />
-              Import Connections
+              {t("export.section.import")}
             </h2>
             <div className="space-y-3">
               <p className="text-[13px] text-text-secondary">
-                Import from an encrypted or plain JSON export. Encrypted files will prompt for the password.
-                You'll be asked to enter the WebDAV password for each connection.
+                {t("export.importNote")}
               </p>
               <Button
                 variant="default"
@@ -517,7 +518,7 @@ ${protocolFlags} \`
                 className="gap-2"
               >
                 <Upload size={16} weight="bold" />
-                Import JSON File
+                {t("export.btn.importJson")}
               </Button>
               <input ref={fileInputRef} type="file" accept=".json" className="hidden" />
               {importError && (
@@ -533,15 +534,15 @@ ${protocolFlags} \`
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Code size={18} weight="duotone" className="text-accent-amber" />
-              PowerShell Scripts
+              {t("export.section.powershell")}
             </h2>
             <p className="text-[13px] text-text-secondary mb-4">
-              Generate standalone mount scripts for each connection
+              {t("export.powershellNote")}
             </p>
             {connections.length === 0 ? (
               <div className="py-8 text-center">
                 <p className="text-[13px] text-text-tertiary">
-                  No connections available. Add a connection first.
+                  {t("export.psNoConnections")}
                 </p>
               </div>
             ) : (
@@ -554,7 +555,10 @@ ${protocolFlags} \`
                     <div>
                       <div className="text-[13px] font-medium text-text-primary">{conn.name}</div>
                       <div className="text-[11px] text-text-tertiary">
-                        Drive {conn.drive_letter}: • {conn.network_mode} mode
+                        {t("export.psDriveLine", {
+                          letter: conn.drive_letter,
+                          mode: conn.network_mode,
+                        })}
                       </div>
                     </div>
                     <Button
@@ -564,7 +568,7 @@ ${protocolFlags} \`
                       className="gap-1.5"
                     >
                       <Download size={14} weight="bold" />
-                      Download Script
+                      {t("export.btn.downloadScript")}
                     </Button>
                   </div>
                 ))}

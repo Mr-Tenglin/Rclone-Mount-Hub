@@ -51,6 +51,8 @@ export interface CacheOverrides {
   multi_thread_streams?: number;
 }
 
+export type AppLanguage = "auto" | "en" | "zh-Hans" | "zh-Hant" | "ja" | "es" | "ru";
+
 export interface AppSettings {
   start_with_windows: boolean;
   start_minimized: boolean;
@@ -62,6 +64,7 @@ export interface AppSettings {
   rclone_config_path: string;
   network_change_mode: NetworkChangeMode;
   cache_dir: string;
+  language: AppLanguage;
 }
 
 export interface SpeedProfileInfo {

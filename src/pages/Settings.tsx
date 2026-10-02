@@ -23,8 +23,9 @@ import { Badge } from "../components/ui/Badge";
 import { DriverCardSkeleton } from "../components/ui/Skeleton";
 import { useSettingsStore } from "../lib/store";
 import { useLogStore } from "../lib/logStore";
+import { useI18n, SUPPORTED_LOCALES } from "../lib/i18n";
 import { Check } from "phosphor-react";
-import type { SpeedProfile, NetworkMode } from "../lib/types";
+import type { SpeedProfile, NetworkMode, AppLanguage } from "../lib/types";
 import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
 import { open as openFilePicker } from "@tauri-apps/plugin-dialog";
@@ -40,6 +41,7 @@ interface DriverVersions {
 export function Settings() {
   const { settings, update, reset } = useSettingsStore();
   const { addLog } = useLogStore();
+  const { t } = useI18n();
   const [driverVersions, setDriverVersions] = useState<DriverVersions | null>(null);
   const [driversLoading, setDriversLoading] = useState(true);
   const [installingDrivers, setInstallingDrivers] = useState(false);
@@ -77,61 +79,61 @@ export function Settings() {
         await invoke("disable_autostart");
       }
       update({ start_with_windows: enabled });
-      toast.success(enabled ? "Autostart enabled" : "Autostart disabled");
+      toast.success(enabled ? t("toast.autostartEnabled") : t("toast.autostartDisabled"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to toggle autostart");
+      toast.error(err instanceof Error ? err.message : t("toast.autostartToggleFailed"));
     }
   };
 
   const handleBrowseConfigPath = async () => {
     const selected = await openFilePicker({
-      title: "Select Rclone Config File",
-      filters: [{ name: "Rclone Config", extensions: ["conf"] }],
+      title: t("dialog.selectConfigFile"),
+      filters: [{ name: t("dialog.configFilter"), extensions: ["conf"] }],
     });
     if (selected && typeof selected === "string") {
       update({ rclone_config_path: selected });
       await invoke("set_rclone_config_path", { path: selected });
-      toast.success("Rclone config path updated");
+      toast.success(t("toast.configPathUpdated"));
     }
   };
 
   const handleResetConfigPath = async () => {
     update({ rclone_config_path: "" });
     await invoke("set_rclone_config_path", { path: "" });
-    toast.success("Reset to rclone default config path");
+    toast.success(t("toast.configPathReset"));
   };
 
   const handleBrowseCacheDir = async () => {
     const selected = await openFilePicker({
-      title: "Select VFS Cache Directory",
+      title: t("dialog.selectCacheDir"),
       directory: true,
     });
     if (selected && typeof selected === "string") {
       update({ cache_dir: selected });
-      toast.success("Cache directory updated");
+      toast.success(t("toast.cacheDirUpdated"));
     }
   };
 
   const handleResetCacheDir = () => {
     update({ cache_dir: "" });
-    toast.success("Reset to rclone default cache directory");
+    toast.success(t("toast.cacheDirReset"));
   };
 
   const handleAddToStartMenu = async () => {
     try {
       await invoke("add_to_start_menu");
-      toast.success("Added to Start Menu — notifications will now show 'Rclone Mount Hub'");
+      toast.success(t("toast.startMenuAdded"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to add to Start Menu");
+      toast.error(err instanceof Error ? err.message : t("toast.startMenuAddFailed"));
     }
   };
 
   const handleRemoveFromStartMenu = async () => {
     try {
       await invoke("remove_from_start_menu");
-      toast.success("Removed from Start Menu");
+      toast.success(t("toast.startMenuRemoved"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to remove from Start Menu");
+      toast.error(err instanceof Error ? err.message : t("toast.startMenuRemoveFailed"));
     }
   };
 
@@ -149,15 +151,15 @@ export function Settings() {
 
   const handleInstallRclone = async () => {
     setInstallingDrivers(true);
-    addLog("info", "Installing Rclone via Scoop...", "drivers");
+    addLog("info", t("log.installingRclone"), "drivers");
     try {
       await invoke("install_rclone");
-      addLog("success", "✓ Rclone installed successfully", "drivers");
-      toast.success("Rclone installed successfully");
+      addLog("success", t("log.rcloneInstalledOk"), "drivers");
+      toast.success(t("toast.rcloneInstalled"));
       await loadDriverVersions();
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to install Rclone";
-      addLog("error", `✗ ${errorMsg}`, "drivers");
+      const errorMsg = err instanceof Error ? err.message : t("toast.rcloneInstallFailed");
+      addLog("error", t("log.rcloneInstallFailed", { msg: errorMsg }), "drivers");
       toast.error(errorMsg);
     } finally {
       setInstallingDrivers(false);
@@ -166,16 +168,16 @@ export function Settings() {
 
   const handleDownloadWinfsp = async () => {
     setInstallingDrivers(true);
-    addLog("info", "Fetching latest WinFsp release from GitHub...", "drivers");
+    addLog("info", t("log.fetchingWinfsp"), "drivers");
     try {
       const version = await invoke<string>("download_and_launch_winfsp_installer");
-      addLog("success", `✓ WinFsp ${version} installer downloaded and launched`, "drivers");
-      addLog("info", "Complete the installation wizard, then click \"I've Installed WinFsp\"", "drivers");
-      toast.success(`WinFsp ${version} installer launched — complete the wizard then click Continue`);
+      addLog("success", t("log.winfspDownloaded", { version }), "drivers");
+      addLog("info", t("log.winfspWizard"), "drivers");
+      toast.success(t("toast.winfspLaunched", { version }));
       setWinfspInstallerLaunched(true);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to download WinFsp";
-      addLog("error", `✗ ${errorMsg}`, "drivers");
+      const errorMsg = err instanceof Error ? err.message : t("toast.winfspDownloadFailed");
+      addLog("error", t("log.rcloneInstallFailed", { msg: errorMsg }), "drivers");
       toast.error(errorMsg);
     } finally {
       setInstallingDrivers(false);
@@ -184,20 +186,20 @@ export function Settings() {
 
   const handleVerifyWinfsp = async () => {
     setVerifyingWinfsp(true);
-    addLog("info", "Verifying WinFsp installation...", "drivers");
+    addLog("info", t("log.verifyingWinfsp"), "drivers");
     try {
       await loadDriverVersions();
       const versions = await invoke<DriverVersions>("get_driver_versions");
       if (versions.winfsp_installed) {
-        addLog("success", "✓ WinFsp detected and ready!", "drivers");
-        toast.success("WinFsp is installed and ready!");
+        addLog("success", t("log.winfspDetected"), "drivers");
+        toast.success(t("toast.winfspReady"));
         setWinfspInstallerLaunched(false);
       } else {
-        addLog("warning", "WinFsp not detected yet — finish the installer wizard and try again", "drivers");
-        toast.error("WinFsp not detected yet. Please complete the installer first.");
+        addLog("warning", t("log.winfspNotDetectedLog"), "drivers");
+        toast.error(t("toast.winfspNotDetected"));
       }
     } catch (err) {
-      addLog("error", "✗ Failed to verify WinFsp", "drivers");
+      addLog("error", t("log.winfspVerifyFailed"), "drivers");
     } finally {
       setVerifyingWinfsp(false);
     }
@@ -206,33 +208,33 @@ export function Settings() {
   const handleUninstallRclone = async () => {
     try {
       await invoke("uninstall_rclone");
-      toast.success("Rclone uninstalled");
+      toast.success(t("toast.rcloneUninstalled"));
       await loadDriverVersions();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to uninstall Rclone");
+      toast.error(err instanceof Error ? err.message : t("toast.rcloneUninstallFailed"));
     }
   };
 
   const handleUninstallWinFsp = async () => {
     try {
       await invoke("uninstall_winfsp");
-      toast.success("WinFsp uninstalled");
+      toast.success(t("toast.winfspUninstalled"));
       await loadDriverVersions();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to uninstall WinFsp");
+      toast.error(err instanceof Error ? err.message : t("toast.winfspUninstallFailed"));
     }
   };
 
   const handleCheckUpdates = async () => {
     setCheckingUpdates(true);
-    addLog("info", "Checking for driver updates...", "drivers");
+    addLog("info", t("log.checkingDriverUpdates"), "drivers");
     try {
       const result = await invoke<string>("check_driver_updates");
       addLog("success", `✓ ${result}`, "drivers");
       toast.info(result);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to check for updates";
-      addLog("error", `✗ ${errorMsg}`, "drivers");
+      const errorMsg = err instanceof Error ? err.message : t("toast.checkUpdatesFailed");
+      addLog("error", t("log.checkDriverUpdatesFailed", { msg: errorMsg }), "drivers");
       toast.error(errorMsg);
     } finally {
       setCheckingUpdates(false);
@@ -250,8 +252,8 @@ export function Settings() {
         setUpdateStatus("up-to-date");
       }
     } catch (err) {
-      const errorMsg = typeof err === "string" ? err : err instanceof Error ? err.message : "Failed to check for updates";
-      addLog("error", `✗ Update check failed: ${errorMsg}`, "system");
+      const errorMsg = typeof err === "string" ? err : err instanceof Error ? err.message : t("toast.checkUpdatesFailed");
+      addLog("error", t("log.appUpdateCheckFailed", { msg: errorMsg }), "system");
       toast.error(errorMsg);
       setUpdateStatus("idle");
     }
@@ -263,7 +265,7 @@ export function Settings() {
       await invoke("apply_app_update");
       // apply_updates_and_restart restarts the app — this line won't be reached
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to apply update");
+      toast.error(err instanceof Error ? err.message : t("toast.applyUpdateFailed"));
       setUpdateStatus("available");
     }
   };
@@ -302,10 +304,10 @@ export function Settings() {
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-text-primary tracking-tight mb-2 flex items-center gap-3">
             <Gear size={28} weight="duotone" className="text-accent-blue" />
-            Settings
+            {t("settings.title")}
           </h1>
           <p className="text-[13px] text-text-secondary">
-            Configure application preferences and defaults
+            {t("settings.subtitle")}
           </p>
         </div>
 
@@ -315,16 +317,16 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
               <Rocket size={18} weight="duotone" className="text-accent-green" />
-              Startup Behavior
+              {t("settings.startup.section")}
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-1">
                 <div>
                   <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                    Start with Windows
+                    {t("settings.startup.startWithWindows")}
                   </div>
                   <div className="text-[11px] text-text-tertiary">
-                    Launch Rclone Mounter when your computer starts
+                    {t("settings.startup.startWithWindowsDesc")}
                   </div>
                 </div>
                 <Toggle
@@ -336,10 +338,10 @@ export function Settings() {
               <div className="flex items-center justify-between py-1">
                 <div>
                   <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                    Start minimized
+                    {t("settings.startup.startMinimized")}
                   </div>
                   <div className="text-[11px] text-text-tertiary">
-                    Open to system tray instead of showing the window
+                    {t("settings.startup.startMinimizedDesc")}
                   </div>
                 </div>
                 <Toggle
@@ -357,10 +359,10 @@ export function Settings() {
               <div className="flex items-center justify-between py-1">
                 <div>
                   <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                    Close to tray
+                    {t("settings.startup.closeToTray")}
                   </div>
                   <div className="text-[11px] text-text-tertiary">
-                    Minimize to tray instead of closing completely
+                    {t("settings.startup.closeToTrayDesc")}
                   </div>
                 </div>
                 <Toggle
@@ -374,11 +376,10 @@ export function Settings() {
               <div className="flex items-center justify-between py-1">
                 <div>
                   <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                    Add to Start Menu
+                    {t("settings.startup.addToStartMenu")}
                   </div>
                   <div className="text-[11px] text-text-tertiary">
-                    Creates a Start Menu shortcut and registers the app so toast
-                    notifications show "Rclone Mount Hub" instead of "Windows PowerShell"
+                    {t("settings.startup.addToStartMenuDesc")}
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0 ml-4">
@@ -389,7 +390,7 @@ export function Settings() {
                     className="gap-1.5"
                   >
                     <AppWindow size={14} weight="bold" />
-                    Add to Start Menu
+                    {t("settings.startup.addToStartMenuBtn")}
                   </Button>
                   <Button
                     variant="danger"
@@ -398,7 +399,7 @@ export function Settings() {
                     className="gap-1.5"
                   >
                     <Trash size={14} weight="bold" />
-                    Remove
+                    {t("settings.startup.remove")}
                   </Button>
                 </div>
               </div>
@@ -413,29 +414,29 @@ export function Settings() {
                 weight="duotone"
                 className="text-accent-amber"
               />
-              Default Performance Profile
+              {t("settings.perf.section")}
             </h2>
             <p className="text-[11px] text-text-tertiary mb-4">
-              Used for new connections unless changed
+              {t("settings.perf.sharedHint")}
             </p>
             <div className="grid grid-cols-3 gap-2">
-              {[
+              {([
                 {
                   value: "max" as SpeedProfile,
-                  label: "Max",
-                  desc: "10Gbps LAN",
+                  labelKey: "settings.perf.max",
+                  descKey: "settings.perf.maxDesc",
                 },
                 {
                   value: "balanced" as SpeedProfile,
-                  label: "Balanced",
-                  desc: "Daily use",
+                  labelKey: "settings.perf.balanced",
+                  descKey: "settings.perf.balancedDesc",
                 },
                 {
                   value: "low" as SpeedProfile,
-                  label: "Low",
-                  desc: "Battery mode",
+                  labelKey: "settings.perf.low",
+                  descKey: "settings.perf.lowDesc",
                 },
-              ].map((profile) => (
+              ]).map((profile) => (
                 <button
                   key={profile.value}
                   onClick={() =>
@@ -458,14 +459,14 @@ export function Settings() {
                           : "text-text-primary"
                       }`}
                     >
-                      {profile.label}
+                      {t(profile.labelKey)}
                     </span>
                     {settings.default_speed_profile === profile.value && (
                       <Check size={14} weight="bold" className="text-accent-amber" />
                     )}
                   </div>
                   <span className="text-[11px] text-text-tertiary">
-                    {profile.desc}
+                    {t(profile.descKey)}
                   </span>
                 </button>
               ))}
@@ -476,29 +477,29 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Globe size={18} weight="duotone" className="text-accent-purple" />
-              Default Network Mode
+              {t("settings.network.section")}
             </h2>
             <p className="text-[11px] text-text-tertiary mb-4">
-              Used for new connections unless changed
+              {t("settings.network.sharedHint")}
             </p>
             <div className="grid grid-cols-3 gap-2">
-              {[
+              {([
                 {
                   value: "auto" as NetworkMode,
-                  label: "Auto",
-                  desc: "Smart switch",
+                  labelKey: "settings.network.auto",
+                  descKey: "settings.network.autoDesc",
                 },
                 {
                   value: "local" as NetworkMode,
-                  label: "LAN Only",
-                  desc: "Local network",
+                  labelKey: "settings.network.lan",
+                  descKey: "settings.network.lanDesc",
                 },
                 {
                   value: "tailscale" as NetworkMode,
-                  label: "Tailscale",
-                  desc: "Remote access",
+                  labelKey: "settings.network.tailscale",
+                  descKey: "settings.network.tailscaleDesc",
                 },
-              ].map((mode) => (
+              ]).map((mode) => (
                 <button
                   key={mode.value}
                   onClick={() => update({ default_network_mode: mode.value })}
@@ -519,14 +520,14 @@ export function Settings() {
                           : "text-text-primary"
                       }`}
                     >
-                      {mode.label}
+                      {t(mode.labelKey)}
                     </span>
                     {settings.default_network_mode === mode.value && (
                       <Check size={14} weight="bold" className="text-accent-purple" />
                     )}
                   </div>
                   <span className="text-[11px] text-text-tertiary">
-                    {mode.desc}
+                    {t(mode.descKey)}
                   </span>
                 </button>
               ))}
@@ -537,15 +538,15 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
               <Bell size={18} weight="duotone" className="text-accent-blue" />
-              Notifications
+              {t("settings.notifications.section")}
             </h2>
             <div className="flex items-center justify-between py-1">
               <div>
                 <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                  Show mount/unmount notifications
+                  {t("settings.notifications.show")}
                 </div>
                 <div className="text-[11px] text-text-tertiary">
-                  Display system notifications when drives connect or disconnect
+                  {t("settings.notifications.showDesc")}
                 </div>
               </div>
               <Toggle
@@ -559,24 +560,24 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Globe size={18} weight="duotone" className="text-accent-green" />
-              Network Change Behavior
+              {t("settings.networkChange.section")}
             </h2>
             <p className="text-[11px] text-text-tertiary mb-4">
-              When your network changes (e.g., moving between home WiFi and mobile), the app detects it using Windows network events (zero polling, no battery impact).
+              {t("settings.networkChange.intro")}
             </p>
             <div className="grid grid-cols-2 gap-2">
-              {[
+              {([
                 {
                   value: "notify" as const,
-                  label: "Notify Only",
-                  desc: "Shows a notification when a mounted drive should switch between LAN and Tailscale. You control when to reconnect.",
+                  labelKey: "settings.networkChange.notify",
+                  descKey: "settings.networkChange.notifyDesc",
                 },
                 {
                   value: "auto_reconnect" as const,
-                  label: "Auto-Reconnect",
-                  desc: "Automatically remounts drives on the correct IP. Brief ~2-3s interruption during switch.",
+                  labelKey: "settings.networkChange.autoReconnect",
+                  descKey: "settings.networkChange.autoReconnectDesc",
                 },
-              ].map((mode) => (
+              ]).map((mode) => (
                 <button
                   key={mode.value}
                   onClick={() => update({ network_change_mode: mode.value })}
@@ -594,13 +595,13 @@ export function Settings() {
                           : "text-text-primary"
                       }`}
                     >
-                      {mode.label}
+                      {t(mode.labelKey)}
                     </span>
                     {settings.network_change_mode === mode.value && (
                       <Check size={14} weight="bold" className="text-accent-green" />
                     )}
                   </div>
-                  <span className="text-[11px] text-text-tertiary">{mode.desc}</span>
+                  <span className="text-[11px] text-text-tertiary">{t(mode.descKey)}</span>
                 </button>
               ))}
             </div>
@@ -610,10 +611,10 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
               <File size={18} weight="duotone" className="text-accent-purple" />
-              Rclone Config File
+              {t("settings.config.section")}
             </h2>
             <p className="text-[11px] text-text-tertiary mb-4">
-              By default rclone uses its own config file location. Set a custom path if you use a different config file.
+              {t("settings.config.intro")}
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -627,18 +628,18 @@ export function Settings() {
                 />
                 <Button variant="ghost" size="sm" onClick={handleBrowseConfigPath} className="gap-1.5 shrink-0">
                   <FolderOpen size={15} weight="bold" />
-                  Browse
+                  {t("settings.browse")}
                 </Button>
               </div>
               {settings.rclone_config_path && (
                 <Button variant="ghost" size="sm" onClick={handleResetConfigPath} className="gap-1.5 text-text-tertiary">
                   <ArrowsClockwise size={13} weight="bold" />
-                  Reset to rclone default
+                  {t("settings.config.reset")}
                 </Button>
               )}
               {!settings.rclone_config_path && defaultConfigPath && (
                 <p className="text-[11px] text-text-tertiary">
-                  Using default: <span className="font-mono text-text-secondary">{defaultConfigPath}</span>
+                  {t("settings.config.usingDefault", { path: defaultConfigPath })}
                 </p>
               )}
             </div>
@@ -648,10 +649,10 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
               <FolderOpen size={18} weight="duotone" className="text-accent-amber" />
-              VFS Cache Directory
+              {t("settings.cache.section")}
             </h2>
             <p className="text-[11px] text-text-tertiary mb-4">
-              Rclone caches file writes to your OS drive by default. Point this at a drive with more space to avoid filling up C:\ when copying large files (e.g. VM images).
+              {t("settings.cache.intro")}
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -664,13 +665,13 @@ export function Settings() {
                 />
                 <Button variant="ghost" size="sm" onClick={handleBrowseCacheDir} className="gap-1.5 shrink-0">
                   <FolderOpen size={15} weight="bold" />
-                  Browse
+                  {t("settings.browse")}
                 </Button>
               </div>
               {settings.cache_dir && (
                 <Button variant="ghost" size="sm" onClick={handleResetCacheDir} className="gap-1.5 text-text-tertiary">
                   <ArrowsClockwise size={13} weight="bold" />
-                  Reset to default
+                  {t("settings.cache.reset")}
                 </Button>
               )}
             </div>
@@ -680,7 +681,7 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
               <HardDrives size={18} weight="duotone" className="text-accent-red" />
-              Driver Management
+              {t("settings.drivers.section")}
             </h2>
 
             {driversLoading ? (
@@ -693,12 +694,12 @@ export function Settings() {
                   <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[13px] font-medium text-text-secondary">
-                        Rclone
+                        {t("settings.drivers.rclone")}
                       </span>
                       {driverVersions.rclone_installed ? (
-                        <Badge variant="connected">Installed</Badge>
+                        <Badge variant="connected">{t("settings.drivers.installed")}</Badge>
                       ) : (
-                        <Badge variant="disconnected">Not Installed</Badge>
+                        <Badge variant="disconnected">{t("settings.drivers.notInstalled")}</Badge>
                       )}
                     </div>
                     <div className="text-sm text-text-primary">
@@ -712,7 +713,7 @@ export function Settings() {
                         className="gap-1.5 mt-2"
                       >
                         <Trash size={14} weight="bold" />
-                        Uninstall
+                        {t("settings.drivers.uninstall")}
                       </Button>
                     )}
                   </div>
@@ -721,12 +722,12 @@ export function Settings() {
                   <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[13px] font-medium text-text-secondary">
-                        WinFsp
+                        {t("settings.drivers.winfsp")}
                       </span>
                       {driverVersions.winfsp_installed ? (
-                        <Badge variant="connected">Installed</Badge>
+                        <Badge variant="connected">{t("settings.drivers.installed")}</Badge>
                       ) : (
-                        <Badge variant="disconnected">Not Installed</Badge>
+                        <Badge variant="disconnected">{t("settings.drivers.notInstalled")}</Badge>
                       )}
                     </div>
                     <div className="text-sm text-text-primary">
@@ -740,7 +741,7 @@ export function Settings() {
                         className="gap-1.5 mt-2"
                       >
                         <Trash size={14} weight="bold" />
-                        Uninstall
+                        {t("settings.drivers.uninstall")}
                       </Button>
                     )}
                   </div>
@@ -760,12 +761,12 @@ export function Settings() {
                       {installingDrivers ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Installing...
+                          {t("settings.drivers.installing")}
                         </>
                       ) : (
                         <>
                           <Download size={16} weight="bold" />
-                          Install Rclone (Scoop)
+                          {t("settings.drivers.installRclone")}
                         </>
                       )}
                     </Button>
@@ -783,12 +784,12 @@ export function Settings() {
                       {installingDrivers ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Downloading...
+                          {t("settings.drivers.downloading")}
                         </>
                       ) : (
                         <>
                           <Download size={16} weight="bold" />
-                          Download &amp; Install WinFsp
+                          {t("settings.drivers.installWinfsp")}
                         </>
                       )}
                     </Button>
@@ -806,12 +807,12 @@ export function Settings() {
                       {verifyingWinfsp ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Verifying...
+                          {t("settings.drivers.verifying")}
                         </>
                       ) : (
                         <>
                           <Check size={16} weight="bold" />
-                          I've Installed WinFsp
+                          {t("settings.drivers.verifiedWinfsp")}
                         </>
                       )}
                     </Button>
@@ -829,12 +830,12 @@ export function Settings() {
                       {checkingUpdates ? (
                         <>
                           <div className="w-4 h-4 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
-                          Checking...
+                          {t("settings.drivers.checking")}
                         </>
                       ) : (
                         <>
                           <CloudArrowUp size={16} weight="bold" />
-                          Check for Updates
+                          {t("settings.drivers.checkUpdates")}
                         </>
                       )}
                     </Button>
@@ -843,7 +844,7 @@ export function Settings() {
               </div>
             ) : (
               <div className="text-[13px] text-text-tertiary">
-                Could not load driver information.
+                {t("settings.drivers.loadFailed")}
               </div>
             )}
           </Card>
@@ -852,16 +853,16 @@ export function Settings() {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
               <Info size={18} weight="duotone" className="text-accent-blue" />
-              About &amp; Updates
+              {t("settings.about.section")}
             </h2>
 
             <div className="flex items-center justify-between py-1">
               <div>
                 <div className="text-[13px] font-medium text-text-primary mb-0.5">
-                  Rclone Mount Hub
+                  {t("settings.about.appName")}
                 </div>
                 <div className="text-[11px] text-text-tertiary font-mono">
-                  v{appVersion || "…"}
+                  {t("settings.about.version", { version: appVersion || "…" })}
                 </div>
               </div>
 
@@ -870,13 +871,13 @@ export function Settings() {
                 {updateStatus === "up-to-date" && (
                   <div className="flex items-center gap-1.5 text-accent-green text-[12px]">
                     <CheckCircle size={14} weight="fill" />
-                    Up to date
+                    {t("settings.about.upToDate")}
                   </div>
                 )}
                 {updateStatus === "available" && availableVersion && (
                   <div className="flex items-center gap-1.5 text-accent-amber text-[12px]">
                     <WarningCircle size={14} weight="fill" />
-                    v{availableVersion} available
+                    {t("settings.about.updateAvailable", { version: availableVersion })}
                   </div>
                 )}
 
@@ -889,7 +890,7 @@ export function Settings() {
                     className="gap-1.5"
                   >
                     <Download size={14} weight="bold" />
-                    Update &amp; Restart
+                    {t("settings.about.updateRestart")}
                   </Button>
                 )}
 
@@ -905,17 +906,17 @@ export function Settings() {
                     {updateStatus === "checking" ? (
                       <>
                         <div className="w-3.5 h-3.5 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
-                        Checking…
+                        {t("settings.about.checking")}
                       </>
                     ) : updateStatus === "updating" ? (
                       <>
                         <div className="w-3.5 h-3.5 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
-                        Updating…
+                        {t("settings.about.updating")}
                       </>
                     ) : (
                       <>
                         <CloudArrowUp size={14} weight="bold" />
-                        Check for Updates
+                        {t("settings.about.checkUpdates")}
                       </>
                     )}
                   </Button>
@@ -924,19 +925,45 @@ export function Settings() {
             </div>
           </Card>
 
+          {/* Language */}
+          <Card className="p-6">
+            <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
+              <Globe size={18} weight="duotone" className="text-accent-blue" />
+              {t("settings.language.section")}
+            </h2>
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <div className="text-[13px] font-medium text-text-primary mb-0.5">
+                  {t("settings.language.label")}
+                </div>
+                <div className="text-[11px] text-text-tertiary">
+                  {t("settings.language.hint")}
+                </div>
+              </div>
+              <select
+                value={settings.language ?? "auto"}
+                onChange={(e) => update({ language: e.target.value as AppLanguage })}
+                className="bg-bg-overlay border border-border-default rounded-lg px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-accent-blue/60 min-w-[140px]"
+              >
+                <option value="auto">{t("settings.language.auto")}</option>
+                {SUPPORTED_LOCALES.map((l) => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+          </Card>
+
           {/* Troubleshooting */}
           <Card className="p-5 space-y-2">
-            <h3 className="text-[13px] font-semibold text-text-primary">Troubleshooting</h3>
+            <h3 className="text-[13px] font-semibold text-text-primary">{t("settings.troubleshoot.title")}</h3>
             <div className="text-[12px] text-text-secondary space-y-1.5">
               <p>
-                <span className="text-text-primary font-medium">Installer fails with "Failed to remove existing application directory":</span>{" "}
-                Make sure Rclone Mount Hub is fully closed (check system tray) and all rclone processes are stopped before running the installer. The app unmounts drives automatically on exit, but if it crashed, run{" "}
-                <code className="px-1 py-0.5 rounded bg-white/[0.06] text-[11px] font-mono">taskkill /F /IM rclone.exe</code>{" "}
-                in a terminal first.
+                <span className="text-text-primary font-medium">{t("settings.troubleshoot.installerTitle")}</span>{" "}
+                {t("settings.troubleshoot.installerBody")}
               </p>
               <p>
-                <span className="text-text-primary font-medium">Drive shows in Explorer but can't connect:</span>{" "}
-                The rclone mount process started but the remote connection failed. Unmount, check your credentials and server address, then try again.
+                <span className="text-text-primary font-medium">{t("settings.troubleshoot.driveTitle")}</span>{" "}
+                {t("settings.troubleshoot.driveBody")}
               </p>
             </div>
           </Card>
@@ -950,11 +977,11 @@ export function Settings() {
               className="gap-2"
             >
               <ArrowsClockwise size={16} weight="bold" />
-              Reset to Defaults
+              {t("settings.resetDefaults")}
             </Button>
             <div className="flex-1" />
             <div className="text-[11px] text-text-tertiary">
-              Settings saved automatically
+              {t("settings.savedNote")}
             </div>
           </div>
         </div>

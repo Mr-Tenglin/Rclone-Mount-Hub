@@ -180,6 +180,45 @@ pnpm tauri build --bundles nsis   # production NSIS installer
 | -------------------------------------------- | --------------------------------------------- |
 | [docs/Building-Src.md](docs/Building-Src.md)         | Build, bundle, distribute, version bumping    |
 | [docs/Architecture.md](docs/Architecture.md) | Full architecture, data models, design system |
+| [docs/Updater-System.md](docs/Updater-System.md) | Velopack auto-update system (user + developer) |
+
+---
+
+## Project Updates
+
+This section tracks notable updates applied to the project, in reverse-chronological order.
+
+### v0.1.9 (current)
+
+#### Internationalization (i18n)
+- Added a lightweight i18n system (`i18n/` folder + `src/lib/i18n.ts`) that auto-discovers
+  all locale packs via Vite's `import.meta.glob`.
+- New locale packs: `i18n/en.json` (base), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
+  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — 490 translation keys each, fully
+  key-aligned with the English base.
+- All UI strings across every page, toast, log, and modal are now routed through
+  `t("...")`. Missing keys fall back to English, then to the key path.
+- Settings → Language lets the user pick **System / English / 简体中文 / 繁體中文 /
+  日本語 / Español / Русский**, or follow the system display language. The choice is
+  persisted in the settings store and applied instantly (no restart).
+
+#### Dependency alignment & build tooling
+- Upgraded `@tauri-apps/api` to **2.12** and aligned `@tauri-apps/plugin-dialog` /
+  `@tauri-apps/plugin-store` to matching versions so the Rust crates no longer report
+  a version mismatch.
+- Removed `tauri-plugin-mcp-bridge`: every published version (0.1.3–0.13.0) pins
+  `webview2-com 0.38`, which is incompatible with Tauri 2.12's `webview2-com 0.39`.
+  The plugin was only used under `#[cfg(debug_assertions)]` and is not needed in
+  release builds.
+- The Rust `tauri` crate and plugin crate versions are now resolved consistently
+  against the npm packages (all 2.12.x).
+
+#### Build & release
+- The project builds on Windows 11 with the Rust + MSVC toolchain.
+- `build-release.ps1` produces:
+  - `Rclone Mount Hub_<ver>_x64-setup.exe` (Velopack installer, in-place updates)
+  - `Rclone Mount Hub_<ver>_x64-Portable.exe` (single-file, runs anywhere)
+- Update feed URL: `https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download`
 
 ---
 
@@ -206,6 +245,10 @@ So, I created **Rclone Mount Hub** so I can easily manage my NAS mounts and even
 ## Contributing
 
 Issues, feature requests, and pull requests are welcome. If Windows SMB has also ruined your life, open a discussion — misery loves company.
+
+### Developed with DeepSeek Harness
+
+This project is actively maintained and upgraded with the help of **DeepSeek Harness**, an AI coding agent. Recent updates — including the i18n system, the Tauri 2.12 dependency alignment, and the Velopack packaging workflow — were produced with DeepSeek Harness and validated by `tsc` / `vite build` / the Tauri release build. Contributions are welcome whether written by hand or generated with DeepSeek Harness: open an issue or pull request describing what changed and why.
 
 ---
 

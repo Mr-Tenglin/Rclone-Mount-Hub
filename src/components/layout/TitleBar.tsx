@@ -1,8 +1,10 @@
 import { X, Minus, CornersOut } from "phosphor-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useI18n } from "../../lib/i18n";
 
 export function TitleBar() {
   const appWindow = getCurrentWindow();
+  const { t } = useI18n();
 
   const handleMinimize = () => appWindow.minimize();
   const handleMaximize = () => appWindow.toggleMaximize();
@@ -25,7 +27,7 @@ export function TitleBar() {
       <div onMouseDown={handleDragStart} className="flex-1 flex items-center pl-4 gap-2.5 h-full">
         <div className="w-[7px] h-[7px] rounded-full bg-accent-blue shadow-[0_0_6px_rgba(59,130,246,0.4)]" />
         <span className="text-[12px] font-medium text-text-secondary tracking-tight">
-          Rclone Mount Hub
+          {t("titlebar.appName")}
         </span>
       </div>
 

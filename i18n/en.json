@@ -1,0 +1,640 @@
+{
+  "app": {
+    "name": "Rclone Mount Hub",
+    "sidebarTitle": "Mount Hub"
+  },
+  "titlebar": {
+    "appName": "Rclone Mount Hub"
+  },
+  "sidebar": {
+    "activeCount": "{count} active",
+    "section": {
+      "drives": "Drives",
+      "tools": "Tools",
+      "rclone": "Rclone"
+    },
+    "nav": {
+      "overview": "Overview",
+      "addConnection": "Add Connection",
+      "speedTest": "Speed Test",
+      "export": "Export",
+      "settings": "Settings"
+    },
+    "rcloneWebUi": "Rclone Web UI",
+    "drivers": {
+      "checking": "Checking drivers...",
+      "rclone": "rclone {version}",
+      "rcloneMissing": "rclone missing",
+      "winfsp": "WinFsp {version}",
+      "winfspMissing": "WinFsp missing"
+    }
+  },
+  "status": {
+    "mountsActive": "{count} mount active",
+    "mountsActivePlural": "{count} mounts active",
+    "network": {
+      "lan": "LAN",
+      "tailscale": "Tailscale",
+      "offline": "Offline"
+    },
+    "showLogs": "Show Logs",
+    "hideLogs": "Hide Logs"
+  },
+  "logPanel": {
+    "title": "System Logs",
+    "clear": "Clear",
+    "minimize": "Minimize",
+    "empty": "No log entries yet",
+    "emptyFiltered": "No {filter} logs",
+    "filter": {
+      "all": "All",
+      "drivers": "Drivers",
+      "mounts": "Mounts",
+      "network": "Network",
+      "system": "System"
+    }
+  },
+  "shared": {
+    "action": {
+      "cancel": "Cancel",
+      "testConnection": "Test Connection",
+      "testing": "Testing...",
+      "testReached": "Reachable",
+      "refresh": "Refresh"
+    },
+    "remote": {
+      "webdav": "WebDAV",
+      "webdavDesc": "Unraid, Nextcloud, copyparty",
+      "sftp": "SFTP",
+      "sftpDesc": "SFTPGo, OpenSSH",
+      "smb": "SMB / Samba",
+      "smbDesc": "Windows shares, NAS",
+      "s3": "S3",
+      "s3Desc": "AWS S3, MinIO, Backblaze",
+      "ftp": "FTP",
+      "ftpDesc": "Classic FTP server"
+    },
+    "vendor": {
+      "webdav": {
+        "copyparty": "Copyparty (Unraid)",
+        "nextcloud": "Nextcloud",
+        "owncloud": "ownCloud",
+        "sharepoint": "SharePoint",
+        "other": "Other WebDAV"
+      },
+      "sftp": {
+        "sftpgo": "SFTPGo",
+        "openssh": "OpenSSH",
+        "other": "Other SFTP Server"
+      },
+      "s3": {
+        "aws": "AWS",
+        "minio": "MinIO",
+        "backblaze": "Backblaze",
+        "wasabi": "Wasabi",
+        "other": "Other"
+      }
+    },
+    "mode": {
+      "auto": "Auto",
+      "autoDesc": "Smart switching",
+      "lan": "LAN Only",
+      "lanDesc": "Local network",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "Remote access"
+    },
+    "profile": {
+      "max": "Max Speed",
+      "maxDesc": "10Gbps LAN, Fiber",
+      "balanced": "Balanced",
+      "balancedDesc": "Daily use (Recommended)",
+      "low": "Low Resource",
+      "lowDesc": "Battery, slow WiFi"
+    },
+    "label": {
+      "dirCacheTime": "Dir Cache Time",
+      "pollInterval": "Poll Interval",
+      "vfsCacheMode": "VFS Cache Mode",
+      "vfsCacheSize": "VFS Cache Size",
+      "readAhead": "Read Ahead",
+      "bufferSize": "Buffer Size",
+      "transfers": "Transfers",
+      "multiThreadStreams": "Multi-thread Streams",
+      "extraFlags": "Extra Rclone Flags",
+      "connectionName": "Connection Name",
+      "driveLetter": "Drive Letter",
+      "description": "Description (optional)",
+      "serverSoftware": "Server Software",
+      "host": "Host / IP (LAN)",
+      "hostIp": "Host / IP",
+      "port": "Port",
+      "tailscaleIp": "Tailscale IP (optional)",
+      "username": "Username",
+      "password": "Password",
+      "provider": "Provider",
+      "accessKeyId": "Access Key ID",
+      "secretAccessKey": "Secret Access Key",
+      "region": "Region",
+      "bucket": "Bucket",
+      "customEndpoint": "Custom Endpoint (optional)"
+    },
+    "placeholder": {
+      "connectionName": "e.g., Home Server, NAS",
+      "description": "e.g., main storage, media share",
+      "host": "192.168.1.x or \\\\SERVER\\share"
+    },
+    "hint": {
+      "host": "Local network address",
+      "tailscaleIp": "Used when away from home",
+      "customEndpoint": "For MinIO or other S3-compatible services",
+      "dirCacheTime": "0 = always fresh on navigate",
+      "pollInterval": "Background check interval"
+    },
+    "vfsCacheMode": {
+      "default": "Default (full)",
+      "full": "Full",
+      "writes": "Writes",
+      "minimal": "Minimal",
+      "off": "Off"
+    },
+    "extraFlagsPlaceholder": "--sftp-set-modtime=false\n--sftp-disable-hashcheck\n--checkers 8",
+    "extraFlagsHint": "One flag per line. Appended to the rclone mount command after all other settings.",
+    "resetDefaults": "Reset to Defaults",
+    "drivesFree": "{count} free"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "subtitle": "Manage your rclone drive mounts",
+    "updated": "Updated {timeSince}",
+    "time": {
+      "justNow": "just now",
+      "secondsAgo": "{count}s ago",
+      "minutesAgo": "{count}m ago"
+    },
+    "action": {
+      "directUpload": "Direct Upload",
+      "directUploadTipEnabled": "Upload files directly — bypasses VFS cache",
+      "directUploadTipDisabled": "Mount a drive first",
+      "newMount": "New Mount",
+      "import": "Import",
+      "mount": "Mount",
+      "unmount": "Unmount"
+    },
+    "tip": {
+      "test": "Test connection",
+      "edit": "Edit connection",
+      "delete": "Delete connection"
+    },
+    "driverWarning": {
+      "title": "Required drivers not installed",
+      "body": "Rclone and WinFsp must be installed before you can mount drives.",
+      "action": "Install Drivers in Settings"
+    },
+    "stat": {
+      "totalMounts": "Total Mounts",
+      "active": "Active",
+      "network": "Network",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "section": {
+      "managed": "Managed Connections",
+      "external": "External Mounts (running outside this app)",
+      "rcloneRemotes": "Rclone Remotes (in rclone config, not managed here)"
+    },
+    "remotesDescription": "In rclone config but not managed here — import to edit and mount",
+    "empty": {
+      "title": "No mounts configured",
+      "body": "Connect to your Unraid server, NAS, or cloud storage. Drives appear in Windows Explorer like local disks.",
+      "cta": "Add Your First Mount"
+    },
+    "badge": {
+      "mountedWarning": "Mounted (Warning)",
+      "mounted": "Mounted",
+      "unmounted": "Unmounted",
+      "external": "External",
+      "mountedAt": "Mounted ({mountPoint})"
+    },
+    "unknown": "Unknown",
+    "drivePoint": "Drive {point}",
+    "mountPointUnknown": "Mount point unknown",
+    "cardProfileSuffix": "{profile} profile",
+    "profileSuffix": " {profile} profile",
+    "confirm": {
+      "deleteConnectionTitle": "Delete Connection",
+      "deleteConnection": "Delete connection \"{name}\"? This cannot be undone.",
+      "deleteRemoteTitle": "Delete Remote",
+      "deleteRemote": "Delete rclone remote \"{name}\"? This will remove it from rclone config."
+    },
+    "importedDescription": "Imported from rclone config"
+  },
+  "toast": {
+    "webUiLaunched": "Rclone Web UI launched",
+    "webUiLaunchFailed": "Failed to launch Web UI: {msg}",
+    "mounted": "Mounted {name} to drive {letter}: via {mode}",
+    "mountedWarning": "{name} mounted via {mode} ({url}) with warning: {error}",
+    "mountFailed": "Failed to mount {name}",
+    "unmounted": "Unmounted {name}",
+    "unmountFailed": "Failed to unmount {name}",
+    "switchedTo": "{name} switched to {mode}",
+    "switchAvailable": "{name}: switch to {mode} available",
+    "deleted": "Deleted {name}",
+    "remoteDeleted": "Deleted remote {name}",
+    "imported": "Imported \"{name}\" into the app. Edit it to configure fully.",
+    "importFailed": "Import failed: {msg}",
+    "created": "Created mount \"{name}\"",
+    "createFailed": "Failed to create: {msg}",
+    "saved": "Saved changes to \"{name}\"",
+    "saveFailed": "Save failed: {msg}",
+    "testFailed": "Test failed: {msg}",
+    "nameRequired": "Connection name is required",
+    "driveLetterRequired": "Drive letter is required",
+    "hostRequired": "Host / IP address is required",
+    "s3KeysRequired": "S3 access key and secret key are required",
+    "s3LooksValid": "S3 config looks valid (start mount to verify credentials)",
+    "exportSaved": "Export saved and encrypted successfully",
+    "exportFailed": "Export failed: {err}",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Failed to copy to clipboard",
+    "invalidJson": "File is not valid JSON",
+    "wrongPassword": "Wrong password or corrupted file",
+    "missingField": "Missing required field: {field}",
+    "importSkipped": "Skipped: {name} (no password provided)",
+    "importRemoteFailed": "Failed to create remote for {name}: {err}",
+    "importedCount": "Imported {count} connection(s)",
+    "noImport": "No connections were imported",
+    "scriptSaved": "Script saved: {name}",
+    "speedTestDone": "Speed test completed",
+    "speedTestFailed": "Speed test failed",
+    "targetIpRequired": "Please enter a target IP address",
+    "pathAnalyzed": "Network path analyzed",
+    "pathAnalysisFailed": "Path analysis failed",
+    "diskBenchmarkDone": "Disk benchmark completed",
+    "diskBenchmarkFailed": "Disk benchmark failed",
+    "autostartEnabled": "Autostart enabled",
+    "autostartDisabled": "Autostart disabled",
+    "autostartToggleFailed": "Failed to toggle autostart",
+    "configPathUpdated": "Rclone config path updated",
+    "configPathReset": "Reset to rclone default config path",
+    "cacheDirUpdated": "Cache directory updated",
+    "cacheDirReset": "Reset to rclone default cache directory",
+    "startMenuAdded": "Added to Start Menu — notifications will now show 'Rclone Mount Hub'",
+    "startMenuAddFailed": "Failed to add to Start Menu",
+    "startMenuRemoved": "Removed from Start Menu",
+    "startMenuRemoveFailed": "Failed to remove from Start Menu",
+    "rcloneInstalled": "Rclone installed successfully",
+    "rcloneInstallFailed": "Failed to install Rclone",
+    "winfspLaunched": "WinFsp {version} installer launched — complete the wizard then click Continue",
+    "winfspDownloadFailed": "Failed to download WinFsp",
+    "winfspReady": "WinFsp is installed and ready!",
+    "winfspNotDetected": "WinFsp not detected yet. Please complete the installer first.",
+    "rcloneUninstalled": "Rclone uninstalled",
+    "rcloneUninstallFailed": "Failed to uninstall Rclone",
+    "winfspUninstalled": "WinFsp uninstalled",
+    "winfspUninstallFailed": "Failed to uninstall WinFsp",
+    "checkUpdatesFailed": "Failed to check for updates",
+    "applyUpdateFailed": "Failed to apply update"
+  },
+  "notif": {
+    "mountedTitle": "Drive Mounted",
+    "mountedBody": "{name} connected via {mode}",
+    "unmountedTitle": "Drive Unmounted",
+    "unmountedBody": "{name} disconnected",
+    "networkChangedTitle": "Network Changed",
+    "networkChangedBodyReconnected": "{name} reconnected via {mode}",
+    "networkChangedBody": "{name} may need to switch to {mode}"
+  },
+  "test": {
+    "localOk": "Local: OK",
+    "tailscaleOk": "Tailscale: OK",
+    "localFailed": "Local: Failed",
+    "tailscaleFailed": "Tailscale: Failed",
+    "noIps": "No IPs configured to test"
+  },
+  "log": {
+    "networkRemounting": "Network changed: remounting {name} to {mode}...",
+    "reconnectedVia": "{name} reconnected via {mode}",
+    "reconnectFailed": "Failed to reconnect {name}: {msg}",
+    "networkSuggestSwitch": "Network changed: {name} is on {mode} but {newMode} is now available. Consider reconnecting.",
+    "mounting": "Mounting {name} to drive {letter}...",
+    "mountedOk": "{name} mounted to {letter}: via {mode} ({url})",
+    "mountFailed": "Mount failed: {msg}",
+    "unmounting": "Unmounting {name}...",
+    "unmounted": "{name} unmounted successfully",
+    "unmountFailed": "Unmount failed: {msg}",
+    "externalUnmounting": "Unmounting external mount {name} (PID {pid})...",
+    "externalUnmounted": "External mount {name} unmounted",
+    "externalUnmountFailed": "Failed to unmount external: {msg}",
+    "testingConnection": "Testing connection for {name}...",
+    "testFailed": "Test failed: {msg}",
+    "localReachable": "Local ({ip}:{port}): reachable",
+    "localUnreachable": "Local ({ip}:{port}): unreachable — {err}",
+    "tailscaleReachable": "Tailscale ({ip}:{port}): reachable",
+    "tailscaleUnreachable": "Tailscale ({ip}:{port}): unreachable — {err}",
+    "activeReachable": "Active mount ({url}): reachable",
+    "activeUnreachable": "Active mount ({url}): unreachable",
+    "imported": "Imported \"{name}\" — edit it to set IP, drive letter, and other settings",
+    "testingLocal": "Testing local {host}:{port}...",
+    "testingTailscale": "Testing Tailscale {host}:{port}...",
+    "creatingRemote": "Creating rclone remote \"{name}\" ({type})...",
+    "remoteCreated": "Remote \"{name}\" created",
+    "createRemoteFailed": "Failed to create remote: {msg}",
+    "connectionUpdated": "Connection \"{name}\" updated",
+    "saveFailed": "Save failed: {msg}",
+    "installingRclone": "Installing Rclone via Scoop...",
+    "rcloneInstalledOk": "✓ Rclone installed successfully",
+    "rcloneInstallFailed": "✗ {msg}",
+    "fetchingWinfsp": "Fetching latest WinFsp release from GitHub...",
+    "winfspDownloaded": "✓ WinFsp {version} installer downloaded and launched",
+    "winfspWizard": "Complete the installation wizard, then click \"I've Installed WinFsp\"",
+    "verifyingWinfsp": "Verifying WinFsp installation...",
+    "winfspDetected": "✓ WinFsp detected and ready!",
+    "winfspNotDetectedLog": "WinFsp not detected yet — finish the installer wizard and try again",
+    "winfspVerifyFailed": "✗ Failed to verify WinFsp",
+    "checkingDriverUpdates": "Checking for driver updates...",
+    "checkDriverUpdatesFailed": "✗ {msg}",
+    "appUpdateCheckFailed": "✗ Update check failed: {msg}"
+  },
+  "add": {
+    "back": "Back to Overview",
+    "title": "Add New Mount",
+    "subtitle": "Connect to a remote storage and mount it as a local drive",
+    "section": {
+      "basic": "Basic Information",
+      "webdav": "WebDAV Settings",
+      "sftp": "SFTP Settings",
+      "ftp": "FTP Settings",
+      "smb": "SMB / Samba Settings",
+      "s3": "S3 Settings",
+      "auth": "Authentication",
+      "networkMode": "Network Mode",
+      "performanceProfile": "Performance Profile",
+      "advancedCache": "Advanced Cache Settings"
+    },
+    "sftpgoHint": "Add custom rclone flags in Advanced Settings below (e.g. --sftp-set-modtime=false for object-storage backends).",
+    "cachePrefix": "Cache: {cache}",
+    "usingProfileDefaults": "Using {profile} profile defaults",
+    "advancedHint": "Leave blank to use the speed profile defaults. Dir Cache Time: how long directory listings are cached (0 = always fresh). Poll Interval: how often rclone checks for remote changes.",
+    "autoMountTitle": "Auto-mount on startup",
+    "autoMountDesc": "Automatically connect this drive when the app starts",
+    "dualMountTitle": "Dual Mount (Archive)",
+    "dualMountDesc": "Mount a second read-only drive with 24h cached listings — fast browsing for grabbing old files",
+    "liveMountLabel": "Live Mount",
+    "liveMountLine1": "Always up-to-date",
+    "liveMountLine2": "normal speed profile",
+    "archiveMountLabel": "Archive Mount",
+    "archiveMountLine1": "Read-only, 24h",
+    "archiveMountLine2": "dir cache",
+    "dualMountNote": "The archive mount has aggressive directory caching (24h) and polls for changes only hourly. Use it to browse and grab files — uploads and edits should use the live mount.",
+    "creating": "Creating...",
+    "createMount": "Create Mount"
+  },
+  "edit": {
+    "title": "Edit Connection",
+    "subtitle": "{remoteType} connection • created {date}",
+    "remoteSettings": "{type} Settings",
+    "newPassword": "New Password (leave blank to keep current)",
+    "passwordStoredHint": "Password is stored encrypted in rclone config",
+    "nameChangedNote": "Note: changing name requires re-entering your password to update the rclone config.",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure application preferences and defaults",
+    "startup": {
+      "section": "Startup Behavior",
+      "startWithWindows": "Start with Windows",
+      "startWithWindowsDesc": "Launch Rclone Mounter when your computer starts",
+      "startMinimized": "Start minimized",
+      "startMinimizedDesc": "Open to system tray instead of showing the window",
+      "closeToTray": "Close to tray",
+      "closeToTrayDesc": "Minimize to tray instead of closing completely",
+      "addToStartMenu": "Add to Start Menu",
+      "addToStartMenuDesc": "Creates a Start Menu shortcut and registers the app so toast notifications show \"Rclone Mount Hub\" instead of \"Windows PowerShell\"",
+      "addToStartMenuBtn": "Add to Start Menu",
+      "remove": "Remove"
+    },
+    "perf": {
+      "section": "Default Performance Profile",
+      "sharedHint": "Used for new connections unless changed",
+      "max": "Max Speed",
+      "maxDesc": "10Gbps LAN",
+      "balanced": "Balanced",
+      "balancedDesc": "Daily use",
+      "low": "Low Resource",
+      "lowDesc": "Battery mode"
+    },
+    "network": {
+      "section": "Default Network Mode",
+      "sharedHint": "Used for new connections unless changed",
+      "auto": "Auto",
+      "autoDesc": "Smart switch",
+      "lan": "LAN Only",
+      "lanDesc": "Local network",
+      "tailscale": "Tailscale",
+      "tailscaleDesc": "Remote access"
+    },
+    "notifications": {
+      "section": "Notifications",
+      "show": "Show mount/unmount notifications",
+      "showDesc": "Display system notifications when drives connect or disconnect"
+    },
+    "networkChange": {
+      "section": "Network Change Behavior",
+      "intro": "When your network changes (e.g., moving between home WiFi and mobile), the app detects it using Windows network events (zero polling, no battery impact).",
+      "notify": "Notify Only",
+      "notifyDesc": "Shows a notification when a mounted drive should switch between LAN and Tailscale. You control when to reconnect.",
+      "autoReconnect": "Auto-Reconnect",
+      "autoReconnectDesc": "Automatically remounts drives on the correct IP. Brief ~2-3s interruption during switch."
+    },
+    "config": {
+      "section": "Rclone Config File",
+      "intro": "By default rclone uses its own config file location. Set a custom path if you use a different config file.",
+      "reset": "Reset to rclone default",
+      "usingDefault": "Using default: {path}"
+    },
+    "cache": {
+      "section": "VFS Cache Directory",
+      "intro": "Rclone caches file writes to your OS drive by default. Point this at a drive with more space to avoid filling up C:\\ when copying large files (e.g. VM images).",
+      "reset": "Reset to default"
+    },
+    "drivers": {
+      "section": "Driver Management",
+      "rclone": "Rclone",
+      "winfsp": "WinFsp",
+      "installed": "Installed",
+      "notInstalled": "Not Installed",
+      "uninstall": "Uninstall",
+      "installRclone": "Install Rclone (Scoop)",
+      "installing": "Installing...",
+      "installWinfsp": "Download & Install WinFsp",
+      "downloading": "Downloading...",
+      "verifiedWinfsp": "I've Installed WinFsp",
+      "verifying": "Verifying...",
+      "checkUpdates": "Check for Updates",
+      "checking": "Checking...",
+      "loadFailed": "Could not load driver information."
+    },
+    "about": {
+      "section": "About & Updates",
+      "appName": "Rclone Mount Hub",
+      "version": "v{version}",
+      "upToDate": "Up to date",
+      "updateAvailable": "v{version} available",
+      "updateRestart": "Update & Restart",
+      "checking": "Checking…",
+      "updating": "Updating…",
+      "checkUpdates": "Check for Updates"
+    },
+    "troubleshoot": {
+      "title": "Troubleshooting",
+      "installerTitle": "Installer fails with \"Failed to remove existing application directory\":",
+      "installerBody": "Make sure Rclone Mount Hub is fully closed (check system tray) and all rclone processes are stopped before running the installer. The app unmounts drives automatically on exit, but if it crashed, run taskkill /F /IM rclone.exe in a terminal first.",
+      "driveTitle": "Drive shows in Explorer but can't connect:",
+      "driveBody": "The rclone mount process started but the remote connection failed. Unmount, check your credentials and server address, then try again."
+    },
+    "resetDefaults": "Reset to Defaults",
+    "savedNote": "Settings saved automatically",
+    "language": {
+      "section": "Language",
+      "label": "Language",
+      "auto": "System",
+      "en": "English",
+      "zh": "简体中文",
+      "hint": "Interface language. \"System\" follows your Windows display language."
+    }
+  },
+  "export": {
+    "title": "Export & Import",
+    "subtitle": "Backup your connections or generate standalone scripts",
+    "section": {
+      "export": "Export Connections",
+      "import": "Import Connections",
+      "powershell": "PowerShell Scripts"
+    },
+    "encryptionNote": "Export is encrypted with AES-256-GCM. You'll enter a password before saving. Includes all connection data, usernames, and app settings.",
+    "btn": {
+      "exportJson": "Export as JSON",
+      "copyPlain": "Copy Plain JSON",
+      "importJson": "Import JSON File",
+      "downloadScript": "Download Script"
+    },
+    "previewLabel": "Preview (what will be included in the export)",
+    "noConnections": "No connections to export",
+    "importNote": "Import from an encrypted or plain JSON export. Encrypted files will prompt for the password. You'll be asked to enter the WebDAV password for each connection.",
+    "powershellNote": "Generate standalone mount scripts for each connection",
+    "psNoConnections": "No connections available. Add a connection first.",
+    "psDriveLine": "Drive {letter} • {mode} mode",
+    "modal": {
+      "exportTitle": "Encrypt Export",
+      "importTitle": "Decrypt Import",
+      "exportDesc": "Your connections (including usernames and all settings) will be encrypted with AES-256-GCM. You'll need this password to import the file.",
+      "importDesc": "Enter the password used when this export was created.",
+      "passwordPlaceholder": "Password",
+      "passwordTooShort": "Password must be at least 4 characters",
+      "exportCta": "Encrypt & Save",
+      "importCta": "Decrypt & Import"
+    },
+    "promptPassword": "Enter WebDAV password for \"{name}\":"
+  },
+  "speed": {
+    "title": "Speed Test & Diagnostics",
+    "subtitle": "Test transfer speeds and identify performance bottlenecks",
+    "section": {
+      "run": "Run Speed Test"
+    },
+    "btn": {
+      "run": "Run Test",
+      "running": "Running Test..."
+    },
+    "label": {
+      "driveLetter": "Drive Letter",
+      "fileSize": "Test File Size"
+    },
+    "size": {
+      "quickLabel": "10 MB",
+      "quickDesc": "Quick test",
+      "recLabel": "100 MB",
+      "recDesc": "Recommended",
+      "thoroughLabel": "1 GB",
+      "thoroughDesc": "Thorough"
+    },
+    "results": {
+      "title": "Test Results",
+      "upload": "Upload",
+      "download": "Download",
+      "latency": "Latency",
+      "bottleneck": "Bottleneck",
+      "unitMbs": "MB/s",
+      "unitMs": "ms"
+    },
+    "badge": {
+      "local": "Local Network",
+      "tailscale": "Tailscale VPN"
+    },
+    "path": {
+      "title": "Network Path Analysis",
+      "label": "Target IP Address",
+      "analyzing": "Analyzing...",
+      "btn": "Analyze Path",
+      "badgeLocal": "Local Network",
+      "badgeVpn": "VPN",
+      "hops": "Network Hops"
+    },
+    "disk": {
+      "title": "Local Disk Benchmark",
+      "intro": "Test your local disk's read/write performance",
+      "benchmarking": "Benchmarking...",
+      "btn": "Benchmark Local Disk",
+      "speed": "Disk Speed"
+    }
+  },
+  "upload": {
+    "title": "Direct Upload",
+    "intro": "Upload files directly to your remote without going through the mounted drive. Streams straight to the server — no local VFS cache needed.",
+    "label": {
+      "source": "Source",
+      "destinationRemote": "Destination Remote",
+      "destinationPath": "Destination Path"
+    },
+    "emptySource": "No file or folder selected",
+    "btn": {
+      "file": "File",
+      "folder": "Folder",
+      "cancelUpload": "Cancel Upload",
+      "close": "Close",
+      "upload": "Upload"
+    },
+    "placeholder": {
+      "connection": "Select a mounted connection..."
+    },
+    "hint": {
+      "destinationPath": "Path on the remote where files will be uploaded (e.g. /Chris-disk10/Backups)"
+    },
+    "state": {
+      "uploading": "Uploading...",
+      "done": "Upload complete",
+      "error": "Upload failed"
+    },
+    "progress": "{transferred} / {total} ({percent}%)",
+    "eta": "ETA {eta}"
+  },
+  "dialog": {
+    "selectConfigFile": "Select Rclone Config File",
+    "configFilter": "Rclone Config",
+    "selectCacheDir": "Select VFS Cache Directory",
+    "selectFileUpload": "Select File to Upload",
+    "selectFolderUpload": "Select Folder to Upload"
+  },
+  "update": {
+    "versionAvailable": "v{version} available",
+    "updateRestart": "Update & Restart",
+    "restarting": "Restarting...",
+    "downloading": "Downloading..."
+  },
+  "quit": {
+    "title": "Quitting Rclone Mount Hub",
+    "subtitle": "Ctrl + Close"
+  }
+}

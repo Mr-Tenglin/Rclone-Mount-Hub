@@ -169,8 +169,8 @@ pub fn run() {
             Ok(())
         });
 
-    #[cfg(debug_assertions)]
-    let builder = builder.plugin(tauri_plugin_mcp_bridge::init());
+    // tauri-plugin-mcp-bridge was removed: its webview2-com 0.38 requirement
+    // conflicts with tauri 2.12.x's webview2-com 0.39.
 
     builder
         .build(tauri::generate_context!())

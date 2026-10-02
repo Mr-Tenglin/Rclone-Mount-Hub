@@ -48,6 +48,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   rclone_config_path: "",
   network_change_mode: "notify",
   cache_dir: "",
+  language: "auto",
 };
 
 // Settings Store

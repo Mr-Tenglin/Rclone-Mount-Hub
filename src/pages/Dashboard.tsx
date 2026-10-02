@@ -25,6 +25,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { toast } from "sonner";
 import { DirectUploadModal } from "../components/DirectUploadModal";
+import { t } from "../lib/i18n";
 
 interface DashboardProps {
   onNavigate?: (page: string, connectionId?: string) => void;
@@ -70,13 +71,13 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
     if (!lastRefreshed) return;
     const update = () => {
       const secs = Math.round((Date.now() - lastRefreshed.getTime()) / 1000);
-      if (secs < 5) setTimeSince("just now");
-      else if (secs < 60) setTimeSince(`${secs}s ago`);
-      else setTimeSince(`${Math.floor(secs / 60)}m ago`);
+      if (secs < 5) setTimeSince(t("dashboard.time.justNow"));
+      else if (secs < 60) setTimeSince(t("dashboard.time.secondsAgo", { count: secs }));
+      else setTimeSince(t("dashboard.time.minutesAgo", { count: Math.floor(secs / 60) }));
     };
     update();
-    const t = setInterval(update, 5000);
-    return () => clearInterval(t);
+    const interval = setInterval(update, 5000);
+    return () => clearInterval(interval);
   }, [lastRefreshed]);
 
   // Run auto-mount exactly once — useRef guard prevents StrictMode double-fire
@@ -160,7 +161,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
         const newMode = localReachable ? "LAN" : "Tailscale";
 
         if (settings.network_change_mode === "auto_reconnect") {
-          addLog("info", `Network changed: remounting ${conn.name} to ${newMode}...`, "network");
+          addLog("info", t("log.networkRemounting", { name: conn.name, mode: newMode }), "network");
           try {
             await invoke("unmount_drive", { connectionId: conn.id });
             const newStatus = await invoke<MountStatus>("mount_drive", {
@@ -168,22 +169,26 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               cacheDir: settings.cache_dir || null,
             });
             setMountStatuses(prev => ({ ...prev, [conn.id]: newStatus }));
-            addLog("success", `${conn.name} reconnected via ${newMode}`, "network");
-            toast.info(`${conn.name} switched to ${newMode}`);
+            addLog("success", t("log.reconnectedVia", { name: conn.name, mode: newMode }), "network");
+            toast.info(t("toast.switchedTo", { name: conn.name, mode: newMode }));
             await invoke("send_notification", {
-              title: "Network Changed",
-              body: `${conn.name} reconnected via ${newMode}`,
+              title: t("notif.networkChangedTitle"),
+              body: t("log.reconnectedVia", { name: conn.name, mode: newMode }),
             }).catch(() => {});
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
-            addLog("error", `Failed to reconnect ${conn.name}: ${msg}`, "network");
+            addLog("error", t("log.reconnectFailed", { name: conn.name, msg }), "network");
           }
         } else {
-          addLog("warning", `Network changed: ${conn.name} is on ${activeMode === "local" ? "LAN" : "Tailscale"} but ${newMode} is now available. Consider reconnecting.`, "network");
-          toast.warning(`${conn.name}: switch to ${newMode} available`, { duration: 10000 });
+          addLog("warning", t("log.networkSuggestSwitch", {
+            name: conn.name,
+            mode: activeMode === "local" ? "LAN" : "Tailscale",
+            newMode,
+          }), "network");
+          toast.warning(t("toast.switchAvailable", { name: conn.name, mode: newMode }), { duration: 10000 });
           await invoke("send_notification", {
-            title: "Network Changed",
-            body: `${conn.name} may need to switch to ${newMode}`,
+            title: t("notif.networkChangedTitle"),
+            body: t("notif.networkChangedBody", { name: conn.name, mode: newMode }),
           }).catch(() => {});
         }
       }
@@ -271,7 +276,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
     if (loading[conn.id]) return;
     if (mountStatuses[conn.id]?.state === "mounted") return;
     setLoading({ ...loading, [conn.id]: true });
-    addLog("info", `Mounting ${conn.name} to drive ${conn.drive_letter}:...`, "mounts");
+    addLog("info", t("log.mounting", { name: conn.name, letter: conn.drive_letter }), "mounts");
 
     try {
       const status = await invoke<MountStatus>("mount_drive", {
@@ -289,23 +294,23 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
 
       if (status.error) {
         addLog("warning", status.error, "mounts");
-        toast.warning(`${conn.name} mounted via ${mode} (${url}) with warning: ${status.error}`);
+        toast.warning(t("toast.mountedWarning", { name: conn.name, mode, url, error: status.error }));
       } else {
-        addLog("success", `${conn.name} mounted to ${conn.drive_letter}: via ${mode} (${url})`, "mounts");
-        toast.success(`Mounted ${conn.name} to drive ${conn.drive_letter}: via ${mode}`);
+        addLog("success", t("log.mountedOk", { name: conn.name, letter: conn.drive_letter, mode, url }), "mounts");
+        toast.success(t("toast.mounted", { name: conn.name, letter: conn.drive_letter, mode }));
       }
 
       try {
         await invoke("send_notification", {
-          title: "Drive Mounted",
-          body: `${conn.name} connected via ${mode}`,
+          title: t("notif.mountedTitle"),
+          body: t("notif.mountedBody", { name: conn.name, mode }),
         });
       } catch (err) {
         console.error("Failed to send notification:", err);
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : (typeof err === "string" ? err : `Failed to mount ${conn.name}`);
-      addLog("error", `Mount failed: ${errorMsg}`, "mounts");
+      const errorMsg = err instanceof Error ? err.message : (typeof err === "string" ? err : t("toast.mountFailed", { name: conn.name }));
+      addLog("error", t("log.mountFailed", { msg: errorMsg }), "mounts");
       toast.error(errorMsg);
       // Clear any stale "mounted" status so the card reflects the failure
       setMountStatuses(prev => ({
@@ -328,7 +333,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
 
   const handleUnmount = async (conn: Connection) => {
     setLoading({ ...loading, [conn.id]: true });
-    addLog("info", `Unmounting ${conn.name}...`, "mounts");
+    addLog("info", t("log.unmounting", { name: conn.name }), "mounts");
 
     try {
       await invoke("unmount_drive", { connectionId: conn.id });
@@ -336,20 +341,20 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
         connectionId: conn.id,
       });
       setMountStatuses({ ...mountStatuses, [conn.id]: status });
-      addLog("success", `${conn.name} unmounted successfully`, "mounts");
-      toast.success(`Unmounted ${conn.name}`);
+      addLog("success", t("log.unmounted", { name: conn.name }), "mounts");
+      toast.success(t("toast.unmounted", { name: conn.name }));
 
       try {
         await invoke("send_notification", {
-          title: "Drive Unmounted",
-          body: `${conn.name} disconnected`,
+          title: t("notif.unmountedTitle"),
+          body: t("notif.unmountedBody", { name: conn.name }),
         });
       } catch (err) {
         console.error("Failed to send notification:", err);
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : (typeof err === "string" ? err : `Failed to unmount ${conn.name}`);
-      addLog("error", `Unmount failed: ${errorMsg}`, "mounts");
+      const errorMsg = err instanceof Error ? err.message : (typeof err === "string" ? err : t("toast.unmountFailed", { name: conn.name }));
+      addLog("error", t("log.unmountFailed", { msg: errorMsg }), "mounts");
       toast.error(errorMsg);
     } finally {
       setLoading({ ...loading, [conn.id]: false });
@@ -359,16 +364,16 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
   const handleUnmountExternal = async (mount: ExternalMount) => {
     const key = `ext-${mount.pid}`;
     setLoading({ ...loading, [key]: true });
-    addLog("info", `Unmounting external mount ${mount.remote_name} (PID ${mount.pid})...`, "mounts");
+    addLog("info", t("log.externalUnmounting", { name: mount.remote_name || mount.mount_point, pid: mount.pid }), "mounts");
 
     try {
       await invoke("unmount_external_mount", { pid: mount.pid });
-      addLog("success", `External mount ${mount.remote_name} unmounted`, "mounts");
-      toast.success(`Unmounted ${mount.remote_name || mount.mount_point}`);
+      addLog("success", t("log.externalUnmounted", { name: mount.remote_name || mount.mount_point }), "mounts");
+      toast.success(t("toast.unmounted", { name: mount.remote_name || mount.mount_point }));
       await refreshExternalMounts();
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      addLog("error", `Failed to unmount external: ${errorMsg}`, "mounts");
+      addLog("error", t("log.externalUnmountFailed", { msg: errorMsg }), "mounts");
       toast.error(errorMsg);
     } finally {
       setLoading({ ...loading, [key]: false });
@@ -378,7 +383,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
   const handleTestConnection = async (conn: Connection) => {
     const key = `test-${conn.id}`;
     setLoading({ ...loading, [key]: true });
-    addLog("info", `Testing connection for ${conn.name}...`, "network");
+    addLog("info", t("log.testingConnection", { name: conn.name }), "network");
 
     try {
       const status = mountStatuses[conn.id];
@@ -400,41 +405,41 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
 
       if (result.local_reachable !== null) {
         if (result.local_reachable) {
-          addLog("success", `Local (${result.local_ip}:${conn.port}): reachable`, "network");
+          addLog("success", t("log.localReachable", { ip: result.local_ip, port: conn.port }), "network");
         } else {
-          addLog("error", `Local (${result.local_ip}:${conn.port}): unreachable${result.local_error ? ` — ${result.local_error}` : ""}`, "network");
+          addLog("error", t("log.localUnreachable", { ip: result.local_ip, port: conn.port, err: result.local_error ?? "" }), "network");
         }
       }
 
       if (result.tailscale_reachable !== null) {
         if (result.tailscale_reachable) {
-          addLog("success", `Tailscale (${result.tailscale_ip}:${conn.port}): reachable`, "network");
+          addLog("success", t("log.tailscaleReachable", { ip: result.tailscale_ip, port: conn.port }), "network");
         } else {
-          addLog("error", `Tailscale (${result.tailscale_ip}:${conn.port}): unreachable${result.tailscale_error ? ` — ${result.tailscale_error}` : ""}`, "network");
+          addLog("error", t("log.tailscaleUnreachable", { ip: result.tailscale_ip, port: conn.port, err: result.tailscale_error ?? "" }), "network");
         }
       }
 
       if (result.active_url_reachable !== null) {
         if (result.active_url_reachable) {
-          addLog("success", `Active mount (${result.active_url}): reachable`, "network");
+          addLog("success", t("log.activeReachable", { url: result.active_url }), "network");
         } else {
-          addLog("error", `Active mount (${result.active_url}): unreachable`, "network");
+          addLog("error", t("log.activeUnreachable", { url: result.active_url }), "network");
         }
       }
 
-      const localStatus = result.local_reachable === null ? "" : result.local_reachable ? "Local: OK" : "Local: Failed";
-      const tsStatus = result.tailscale_reachable === null ? "" : result.tailscale_reachable ? "Tailscale: OK" : "Tailscale: Failed";
+      const localStatus = result.local_reachable === null ? "" : result.local_reachable ? t("test.localOk") : t("test.localFailed");
+      const tsStatus = result.tailscale_reachable === null ? "" : result.tailscale_reachable ? t("test.tailscaleOk") : t("test.tailscaleFailed");
       const parts = [localStatus, tsStatus].filter(Boolean).join(", ");
       const anySuccess = result.local_reachable || result.tailscale_reachable;
 
       if (anySuccess) {
         toast.success(parts);
       } else {
-        toast.error(parts || "No IPs configured to test");
+        toast.error(parts || t("test.noIps"));
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      addLog("error", `Test failed: ${msg}`, "network");
+      addLog("error", t("log.testFailed", { msg }), "network");
       toast.error(msg);
     } finally {
       setLoading({ ...loading, [key]: false });
@@ -442,8 +447,8 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
   };
 
   const handleDelete = async (conn: Connection) => {
-    const confirmed = await confirm(`Delete connection "${conn.name}"? This cannot be undone.`, {
-      title: "Delete Connection",
+    const confirmed = await confirm(t("dashboard.confirm.deleteConnection", { name: conn.name }), {
+      title: t("dashboard.confirm.deleteConnectionTitle"),
       kind: "warning",
     });
     if (!confirmed) return;
@@ -464,19 +469,19 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
     }
 
     remove(conn.id);
-    toast.success(`Deleted ${conn.name}`);
+    toast.success(t("toast.deleted", { name: conn.name }));
   };
 
   const handleDeleteRemote = async (remoteName: string) => {
-    const confirmed = await confirm(`Delete rclone remote "${remoteName}"? This will remove it from rclone config.`, {
-      title: "Delete Remote",
+    const confirmed = await confirm(t("dashboard.confirm.deleteRemote", { name: remoteName }), {
+      title: t("dashboard.confirm.deleteRemoteTitle"),
       kind: "warning",
     });
     if (!confirmed) return;
 
     try {
       await invoke("delete_remote", { name: remoteName });
-      toast.success(`Deleted remote ${remoteName}`);
+      toast.success(t("toast.remoteDeleted", { name: remoteName }));
       await refreshExternalMounts();
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -519,7 +524,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
       const connection: Connection = {
         id: crypto.randomUUID(),
         name: remote.name,
-        description: "Imported from rclone config",
+        description: t("dashboard.importedDescription"),
         remote_type: remoteType,
         local_ip: localIp,
         tailscale_ip: "",
@@ -538,12 +543,12 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
       };
 
       add(connection);
-      addLog("success", `Imported "${remote.name}" — edit it to set IP, drive letter, and other settings`, "mounts");
-      toast.success(`Imported "${remote.name}" into the app. Edit it to configure fully.`);
+      addLog("success", t("log.imported", { name: remote.name }), "mounts");
+      toast.success(t("toast.imported", { name: remote.name }));
       await refreshExternalMounts();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error(`Import failed: ${msg}`);
+      toast.error(t("toast.importFailed", { msg }));
     }
   };
 
@@ -558,16 +563,16 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
-              Overview
+              {t("dashboard.title")}
             </h1>
             <p className="text-[13px] text-text-secondary mt-1">
-              Manage your rclone drive mounts
+              {t("dashboard.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {lastRefreshed && (
               <span className="text-[12px] text-text-tertiary select-none">
-                Updated {timeSince}
+                {t("dashboard.updated", { timeSince })}
               </span>
             )}
             <Button
@@ -577,7 +582,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               onClick={refreshAll}
             >
               <ArrowsClockwise size={15} weight="bold" />
-              Refresh
+              {t("shared.action.refresh")}
             </Button>
             <Button
               variant="default"
@@ -585,10 +590,12 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               className="gap-1.5 text-[13px]"
               onClick={() => setShowUpload(true)}
               disabled={totalActive === 0}
-              title={totalActive === 0 ? "Mount a drive first" : "Upload files directly — bypasses VFS cache"}
+              title={totalActive === 0
+                ? t("dashboard.action.directUploadTipDisabled")
+                : t("dashboard.action.directUploadTipEnabled")}
             >
               <CloudArrowUp size={15} weight="bold" />
-              Direct Upload
+              {t("dashboard.action.directUpload")}
             </Button>
             <Button
               variant="primary"
@@ -597,7 +604,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               onClick={() => onNavigate?.("add")}
             >
               <Plus size={15} weight="bold" />
-              New Mount
+              {t("dashboard.action.newMount")}
             </Button>
           </div>
         </div>
@@ -609,10 +616,10 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               <Warning size={20} className="text-accent-amber mt-0.5" weight="bold" />
               <div className="flex-1">
                 <div className="text-[13px] font-medium text-text-primary mb-1">
-                  Required drivers not installed
+                  {t("dashboard.driverWarning.title")}
                 </div>
                 <div className="text-[13px] text-text-secondary mb-3">
-                  Rclone and WinFsp must be installed before you can mount drives.
+                  {t("dashboard.driverWarning.body")}
                 </div>
                 <Button
                   variant="default"
@@ -620,7 +627,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                   onClick={() => onNavigate?.("settings")}
                   className="gap-1.5"
                 >
-                  Install Drivers in Settings
+                  {t("dashboard.driverWarning.action")}
                 </Button>
               </div>
             </div>
@@ -634,20 +641,20 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
           <div className="grid grid-cols-3 gap-4">
             <StatCard
               icon={HardDrives}
-              label="Total Mounts"
+              label={t("dashboard.stat.totalMounts")}
               value={(connections.length + unmanagedRemotes.length).toString()}
               color="text-text-primary"
             />
             <StatCard
               icon={Lightning}
-              label="Active"
+              label={t("dashboard.stat.active")}
               value={totalActive.toString()}
               color="text-accent-green"
             />
             <StatCard
               icon={WifiHigh}
-              label="Network"
-              value={totalActive > 0 ? "Online" : "Offline"}
+              label={t("dashboard.stat.network")}
+              value={totalActive > 0 ? t("dashboard.stat.online") : t("dashboard.stat.offline")}
               color={totalActive > 0 ? "text-accent-green" : "text-text-tertiary"}
               isText
             />
@@ -658,14 +665,14 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
         {initialLoading ? (
           <div className="space-y-3">
             <div className="text-[11px] text-text-tertiary uppercase tracking-wider font-medium">
-              Managed Connections
+              {t("dashboard.section.managed")}
             </div>
             {[0, 1].map((i) => <ConnectionCardSkeleton key={i} />)}
           </div>
         ) : connections.length > 0 && (
           <div className="space-y-3">
             <div className="text-[11px] text-text-tertiary uppercase tracking-wider font-medium">
-              Managed Connections
+              {t("dashboard.section.managed")}
             </div>
             {connections.map((conn) => {
               const status = mountStatuses[conn.id];
@@ -683,15 +690,15 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         {isMounted ? (
                           status?.error ? (
                             <Badge variant="default" dot>
-                              Mounted (Warning)
+                              {t("dashboard.badge.mountedWarning")}
                             </Badge>
                           ) : (
                             <Badge variant="connected" dot>
-                              Mounted
+                              {t("dashboard.badge.mounted")}
                             </Badge>
                           )
                         ) : (
-                          <Badge variant="disconnected">Unmounted</Badge>
+                          <Badge variant="disconnected">{t("dashboard.badge.unmounted")}</Badge>
                         )}
                         {status?.active_mode && (
                           <Badge
@@ -699,7 +706,9 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                               status.active_mode === "local" ? "local" : "tailscale"
                             }
                           >
-                            {status.active_mode === "local" ? "LAN" : "Tailscale"}
+                            {status.active_mode === "local"
+                              ? t("shared.mode.lan")
+                              : t("shared.mode.tailscale")}
                           </Badge>
                         )}
                       </div>
@@ -713,7 +722,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         {isMounted && status?.active_url
                           ? status.active_url.replace("http://", "")
                           : `${conn.local_ip}:${conn.port}`} &bull;{" "}
-                        {conn.speed_profile} profile
+                        {t("dashboard.profileSuffix", { profile: conn.speed_profile })}
                       </div>
                       {isMounted && status?.error && (
                         <div className="text-[11px] text-accent-amber mt-1">
@@ -736,7 +745,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                           ) : (
                             <Stop size={14} weight="bold" />
                           )}
-                          Unmount
+                          {t("dashboard.action.unmount")}
                         </Button>
                       ) : (
                         <Button
@@ -751,7 +760,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                           ) : (
                             <Play size={14} weight="bold" />
                           )}
-                          Mount
+                          {t("dashboard.action.mount")}
                         </Button>
                       )}
                       <Button
@@ -759,7 +768,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         size="sm"
                         onClick={() => handleTestConnection(conn)}
                         disabled={loading[`test-${conn.id}`]}
-                        title="Test connection"
+                        title={t("dashboard.tip.test")}
                       >
                         {loading[`test-${conn.id}`] ? (
                           <div className="w-3.5 h-3.5 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
@@ -771,7 +780,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         variant="ghost"
                         size="sm"
                         onClick={() => onNavigate?.("edit", conn.id)}
-                        title="Edit connection"
+                        title={t("dashboard.tip.edit")}
                       >
                         <PencilSimple size={14} weight="bold" />
                       </Button>
@@ -779,7 +788,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(conn)}
-                        title="Delete connection"
+                        title={t("dashboard.tip.delete")}
                       >
                         <Trash size={14} weight="bold" />
                       </Button>
@@ -795,14 +804,14 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
         {!initialLoading && externalMounts.length > 0 && (
           <div className="space-y-3">
             <div className="text-[11px] text-text-tertiary uppercase tracking-wider font-medium">
-              External Mounts (running outside this app)
+              {t("dashboard.section.external")}
             </div>
             {externalMounts.map((mount) => {
               const key = `ext-${mount.pid}`;
               const isLoading = loading[key];
               const displayName = mount.remote_name
                 ? mount.remote_name.replace(/:$/, "")
-                : "Unknown";
+                : t("dashboard.unknown");
 
               return (
                 <Card key={key} className="p-5 border-accent-amber/20">
@@ -814,12 +823,14 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                           {displayName}
                         </h3>
                         <Badge variant="connected" dot>
-                          Mounted
+                          {t("dashboard.badge.mounted")}
                         </Badge>
-                        <Badge variant="default">External</Badge>
+                        <Badge variant="default">{t("dashboard.badge.external")}</Badge>
                       </div>
                       <div className="text-[13px] text-text-secondary">
-                        {mount.mount_point ? `Drive ${mount.mount_point}` : "Mount point unknown"} &bull; PID {mount.pid}
+                        {mount.mount_point
+                          ? `${t("dashboard.drivePoint", { point: mount.mount_point })} • PID ${mount.pid}`
+                          : `${t("dashboard.mountPointUnknown")} • PID ${mount.pid}`}
                       </div>
                     </div>
 
@@ -836,7 +847,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         ) : (
                           <Stop size={14} weight="bold" />
                         )}
-                        Unmount
+                        {t("dashboard.action.unmount")}
                       </Button>
                     </div>
                   </div>
@@ -850,7 +861,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
         {!initialLoading && unmanagedRemotes.length > 0 && (
           <div className="space-y-3">
             <div className="text-[11px] text-text-tertiary uppercase tracking-wider font-medium">
-              Rclone Remotes (in rclone config, not managed here)
+              {t("dashboard.section.rcloneRemotes")}
             </div>
             {unmanagedRemotes.map((remote) => {
               // Check if this remote is currently mounted externally
@@ -872,12 +883,12 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         <Badge variant="default">{remote.remote_type}</Badge>
                         {externallyMounted && (
                           <Badge variant="connected" dot>
-                            Mounted ({externallyMounted.mount_point})
+                            {t("dashboard.badge.mountedAt", { mountPoint: externallyMounted.mount_point })}
                           </Badge>
                         )}
                       </div>
                       <div className="text-[13px] text-text-secondary">
-                        In rclone config but not managed here — import to edit and mount
+                        {t("dashboard.remotesDescription")}
                       </div>
                     </div>
 
@@ -889,7 +900,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
                         className="gap-1.5"
                       >
                         <CloudArrowDown size={14} weight="bold" />
-                        Import
+                        {t("dashboard.action.import")}
                       </Button>
                       <Button
                         variant="ghost"
@@ -914,11 +925,10 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               <HardDrives size={32} className="text-accent-blue" weight="duotone" />
             </div>
             <h2 className="text-xl font-semibold text-text-primary mb-3">
-              No mounts configured
+              {t("dashboard.empty.title")}
             </h2>
             <p className="text-[13px] text-text-secondary max-w-md mb-8 leading-relaxed">
-              Connect to your Unraid server, NAS, or cloud storage. Drives appear
-              in Windows Explorer like local disks.
+              {t("dashboard.empty.body")}
             </p>
             <Button
               variant="primary"
@@ -927,7 +937,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
               onClick={() => onNavigate?.("add")}
             >
               <Plus size={16} weight="bold" />
-              Add Your First Mount
+              {t("dashboard.empty.cta")}
             </Button>
           </Card>
         )}

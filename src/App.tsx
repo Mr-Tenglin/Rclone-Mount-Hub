@@ -10,6 +10,7 @@ import { SpeedTest } from "./pages/SpeedTest";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettingsStore, useConnectionStore } from "./lib/store";
+import { useI18n } from "./lib/i18n";
 import type { Connection } from "./lib/types";
 
 interface UpdateInfo {
@@ -18,7 +19,8 @@ interface UpdateInfo {
   downloadSize: number | null;
 }
 
-function App() {
+export function App() {
+  const { t } = useI18n();
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
   const [quitting, setQuitting] = useState(false);
@@ -142,7 +144,7 @@ function App() {
           <div className="px-4 py-2.5 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 text-[13px] font-medium text-white">
-                <span>v{updateInfo.version} available</span>
+                <span>{t("update.versionAvailable", { version: updateInfo.version })}</span>
                 {updateInfo.downloadSize && (
                   <span className="text-white/60 text-[11px]">
                     ({formatBytes(updateInfo.downloadSize)})
@@ -175,7 +177,7 @@ function App() {
                     onClick={handleApplyUpdate}
                     className="px-3 py-1 rounded-md bg-white text-indigo-700 text-[12px] font-semibold hover:bg-white/90 transition-colors"
                   >
-                    Update & Restart
+                    {t("update.updateRestart")}
                   </button>
                   <button
                     onClick={() => setUpdateDismissed(true)}
@@ -186,7 +188,9 @@ function App() {
                 </>
               ) : (
                 <span className="text-[12px] text-white/80 font-medium">
-                  {downloadProgress !== null && downloadProgress >= 100 ? "Restarting..." : "Downloading..."}
+                  {downloadProgress !== null && downloadProgress >= 100
+                    ? t("update.restarting")
+                    : t("update.downloading")}
                 </span>
               )}
             </div>
@@ -245,10 +249,10 @@ function App() {
           />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <div style={{ color: "#fff", fontSize: "15px", fontWeight: 600, letterSpacing: "0.01em" }}>
-            Quitting Rclone Mount Hub
+            {t("quit.title")}
           </div>
           <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>
-            Ctrl + Close
+            {t("quit.subtitle")}
           </div>
         </div>
       </div>
