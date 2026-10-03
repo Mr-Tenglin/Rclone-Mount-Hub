@@ -25,7 +25,8 @@ import { useSettingsStore } from "../lib/store";
 import { useLogStore } from "../lib/logStore";
 import { useI18n, SUPPORTED_LOCALES } from "../lib/i18n";
 import { Check } from "phosphor-react";
-import type { SpeedProfile, NetworkMode, AppLanguage, ScoopBucketSource } from "../lib/types";
+import type { SpeedProfile, NetworkMode, AppLanguage, ScoopBucketSource, ProxyScheme } from "../lib/types";
+import { buildProxyUrl } from "../lib/types";
 import { invoke } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
 import { open as openFilePicker } from "@tauri-apps/plugin-dialog";
@@ -155,7 +156,7 @@ export function Settings() {
     try {
       await invoke("install_rclone", {
         scoopBucketSource: settings.scoop_bucket_source,
-        proxyUrl: settings.proxy_url,
+        proxyUrl: buildProxyUrl(settings),
       });
       addLog("success", t("log.rcloneInstalledOk"), "drivers");
       toast.success(t("toast.rcloneInstalled"));
@@ -174,7 +175,7 @@ export function Settings() {
     addLog("info", t("log.fetchingWinfsp"), "drivers");
     try {
       const version = await invoke<string>("download_and_launch_winfsp_installer", {
-        proxyUrl: settings.proxy_url,
+        proxyUrl: buildProxyUrl(settings),
       });
       addLog("success", t("log.winfspDownloaded", { version }), "drivers");
       addLog("info", t("log.winfspWizard"), "drivers");
@@ -236,7 +237,7 @@ export function Settings() {
     try {
       const result = await invoke<string>("check_driver_updates", {
         scoopBucketSource: settings.scoop_bucket_source,
-        proxyUrl: settings.proxy_url,
+        proxyUrl: buildProxyUrl(settings),
       });
       addLog("success", `✓ ${result}`, "drivers");
       toast.info(result);
@@ -1005,24 +1006,45 @@ export function Settings() {
                 </div>
               </div>
               <Toggle
-                enabled={Boolean(settings.proxy_url?.trim())}
-                onChange={(val) => update({ proxy_url: val ? settings.proxy_url : "" })}
+                enabled={settings.proxy_enabled}
+                onChange={(val) => update({ proxy_enabled: val })}
               />
             </div>
-            {Boolean(settings.proxy_url?.trim()) && (
-              <div className="mt-3 space-y-1.5">
-                <label className="block text-[13px] font-medium text-text-secondary">
-                  {t("settings.proxy.address")}
-                </label>
-                <input
-                  type="text"
-                  value={settings.proxy_url}
-                  onChange={(e) => update({ proxy_url: e.target.value })}
-                  placeholder={t("settings.proxy.addressPlaceholder")}
-                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-blue/50 font-mono"
-                />
+            {settings.proxy_enabled && (
+              <div className="mt-3 space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[13px] font-medium text-text-secondary mb-2">
+                      {t("settings.proxy.scheme")}
+                    </label>
+                    <select
+                      value={settings.proxy_scheme ?? "http"}
+                      onChange={(e) =>
+                        update({ proxy_scheme: e.target.value as ProxyScheme })
+                      }
+                      className="w-full bg-bg-overlay border border-border-default rounded-lg px-3 py-2 text-[13px] text-text-primary focus:outline-none focus:border-accent-blue/60"
+                    >
+                      <option value="http">http</option>
+                      <option value="https">https</option>
+                      <option value="socks4">socks4</option>
+                      <option value="socks5">socks5</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-medium text-text-secondary mb-2">
+                      {t("settings.proxy.address")}
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.proxy_url}
+                      onChange={(e) => update({ proxy_url: e.target.value })}
+                      placeholder={t("settings.proxy.addressPlaceholder")}
+                      className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-blue/50 font-mono"
+                    />
+                  </div>
+                </div>
                 <p className="text-[11px] text-text-tertiary">
-                  {t("settings.proxy.addressHint")} {t("settings.proxy.schemeHint")}
+                  {t("settings.proxy.addressHint")}
                 </p>
               </div>
             )}

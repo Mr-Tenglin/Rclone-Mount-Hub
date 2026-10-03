@@ -518,10 +518,10 @@
       "section": "代理",
       "label": "使用代理",
       "toggleHint": "對驅動安裝/更新（Scoop、WinFsp）、Scoop 引導下載以及 rclone 掛載/上傳操作生效。",
+      "scheme": "協定",
       "address": "代理位址",
-      "addressPlaceholder": "http://127.0.0.1:7890",
-      "addressHint": "例如 http://127.0.0.1:7890 或 socks5://10.0.10.1:1080。留空表示不使用代理。",
-      "schemeHint": "省略協定時會自動補上 http://。"
+      "addressPlaceholder": "127.0.0.1:7890",
+      "addressHint": "主機與端口，例如 127.0.0.1:7890。協定會依所選類型自動補全。"
     }
   },
   "export": {

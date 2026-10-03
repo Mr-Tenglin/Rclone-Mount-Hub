@@ -21,6 +21,7 @@ import { ConnectionCardSkeleton, StatCardsSkeleton } from "../components/ui/Skel
 import { useConnectionStore, useMountSummaryStore, useSettingsStore } from "../lib/store";
 import { useLogStore } from "../lib/logStore";
 import type { Connection, MountStatus } from "../lib/types";
+import { buildProxyUrl } from "../lib/types";
 import { invoke } from "@tauri-apps/api/core";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { toast } from "sonner";
@@ -167,7 +168,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
             const newStatus = await invoke<MountStatus>("mount_drive", {
               connectionJson: JSON.stringify(conn),
               cacheDir: settings.cache_dir || null,
-              proxyUrl: settings.proxy_url || null,
+              proxyUrl: buildProxyUrl(settings),
             });
             setMountStatuses(prev => ({ ...prev, [conn.id]: newStatus }));
             addLog("success", t("log.reconnectedVia", { name: conn.name, mode: newMode }), "network");
@@ -283,7 +284,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
       const status = await invoke<MountStatus>("mount_drive", {
         connectionJson: JSON.stringify(conn),
         cacheDir: settings.cache_dir || null,
-        proxyUrl: settings.proxy_url || null,
+        proxyUrl: buildProxyUrl(settings),
       });
       setMountStatuses({ ...mountStatuses, [conn.id]: status });
 

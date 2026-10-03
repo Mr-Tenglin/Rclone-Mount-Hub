@@ -8,7 +8,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > このファイルは英語 README の日本語訳です。英語の原文：[README.md](README.md)。
@@ -192,14 +192,23 @@ pnpm tauri build --bundles nsis   # 本番 NSIS インストーラ
 
 このセクションではプロジェクトへ適用された主な更新を、新しい順に記録しています。
 
-### v0.1.9（現在）
+### v0.2.0（現在）
+
+#### グローバルプロキシ設定
+- **設定 → プロキシ** カード：独立した ON/OFF トグル、プロトコル選択
+  （`http` / `https` / `socks4` / `socks5`）、`host:port` 形式のアドレス欄。
+- プロキシが適用される範囲：ドライバのインストール/更新（Scoop は
+  `scoop config --global proxy` 経由）、Scoop のブートストラップダウンロードと
+  WinFsp インストーラーのダウンロード（`HTTP_PROXY`/`HTTPS_PROXY` 環境変数）、
+  rclone のマウント（ダブルマウントの archive ドライブ含む）/直接アップロード
+  （`HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`、`NO_PROXY` でローカルループバックを保護）。
 
 #### 国際化（i18n）
 - 軽量な i18n システム（`i18n/` フォルダ + `src/lib/i18n.ts`）を追加しました。Vite の
   `import.meta.glob` を使って全ロケールパックを自動発見します。
 - 新規ロケールパック：`i18n/en.json`（ベース）、`i18n/zh-Hans.json`、`i18n/zh-Hant.json`、
   `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 英語ベースパックと完全にキー一致
-  （各 498 キー）。
+  （各 505 キー）。
 - 全ページ、トースト、ログ、モーダルの UI 文字列はすべて `t("...")` 経由でルーティングされます。
   欠落キーは英語にフォールバックし、最終的にキーパス自体になります。
 - 設定 → 言語で **システム / English / 简体中文 / 繁體中文 / 日本語 / Español / Русский** を選択

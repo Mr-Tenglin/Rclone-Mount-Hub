@@ -8,7 +8,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > 本文件为英文 README 的中文翻译。原始英文见 [README.md](README.md)。
@@ -192,13 +192,21 @@ pnpm tauri build --bundles nsis   # 生产 NSIS 安装器
 
 本节以倒序记录项目的重要更新。
 
-### v0.1.9（当前）
+### v0.2.0（当前）
+
+#### 全局代理设置
+- 新增 **设置 → 代理** 卡片：独立的开/关开关、协议选择（`http` / `https` /
+  `socks4` / `socks5`）以及纯 `host:port` 地址输入框。
+- 代理生效范围：驱动安装/更新（Scoop 通过 `scoop config --global proxy`）、
+  Scoop 引导下载与 WinFsp 安装包下载（`HTTP_PROXY`/`HTTPS_PROXY` 环境变量）、
+  rclone 挂载（含双挂载 archive 盘）/直接上传（`HTTP_PROXY`/`HTTPS_PROXY`/
+  `ALL_PROXY`，`NO_PROXY` 保护本地回环）。
 
 #### 国际化（i18n）
 - 加入轻量的 i18n 体系（`i18n/` 目录 + `src/lib/i18n.ts`），通过 Vite 的 `import.meta.glob`
   自动发现所有语言包。
 - 新增语言包：`i18n/en.json`（基础包）、`i18n/zh-Hans.json`、`i18n/zh-Hant.json`、
-  `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 与英文基础包完全键对齐（每个 498 词条）。
+  `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 与英文基础包完全键对齐（每个 505 词条）。
 - 所有页面、Toast、日志、弹窗中的界面文案现在都经由 `t("...")` 路由。缺失的键
   回退到英文，再回退到键路径本身。
 - 设置 → 语言可让用户在 **跟随系统 / 简体中文 / English / 繁體中文 / 日本語 /

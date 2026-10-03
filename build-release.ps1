@@ -4,7 +4,7 @@ $ProjectRoot = $PSScriptRoot
 
 # ── 本次发布默认版本号（直接运行 .\build-release.ps1 时沿用） ─────────────────
 # 改这一行即可固定下次发布版本；也可在运行时按提示输入其它版本覆盖。
-$DefaultVersion = "0.1.9"
+$DefaultVersion = "0.2.0"
 
 # ── Detect next version from existing Releases folders ───────────────────────
 $ReleasesDir = Join-Path $ProjectRoot "src-tauri\Releases"

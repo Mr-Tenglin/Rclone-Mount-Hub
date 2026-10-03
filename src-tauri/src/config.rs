@@ -190,6 +190,13 @@ pub struct AppSettings {
     // operations. Empty = disabled. e.g. "http://127.0.0.1:7890"
     #[serde(default)]
     pub proxy_url: String,
+    // Proxy enabled flag (independent of the address so the toggle works
+    // even when the address is still empty).
+    #[serde(default)]
+    pub proxy_enabled: bool,
+    // Proxy protocol: "http" | "https" | "socks4" | "socks5".
+    #[serde(default)]
+    pub proxy_scheme: String,
 }
 
 impl Default for AppSettings {
@@ -207,6 +214,8 @@ impl Default for AppSettings {
             language: "auto".to_string(),
             scoop_bucket_source: "github".to_string(),
             proxy_url: String::new(),
+            proxy_enabled: false,
+            proxy_scheme: "http".to_string(),
         }
     }
 }

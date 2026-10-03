@@ -187,19 +187,12 @@ async fn apply_scoop_proxy(app: &tauri::AppHandle, proxy_url: &str) -> Result<()
         return Ok(());
     }
 
-    // Normalise: ensure a scheme is present so Scoop's config accepts it.
-    let url = if proxy_url.contains("://") {
-        proxy_url.trim().to_string()
-    } else {
-        format!("http://{}", proxy_url.trim())
-    };
-
-    let (ok, out, err) = scoop_run(app, &["config", "--global", "proxy", &url]).await;
+    let (ok, out, err) = scoop_run(app, &["config", "--global", "proxy", proxy_url]).await;
     if !ok {
         let detail = if out.trim().is_empty() { err } else { out };
         return Err(format!(
             "Failed to set Scoop proxy to {} — {}",
-            url,
+            proxy_url,
             detail.trim()
         ));
     }
@@ -213,14 +206,9 @@ fn powershell_proxy_prefix(proxy_url: &str) -> String {
     if proxy_url.trim().is_empty() {
         return String::new();
     }
-    let url = if proxy_url.contains("://") {
-        proxy_url.trim().to_string()
-    } else {
-        format!("http://{}", proxy_url.trim())
-    };
     format!(
         "$env:HTTP_PROXY = '{}'; $env:HTTPS_PROXY = '{}'; $env:NO_PROXY = 'localhost,127.0.0.1'; ",
-        url, url
+        proxy_url, proxy_url
     )
 }
 

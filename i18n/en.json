@@ -518,10 +518,10 @@
       "section": "Proxy",
       "label": "Use proxy",
       "toggleHint": "Applied to driver installs/updates (Scoop, WinFsp), the Scoop bootstrap download, and rclone mount/upload operations.",
+      "scheme": "Protocol",
       "address": "Proxy address",
-      "addressPlaceholder": "http://127.0.0.1:7890",
-      "addressHint": "e.g. http://127.0.0.1:7890 or socks5://10.0.10.1:1080. Empty = no proxy.",
-      "schemeHint": "A scheme (http://) is added automatically if you omit it."
+      "addressPlaceholder": "127.0.0.1:7890",
+      "addressHint": "Host and port, e.g. 127.0.0.1:7890. A scheme is added automatically based on the selected protocol."
     }
   },
   "export": {

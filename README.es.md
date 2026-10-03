@@ -8,7 +8,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Versión](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
+[![Versión](https://img.shields.io/badge/version-0.2.0-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![Licencia](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > Este archivo es la traducción al español del README. El original en inglés: [README.md](README.md).
@@ -192,14 +192,25 @@ pnpm tauri build --bundles nsis   # Instalador NSIS de producción
 
 Esta sección registra las actualizaciones notables aplicadas al proyecto, en orden cronológico inverso.
 
-### v0.1.9 (actual)
+### v0.2.0 (actual)
+
+#### Ajuste global de proxy
+- Nueva tarjeta **Configuración → Proxy**: conmutador independiente, selector de
+  protocolo (`http` / `https` / `socks4` / `socks5`) y campo de dirección
+  `host:port`.
+- El proxy se aplica a: instalación/actualización de drivers (Scoop vía
+  `scoop config --global proxy`), descarga del instalador de Scoop y del
+  instalador de WinFsp (variables `HTTP_PROXY`/`HTTPS_PROXY`) y operaciones de
+  rclone (montaje, incluido el disco de archivo de doble montaje, y carga
+  directa) mediante `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`, con `NO_PROXY`
+  protegiendo el loopback local.
 
 #### Internacionalización (i18n)
 - Se ha añadido un sistema i18n ligero (carpeta `i18n/` + `src/lib/i18n.ts`) que descubre
   automáticamente todos los paquetes de idioma mediante `import.meta.glob` de Vite.
 - Nuevos paquetes de idioma: `i18n/en.json` (base), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
   `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — totalmente alineados por clave
-  con el paquete base en inglés (498 claves en cada uno).
+  con el paquete base en inglés (505 claves en cada uno).
 - Todas las cadenas de interfaz en cada página, toast, log y modal pasan ahora por
   `t("...")`. Las claves que faltan caen en inglés y, en último caso, en la ruta de la clave.
 - **Configuración → Idioma** permite elegir **Sistema / English / 简体中文 / 繁體中文 /

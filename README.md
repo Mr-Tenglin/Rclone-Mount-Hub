@@ -8,7 +8,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 ---
@@ -190,14 +190,24 @@ pnpm tauri build --bundles nsis   # production NSIS installer
 
 This section tracks notable updates applied to the project, in reverse-chronological order.
 
-### v0.1.9 (current)
+### v0.2.0 (current)
+
+#### Global proxy setting
+- New **Settings → Proxy** card: independent on/off toggle, protocol picker
+  (`http` / `https` / `socks4` / `socks5`) and a bare `host:port` address field.
+- The proxy is applied to: driver install/updates (Scoop via
+  `scoop config --global proxy`), the Scoop bootstrap download and the WinFsp
+  installer download (via `HTTP_PROXY`/`HTTPS_PROXY` env), and rclone mount
+  (incl. the dual-mount archive drive) / direct upload operations (via
+  `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY`, with `NO_PROXY` protecting local
+  loopback).
 
 #### Internationalization (i18n)
 - Added a lightweight i18n system (`i18n/` folder + `src/lib/i18n.ts`) that auto-discovers
   all locale packs via Vite's `import.meta.glob`.
 - New locale packs: `i18n/en.json` (base), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
   `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — fully key-aligned with the English
-  base (498 keys each).
+  base (505 keys each).
 - All UI strings across every page, toast, log, and modal are routed through
   `t("...")`. Missing keys fall back to English, then to the key path.
 - Settings → Language lets the user pick **System / English / 简体中文 / 繁體中文 /

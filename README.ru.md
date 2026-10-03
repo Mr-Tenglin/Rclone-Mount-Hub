@@ -8,7 +8,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > Это русский перевод README. Английский оригинал: [README.md](README.md).
@@ -192,14 +192,25 @@ pnpm tauri build --bundles nsis   # Продакшн-установщик NSIS
 
 В этом разделе по хронологии (новые сверху) фиксированы важные обновления проекта.
 
-### v0.1.9 (текущая)
+### v0.2.0 (текущая)
+
+#### Глобальная настройка прокси
+- Новая карточка **Настройки → Прокси**: независимый переключатель вкл/выкл,
+  выбор протокола (`http` / `https` / `socks4` / `socks5`) и поле адреса
+  вида `host:port`.
+- Прокси применяется к: установке/обновлению драйверов (Scoop через
+  `scoop config --global proxy`), загрузке установщика Scoop и установщика
+  WinFsp (переменные `HTTP_PROXY`/`HTTPS_PROXY`), операциям rclone
+  (монтирование, включая архивный диск двойного монтирования, и прямая
+  загрузка) через `HTTP_PROXY`/`HTTPS_PROXY`/`ALL_PROXY` с защитой
+  `NO_PROXY` от локального loopback.
 
 #### Международная локализация (i18n)
 - Добавлена лёгкая i18n-система (папка `i18n/` + `src/lib/i18n.ts`), которая автоматически
   обнаруживает все языковые пакеты через `import.meta.glob` Vite.
 - Новые языковые пакеты: `i18n/en.json` (базовый), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
   `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — полностью выровнены по ключам
-  с английским базовым пакетом (по 498 терминов в каждом).
+  с английским базовым пакетом (по 505 терминов в каждом).
 - Все строки интерфейса во всех страницах, уведомлениях, журналах и модальных окнах теперь
   проходят через `t("...")`. Отсутствующие ключи падают на английский, затем на путь ключа.
 - Настройки → Язык позволяет выбрать **Системный / English / 简体中文 / 繁體中文 /

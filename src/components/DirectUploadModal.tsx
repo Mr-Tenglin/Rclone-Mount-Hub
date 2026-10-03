@@ -11,6 +11,7 @@ import {
 import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { useSettingsStore } from "../lib/store";
+import { buildProxyUrl } from "../lib/types";
 import { useI18n } from "../lib/i18n";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -176,7 +177,7 @@ export function DirectUploadModal({
         activePort: conn?.port || null,
         vendor: conn?.vendor || null,
         cacheDir: settings.cache_dir || null,
-        proxyUrl: settings.proxy_url || null,
+        proxyUrl: buildProxyUrl(settings),
       });
       setUploadPid(pid);
     } catch (err) {

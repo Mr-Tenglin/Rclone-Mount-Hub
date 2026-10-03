@@ -56,6 +56,26 @@ export type AppLanguage = "auto" | "en" | "zh-Hans" | "zh-Hant" | "ja" | "es" | 
 /** Which bucket source the Scoop-based driver installer/updates use. */
 export type ScoopBucketSource = "github" | "gitee";
 
+/** Proxy protocol for the global proxy setting. */
+export type ProxyScheme = "http" | "https" | "socks4" | "socks5";
+
+/**
+ * Build the effective proxy URL from the settings parts, or `null` when the
+ * proxy is disabled / the address is empty. Used at every `invoke` site that
+ * forwards the proxy to the backend.
+ */
+export function buildProxyUrl(settings: {
+  proxy_enabled?: boolean;
+  proxy_scheme?: ProxyScheme;
+  proxy_url?: string;
+}): string | null {
+  if (!settings.proxy_enabled) return null;
+  const host = (settings.proxy_url ?? "").trim();
+  if (!host) return null;
+  const scheme = settings.proxy_scheme ?? "http";
+  return host.includes("://") ? host : `${scheme}://${host}`;
+}
+
 export interface AppSettings {
   start_with_windows: boolean;
   start_minimized: boolean;
@@ -69,9 +89,13 @@ export interface AppSettings {
   cache_dir: string;
   language: AppLanguage;
   scoop_bucket_source: ScoopBucketSource;
+  /** Proxy enabled flag — independent of the address so the toggle stays usable. */
+  proxy_enabled: boolean;
+  /** Proxy protocol (http / https / socks4 / socks5). */
+  proxy_scheme: ProxyScheme;
   /**
-   * HTTP(S) proxy applied to driver installs (Scoop / WinFsp) and rclone
-   * operations. Empty = disabled. e.g. "http://127.0.0.1:7890".
+   * Proxy host:port (no scheme). Empty = no proxy.
+   * The effective proxy URL is `${proxy_scheme}://${proxy_url}`.
    */
   proxy_url: string;
 }

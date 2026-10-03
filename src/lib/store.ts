@@ -50,6 +50,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   cache_dir: "",
   language: "auto",
   scoop_bucket_source: "github",
+  proxy_enabled: false,
+  proxy_scheme: "http",
   proxy_url: "",
 };
 
