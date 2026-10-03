@@ -167,6 +167,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
             const newStatus = await invoke<MountStatus>("mount_drive", {
               connectionJson: JSON.stringify(conn),
               cacheDir: settings.cache_dir || null,
+              proxyUrl: settings.proxy_url || null,
             });
             setMountStatuses(prev => ({ ...prev, [conn.id]: newStatus }));
             addLog("success", t("log.reconnectedVia", { name: conn.name, mode: newMode }), "network");
@@ -282,6 +283,7 @@ export function Dashboard({ onNavigate }: DashboardProps = {}) {
       const status = await invoke<MountStatus>("mount_drive", {
         connectionJson: JSON.stringify(conn),
         cacheDir: settings.cache_dir || null,
+        proxyUrl: settings.proxy_url || null,
       });
       setMountStatuses({ ...mountStatuses, [conn.id]: status });
 

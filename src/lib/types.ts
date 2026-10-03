@@ -69,6 +69,11 @@ export interface AppSettings {
   cache_dir: string;
   language: AppLanguage;
   scoop_bucket_source: ScoopBucketSource;
+  /**
+   * HTTP(S) proxy applied to driver installs (Scoop / WinFsp) and rclone
+   * operations. Empty = disabled. e.g. "http://127.0.0.1:7890".
+   */
+  proxy_url: string;
 }
 
 export interface SpeedProfileInfo {

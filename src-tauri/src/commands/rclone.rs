@@ -281,6 +281,7 @@ pub async fn mount_drive(
     app: tauri::AppHandle,
     connection_json: String,
     cache_dir: Option<String>,
+    proxy_url: Option<String>,
 ) -> Result<MountStatus, String> {
     let connection: Connection = serde_json::from_str(&connection_json)
         .map_err(|e| format!("Invalid connection data: {}", e))?;
@@ -479,10 +480,22 @@ pub async fn mount_drive(
     }
 
     // Spawn rclone process
-    let (_rx, child) = app
-        .shell()
-        .command("rclone")
-        .args(&args)
+    let spawn_cmd = app.shell().command("rclone").args(&args);
+    let spawn_cmd = match proxy_url.as_deref().map(str::trim).filter(|u| !u.is_empty()) {
+        Some(u) => {
+            // rclone honours the standard proxy env vars (Go's default HTTP
+            // transport proxyFromEnvironment). Local hosts are excluded so
+            // loopback mounts never leak into the proxy.
+            let url = if u.contains("://") { u.to_string() } else { format!("http://{}", u) };
+            spawn_cmd
+                .env("HTTP_PROXY", &url)
+                .env("HTTPS_PROXY", &url)
+                .env("ALL_PROXY", &url)
+                .env("NO_PROXY", "localhost,127.0.0.1")
+        }
+        None => spawn_cmd,
+    };
+    let (_rx, child) = spawn_cmd
         .spawn()
         .map_err(|e| format!("Failed to spawn rclone: {}", e))?;
 
@@ -626,7 +639,21 @@ pub async fn mount_drive(
                         }
                     }
 
-                    if let Ok((_rx, archive_child)) = app.shell().command("rclone").args(&archive_args).spawn() {
+                    // Same proxy env vars as the live mount, so the archive
+                    // drive behaves consistently.
+                    let archive_spawn = app.shell().command("rclone").args(&archive_args);
+                    let archive_spawn = match proxy_url.as_deref().map(str::trim).filter(|u| !u.is_empty()) {
+                        Some(u) => {
+                            let url = if u.contains("://") { u.to_string() } else { format!("http://{}", u) };
+                            archive_spawn
+                                .env("HTTP_PROXY", &url)
+                                .env("HTTPS_PROXY", &url)
+                                .env("ALL_PROXY", &url)
+                                .env("NO_PROXY", "localhost,127.0.0.1")
+                        }
+                        None => archive_spawn,
+                    };
+                    if let Ok((_rx, archive_child)) = archive_spawn.spawn() {
                         let apid = archive_child.pid();
                         std::thread::sleep(std::time::Duration::from_millis(600));
                         if is_process_alive(apid) {
@@ -1090,6 +1117,7 @@ pub async fn direct_upload(
     active_port: Option<u16>,
     _vendor: Option<String>,
     cache_dir: Option<String>,
+    proxy_url: Option<String>,
 ) -> Result<u32, String> {
     let remote_dest = if dest_path.is_empty() || dest_path == "/" {
         format!("{}:", remote_name)
@@ -1146,10 +1174,19 @@ pub async fn direct_upload(
         }
     }
 
-    let (mut rx, child) = app
-        .shell()
-        .command("rclone")
-        .args(&args)
+    let upload_spawn = app.shell().command("rclone").args(&args);
+    let upload_spawn = match proxy_url.as_deref().map(str::trim).filter(|u| !u.is_empty()) {
+        Some(u) => {
+            let url = if u.contains("://") { u.to_string() } else { format!("http://{}", u) };
+            upload_spawn
+                .env("HTTP_PROXY", &url)
+                .env("HTTPS_PROXY", &url)
+                .env("ALL_PROXY", &url)
+                .env("NO_PROXY", "localhost,127.0.0.1")
+        }
+        None => upload_spawn,
+    };
+    let (mut rx, child) = upload_spawn
         .spawn()
         .map_err(|e| format!("Failed to spawn rclone copy: {}", e))?;
 

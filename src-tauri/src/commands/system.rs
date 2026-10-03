@@ -47,21 +47,117 @@ fn scoop_bucket_url(source: &str) -> &'static str {
         .unwrap_or(SCOOP_BUCKET_URLS[0].1)
 }
 
-/// Run a powershell one-liner and return (success, stdout).
-async fn ps1(app: &tauri::AppHandle, cmd: &str) -> (bool, String) {
+/// Run a powershell one-liner and return (success, stdout, stderr).
+///
+/// `-NoProfile` keeps it fast and deterministic on a freshly-imaged system;
+/// `-Command` is passed as a single quoted argument. The three-tuple return
+/// shape (instead of the older two) is used by `scoop_run` and the Scoop
+/// bootstrap, which need to surface the installer's output for diagnostics.
+async fn ps1(app: &tauri::AppHandle, cmd: &str) -> (bool, String, String) {
     match app
         .shell()
         .command("powershell")
-        .args(["-Command", cmd])
+        .args(["-NoProfile", "-Command", cmd])
         .output()
         .await
     {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-            (output.status.success(), stdout)
+            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            (output.status.success(), stdout, stderr)
         }
-        Err(_) => (false, String::new()),
+        Err(e) => (false, String::new(), e.to_string()),
     }
+}
+
+/// Is the `scoop` binary present at the default install location
+/// (`%USERPROFILE%\scoop\shims\scoop.exe`)?
+///
+/// We probe the file directly instead of spawning `scoop`: right after a
+/// bootstrap, the shims folder is NOT on this process's cached PATH (it was
+/// only merged into the *registry* user PATH, which new processes see).
+/// A file-existence test sidesteps that entirely.
+#[cfg(target_os = "windows")]
+fn scoop_bin_exists() -> bool {
+    let userprofile = std::env::var("USERPROFILE").unwrap_or_default();
+    let bin = format!(r"{}\scoop\shims\scoop.exe", userprofile);
+    std::path::Path::new(&bin).exists()
+}
+
+/// Append Scoop's shims directory to the *process* PATH so later spawns in
+/// this run can find `scoop` without a restart. Registry changes made by
+/// the bootstrap only reach new processes; this refreshes the current one.
+#[cfg(target_os = "windows")]
+fn update_process_path_env() {
+    let userprofile = std::env::var("USERPROFILE").unwrap_or_default();
+    let shims = format!(r"{}\scoop\shims", userprofile);
+    if !std::path::Path::new(&shims).is_dir() {
+        return;
+    }
+    let current = std::env::var("PATH").unwrap_or_default();
+    if !current.split(';').any(|p| p.trim().eq_ignore_ascii_case(&shims)) {
+        let next = format!("{};{}", shims, current);
+        std::env::set_var("PATH", next);
+    }
+}
+
+/// Run a Scoop subcommand. Prefers the process PATH; when that misses
+/// (fresh bootstrap, cached PATH), falls back to the shims directory merged
+/// from the *registry* PATH — exactly what a new process would see. This is
+/// what makes "install Scoop → install rclone" work in one app run.
+#[cfg(target_os = "windows")]
+async fn scoop_run(app: &tauri::AppHandle, args: &[&str]) -> (bool, String, String) {
+    let joined = args.join(" ");
+
+    // Fast path: scoop on the process PATH.
+    let (ok, out, err) = ps1(app, &format!("scoop {} 2>&1 | Out-String", joined)).await;
+    // If `scoop` was not found on PATH, powershell still exits 0 because
+    // the pipeline succeeded; the *content* says "not recognized".
+    if ok && !out.contains("not recognized") && !out.contains("无法将") {
+        return (ok, out, err);
+    }
+    // Also treat an outright failure to invoke powershell as "retry slow path".
+    if ok {
+        return (ok, out, err);
+    }
+
+    // Slow path: registry-merged PATH.
+    fn reg_path_value(hive: &str, key: &str, value: &str) -> String {
+        let out = std::process::Command::new("reg")
+            .args(["query", &format!("{}\\{}", hive, key), "/v", value])
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).to_string())
+            .unwrap_or_default();
+        out.lines()
+            .filter_map(|l| {
+                let t = l.trim();
+                t.to_lowercase()
+                    .starts_with(&value.to_lowercase())
+                    .then(|| {
+                        if let Some(pos) = t.find("REG_") {
+                            t[pos + 4..]
+                                .trim_start_matches(|c: char| c.is_whitespace() || c == '\t')
+                                .to_string()
+                        } else {
+                            t.to_string()
+                        }
+                    })
+            })
+            .next()
+            .unwrap_or_default()
+    }
+
+    let userprofile = std::env::var("USERPROFILE").unwrap_or_default();
+    let shims = format!(r"{}\scoop\shims", userprofile);
+    let machine = reg_path_value("HKLM", "SYSTEM\\CurrentControlSet\\Control", "Path");
+    let user = reg_path_value("HKCU", "Environment", "Path");
+    let merged = format!("{};{};{}", machine, user, shims);
+    let cmd = format!(
+        "$env:PATH = '{}'; scoop {} 2>&1 | Out-String",
+        merged, joined
+    );
+    ps1(app, &cmd).await
 }
 
 /// Is the Scoop `main` bucket a healthy, current git repo?
@@ -70,49 +166,177 @@ async fn ps1(app: &tauri::AppHandle, cmd: &str) -> (bool, String) {
 /// a git repo, so `scoop update` aborts with "Failed to remove local 'main'
 /// bucket" / "'main' bucket not found" and `scoop install` can't find
 /// manifests. Detect that here so we can repair it.
+#[cfg(target_os = "windows")]
 async fn scoop_main_bucket_healthy(app: &tauri::AppHandle) -> bool {
-    let (ok, out) = ps1(
-        app,
-        "scoop bucket list main 2>&1 | Out-String; $exit = $LASTEXITCODE",
-    )
-    .await;
+    let (ok, out, _) = scoop_run(app, &["bucket", "list", "main"]).await;
     // `scoop bucket list main` prints the bucket + its source on success.
     ok && !out.contains("not found") && !out.contains("Failed to remove")
 }
 
-/// Make sure Scoop itself is present (installing it from get.scoop.sh when
+/// Apply or clear the user's HTTP proxy for the whole Scoop stack:
+///   - `scoop config --global proxy <url>` — makes `scoop install/update`
+///     download through the proxy (Scoop honours this for its downloads).
+///   - `scoop config --global unset proxy` — clears it when the user turns
+///     the proxy off.
+/// A `None`/empty value clears the config. Best-effort: failure to set the
+/// proxy does not abort the install flow, it is just logged.
+#[cfg(target_os = "windows")]
+async fn apply_scoop_proxy(app: &tauri::AppHandle, proxy_url: &str) -> Result<(), String> {
+    if proxy_url.trim().is_empty() {
+        let _ = scoop_run(app, &["config", "--global", "unset", "proxy"]).await;
+        return Ok(());
+    }
+
+    // Normalise: ensure a scheme is present so Scoop's config accepts it.
+    let url = if proxy_url.contains("://") {
+        proxy_url.trim().to_string()
+    } else {
+        format!("http://{}", proxy_url.trim())
+    };
+
+    let (ok, out, err) = scoop_run(app, &["config", "--global", "proxy", &url]).await;
+    if !ok {
+        let detail = if out.trim().is_empty() { err } else { out };
+        return Err(format!(
+            "Failed to set Scoop proxy to {} — {}",
+            url,
+            detail.trim()
+        ));
+    }
+    Ok(())
+}
+
+/// PowerShell snippet that makes `Invoke-WebRequest` / `Invoke-RestMethod`
+/// honour the given proxy (Scoop bootstrap download + WinFsp installer both
+/// use these). Empty proxy returns an empty string (no-op).
+fn powershell_proxy_prefix(proxy_url: &str) -> String {
+    if proxy_url.trim().is_empty() {
+        return String::new();
+    }
+    let url = if proxy_url.contains("://") {
+        proxy_url.trim().to_string()
+    } else {
+        format!("http://{}", proxy_url.trim())
+    };
+    format!(
+        "$env:HTTP_PROXY = '{}'; $env:HTTPS_PROXY = '{}'; $env:NO_PROXY = 'localhost,127.0.0.1'; ",
+        url, url
+    )
+}
+
+/// Make sure Scoop itself is present (bootstrapping it from get.scoop.sh when
 /// missing), then guarantee the `main` bucket exists from the requested
 /// source. If the existing bucket was built from the *other* source, it is
 /// removed and re-added so `scoop update` actually pulls from the right place.
+///
+/// Flow:
+///   1. Detect `scoop` by the shims file (PATH-independent).
+///   2. If missing:
+///      a. Set the user execution policy to RemoteSigned (the installer
+///         refuses to run under Unrestricted-only/Restricted; a previous run
+///         of the installer may have left it blocked — this mirrors what a
+///         user would do manually, and is per-user so no UAC prompt).
+///      b. Download `install.ps1` ourselves with `Invoke-WebRequest` and run
+///         it in-process with `-Bypass`. We do NOT use `irm | iex`: when the
+///         app runs elevated the stock one-liner aborts with "Running the
+///         installer as administrator is disabled by default" (the installer
+///         rejects elevated installs unless `-RunAsAdmin` is passed, which
+///         we deliberately do *not* pass — we want the per-user install).
+///      c. Poll up to 60 s until the shims land, then merge them into the
+///         process PATH so the rest of this run can call `scoop`.
+///   3. Repair / point the main bucket at the requested source.
 #[cfg(target_os = "windows")]
-async fn ensure_scoop_installed(app: &tauri::AppHandle, bucket_source: &str) -> Result<(), String> {
-    // 1. Scoop binary itself — install from the official bootstrap script.
-    let (scoop_ok, _) = ps1(app, "scoop --version").await;
-    if !scoop_ok {
-        let (inst_ok, stderr) = ps1(
-            app,
-            "powershell -NoProfile -Command \"iwr -useb get.scoop.sh | iex\" 2>&1 | Out-String",
-        )
-        .await;
-        if !inst_ok {
-            return Err(format!("Scoop installation failed: {}", stderr.trim()));
+async fn ensure_scoop_installed(
+    app: &tauri::AppHandle,
+    bucket_source: &str,
+    proxy_url: &str,
+) -> Result<(), String> {
+    // 1. Is Scoop already installed (per-user layout)?
+    if !scoop_bin_exists() {
+        // 2a. The installer hard-fails unless the execution policy is one of
+        //     Unrestricted / RemoteSigned / ByPass. Set CurrentUser scope
+        //     (no elevation needed; does not affect other users).
+        let (ep_ok, _ep_out, ep_err) = ps1(app, "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force 2>&1 | Out-String").await;
+        if !ep_ok {
+            return Err(format!(
+                "Could not set the PowerShell execution policy (needed to run the Scoop \
+                 installer): {}. Run manually: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser",
+                ep_err.trim()
+            ));
         }
+
+        // 2b. Download the installer and run it in-process with -Bypass.
+        //     - TLS 1.2 forced (PS 5.1 default is TLS 1.0/1.1 on older systems).
+        //     - No `iex` on a downloaded pipeline (no execution-policy prompt).
+        //     - No `-RunAsAdmin`: per-user install into %USERPROFILE%\scoop,
+        //       even when this app itself runs elevated — the stock one-liner
+        //       would abort otherwise.
+        //     - Honours the user's proxy setting (Invoke-WebRequest).
+        let proxy_prefix = powershell_proxy_prefix(proxy_url);
+        let inner = format!(
+            r#"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+$ErrorActionPreference = "Stop";
+{}
+$scriptPath = Join-Path $env:TEMP "rmh-scoop-install.ps1";
+Invoke-WebRequest -UseBasicParsing -Uri "https://get.scoop.sh" -OutFile $scriptPath;
+& $scriptPath -DisableMinShell;
+if ($LASTEXITCODE -ne 0) {{ throw "Scoop installer exited with code $LASTEXITCODE" }};
+"#,
+            proxy_prefix
+        );
+        let cmd = format!(
+            "powershell -NoProfile -ExecutionPolicy Bypass -Command \"{}\" 2>&1 | Out-String",
+            inner.replace('\n', " ").replace('"', "\\\"")
+        );
+        let (inst_ok, out, err) = ps1(app, &cmd).await;
+        if !inst_ok {
+            let detail = if !out.trim().is_empty() { out } else { err };
+            return Err(format!(
+                "Scoop installation failed: {}\n\
+                 (If your network requires a proxy, set it first: \
+                 scoop config --global proxy http://<host>:<port> — then retry.)",
+                detail.trim()
+            ));
+        }
+
+        // 2c. Wait for the shims to appear, then refresh the process PATH.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(90);
+        while !scoop_bin_exists() {
+            if std::time::Instant::now() >= deadline {
+                return Err(
+                    "Scoop installer finished but its shims were not found under \
+                     %USERPROFILE%\\scoop\\shims. Check the log, then retry."
+                        .to_string(),
+                );
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        }
+        update_process_path_env();
+
+        // Persist the proxy choice into Scoop's global config so subsequent
+        // `scoop install` / `scoop update` in this flow honour it.
+        apply_scoop_proxy(app, proxy_url).await?;
+    } else {
+        // Already installed — make sure the proxy setting is in sync with
+        // what the user configured (they may have toggled it since the last
+        // install attempt).
+        apply_scoop_proxy(app, proxy_url).await?;
     }
 
-    // 2. Repair / point the main bucket at the requested source.
+    // 3. Repair / point the main bucket at the requested source.
     let url = scoop_bucket_url(bucket_source);
     let healthy = scoop_main_bucket_healthy(app).await;
     if !healthy {
         // Best-effort removal of a broken/directory-only bucket.
-        let _ = ps1(app, "scoop bucket rm main 2>$null | Out-String").await;
+        let _ = scoop_run(app, &["bucket", "rm", "main"]).await;
     }
     // Re-add when missing, or when the recorded source differs from the
     // requested one. (The URL of the active bucket shows in `bucket list`.)
-    let (_, list) = ps1(app, "scoop bucket list main 2>&1 | Out-String").await;
+    let (_, list, _) = scoop_run(app, &["bucket", "list", "main"]).await;
     if !healthy || !list.contains(url) {
-        let _ = ps1(app, "scoop bucket rm main 2>$null | Out-String").await;
-        let (add_ok, add_err) =
-            ps1(app, &format!("scoop bucket add main {}", url)).await;
+        let _ = scoop_run(app, &["bucket", "rm", "main"]).await;
+        let (add_ok, _, add_err) = scoop_run(app, &["bucket", "add", "main", url]).await;
         if !add_ok {
             return Err(format!(
                 "Failed to add Scoop main bucket from {} ({}) — check your network: {}",
@@ -121,10 +345,10 @@ async fn ensure_scoop_installed(app: &tauri::AppHandle, bucket_source: &str) -> 
                 add_err.trim()
             ));
         }
-        let _ = ps1(app, "scoop update 2>&1 | Out-String").await;
+        let _ = scoop_run(app, &["update"]).await;
     } else {
         // Healthy bucket already on the right source — just refresh.
-        let _ = ps1(app, "scoop update 2>&1 | Out-String").await;
+        let _ = scoop_run(app, &["update"]).await;
     }
 
     Ok(())
@@ -132,7 +356,11 @@ async fn ensure_scoop_installed(app: &tauri::AppHandle, bucket_source: &str) -> 
 
 /// Non-Windows stub: there is no Scoop, so just succeed no-op.
 #[cfg(not(target_os = "windows"))]
-async fn ensure_scoop_installed(_app: &tauri::AppHandle, _bucket_source: &str) -> Result<(), String> {
+async fn ensure_scoop_installed(
+    _app: &tauri::AppHandle,
+    _bucket_source: &str,
+    _proxy_url: &str,
+) -> Result<(), String> {
     Ok(())
 }
 
@@ -227,36 +455,38 @@ pub async fn is_autostart_enabled(_app: tauri::AppHandle) -> Result<bool, String
 }
 
 #[command]
-pub async fn install_rclone(app: tauri::AppHandle, scoop_bucket_source: Option<String>) -> Result<(), String> {
+pub async fn install_rclone(
+    app: tauri::AppHandle,
+    scoop_bucket_source: Option<String>,
+    proxy_url: Option<String>,
+) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         // Ensure scoop is installed and its main bucket is healthy / on the
-        // requested source (github or gitee).
+        // requested source (github or gitee). Proxy is applied first so
+        // both the bootstrap download (when Scoop is missing) and the
+        // subsequent bucket git-clone honour it.
         let src = scoop_bucket_source.as_deref().unwrap_or("github");
-        ensure_scoop_installed(&app, src).await?;
+        let proxy = proxy_url.unwrap_or_default();
+        ensure_scoop_installed(&app, src, &proxy).await?;
 
-        let output = app
-            .shell()
-            .command("powershell")
-            .args(["-Command", "scoop install rclone"])
-            .output()
-            .await
-            .map_err(|e| format!("Failed to execute scoop: {}", e))?;
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            let stdout = String::from_utf8_lossy(&output.stdout);
-
-            // Combine stderr and stdout for better error messages
-            let error_msg = if !stderr.is_empty() {
-                stderr.to_string()
-            } else if !stdout.is_empty() {
-                stdout.to_string()
+        // Run through `scoop_run` so a freshly-bootstrapped Scoop (whose shims
+        // are not on this process's cached PATH) is still found.
+        let (ok, out, err) = scoop_run(&app, &["install", "rclone"]).await;
+        if !ok {
+            let detail = if !out.trim().is_empty() {
+                out
+            } else if !err.trim().is_empty() {
+                err
             } else {
-                "Unknown error occurred".to_string()
+                "unknown error".to_string()
             };
-
-            return Err(format!("Rclone installation failed: {}", error_msg.trim()));
+            return Err(format!(
+                "Rclone installation failed: {}\n\
+                 (If your network requires a proxy, set it in Settings → Proxy \
+                 and retry.)",
+                detail.trim()
+            ));
         }
 
         Ok(())
@@ -275,20 +505,32 @@ pub async fn install_winfsp(_app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[command]
-pub async fn download_and_launch_winfsp_installer(app: tauri::AppHandle) -> Result<String, String> {
+pub async fn download_and_launch_winfsp_installer(
+    app: tauri::AppHandle,
+    proxy_url: Option<String>,
+) -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
+        let proxy = proxy_url.unwrap_or_default();
+        let proxy_prefix = powershell_proxy_prefix(&proxy);
+
         // Fetch latest release info from GitHub API
         let api_output = app
             .shell()
             .command("powershell")
             .args([
+                "-NoProfile",
                 "-Command",
-                r#"
-                $response = Invoke-RestMethod -Uri 'https://api.github.com/repos/winfsp/winfsp/releases/latest' -UseBasicParsing;
-                $asset = $response.assets | Where-Object { $_.name -like '*.msi' -and $_.name -notlike '*arm*' } | Select-Object -First 1;
-                Write-Output "$($asset.browser_download_url)|$($asset.name)|$($response.tag_name)"
-                "#,
+                &format!(
+                    r#"
+                    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+                    {}
+                    $response = Invoke-RestMethod -Uri 'https://api.github.com/repos/winfsp/winfsp/releases/latest' -UseBasicParsing;
+                    $asset = $response.assets | Where-Object {{ $_.name -like '*.msi' -and $_.name -notlike '*arm*' }} | Select-Object -First 1;
+                    Write-Output "$($asset.browser_download_url)|$($asset.name)|$($response.tag_name)"
+                    "#,
+                    proxy_prefix
+                ),
             ])
             .output()
             .await
@@ -298,7 +540,16 @@ pub async fn download_and_launch_winfsp_installer(app: tauri::AppHandle) -> Resu
         let trimmed = stdout.trim();
 
         if trimmed.is_empty() || !trimmed.contains('|') {
-            return Err("Failed to get WinFsp download URL from GitHub".to_string());
+            let detail = if trimmed.is_empty() {
+                String::from_utf8_lossy(&api_output.stderr).to_string()
+            } else {
+                trimmed.to_string()
+            };
+            return Err(format!(
+                "Failed to get WinFsp download URL from GitHub: {} \
+                 (if your network requires a proxy, enable it in Settings → Proxy and retry)",
+                detail.trim()
+            ));
         }
 
         let parts: Vec<&str> = trimmed.split('|').collect();
@@ -313,10 +564,12 @@ pub async fn download_and_launch_winfsp_installer(app: tauri::AppHandle) -> Resu
             .shell()
             .command("powershell")
             .args([
+                "-NoProfile",
                 "-Command",
                 &format!(
-                    "Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
-                    download_url, temp_path
+                    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+                     {}Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
+                    proxy_prefix, download_url, temp_path
                 ),
             ])
             .output()
@@ -325,7 +578,11 @@ pub async fn download_and_launch_winfsp_installer(app: tauri::AppHandle) -> Resu
 
         if !download_output.status.success() {
             let stderr = String::from_utf8_lossy(&download_output.stderr);
-            return Err(format!("Download failed: {}", stderr.trim()));
+            return Err(format!(
+                "Download failed: {} (if your network requires a proxy, enable it in \
+                 Settings → Proxy and retry)",
+                stderr.trim()
+            ));
         }
 
         // Launch the installer (user goes through wizard)
@@ -597,17 +854,19 @@ pub async fn get_driver_versions(app: tauri::AppHandle) -> Result<DriverVersions
 pub async fn uninstall_rclone(app: tauri::AppHandle) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
-        let output = app
-            .shell()
-            .command("powershell")
-            .args(["-Command", "scoop uninstall rclone"])
-            .output()
-            .await
-            .map_err(|e| e.to_string())?;
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!("Failed to uninstall rclone: {}", stderr));
+        // Through `scoop_run` so a per-user Scoop (shims not on the cached
+        // process PATH) is still found.
+        let (ok, out, err) = scoop_run(&app, &["uninstall", "rclone"]).await;
+        if !ok {
+            let detail = if out.trim().is_empty() {
+                err
+            } else {
+                out
+            };
+            return Err(format!(
+                "Failed to uninstall rclone: {}",
+                detail.trim()
+            ));
         }
 
         Ok(())
@@ -646,28 +905,27 @@ pub async fn uninstall_winfsp(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[command]
-pub async fn check_driver_updates(app: tauri::AppHandle, scoop_bucket_source: Option<String>) -> Result<String, String> {
+pub async fn check_driver_updates(
+    app: tauri::AppHandle,
+    scoop_bucket_source: Option<String>,
+    proxy_url: Option<String>,
+) -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
         // Repair + update Scoop's main bucket from the requested source
         // (github or gitee) before checking package status.
         let src = scoop_bucket_source.as_deref().unwrap_or("github");
-        let _ = ensure_scoop_installed(&app, src).await;
+        let proxy = proxy_url.unwrap_or_default();
+        let _ = ensure_scoop_installed(&app, src, &proxy).await;
 
         // Check for updates
-        let output = app
-            .shell()
-            .command("powershell")
-            .args(["-Command", "scoop status"])
-            .output()
-            .await
-            .map_err(|e| e.to_string())?;
-
-        let stdout = String::from_utf8_lossy(&output.stdout);
-
-        if stdout.contains("Latest versions") || stdout.contains("up to date") {
+        let (ok, out, _) = scoop_run(&app, &["status"]).await;
+        if !ok {
+            return Err("scoop status failed".to_string());
+        }
+        if out.contains("Latest versions") || out.contains("up to date") {
             Ok("All drivers are up to date".to_string())
-        } else if stdout.contains("rclone") || stdout.contains("winfsp") {
+        } else if out.contains("rclone") || out.contains("winfsp") {
             Ok("Updates available. Click Install/Update Drivers to update.".to_string())
         } else {
             Ok("All drivers are up to date".to_string())

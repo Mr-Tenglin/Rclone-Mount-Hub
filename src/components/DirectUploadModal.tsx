@@ -176,6 +176,7 @@ export function DirectUploadModal({
         activePort: conn?.port || null,
         vendor: conn?.vendor || null,
         cacheDir: settings.cache_dir || null,
+        proxyUrl: settings.proxy_url || null,
       });
       setUploadPid(pid);
     } catch (err) {

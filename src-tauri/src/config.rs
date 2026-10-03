@@ -186,6 +186,10 @@ pub struct AppSettings {
     pub language: String, // "auto" | "en" | "zh-Hans" | ...
     #[serde(default)]
     pub scoop_bucket_source: String, // "github" | "gitee"
+    // HTTP(S) proxy used for driver installs (Scoop / WinFsp) and rclone
+    // operations. Empty = disabled. e.g. "http://127.0.0.1:7890"
+    #[serde(default)]
+    pub proxy_url: String,
 }
 
 impl Default for AppSettings {
@@ -202,6 +206,7 @@ impl Default for AppSettings {
             cache_dir: None,
             language: "auto".to_string(),
             scoop_bucket_source: "github".to_string(),
+            proxy_url: String::new(),
         }
     }
 }

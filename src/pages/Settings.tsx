@@ -155,6 +155,7 @@ export function Settings() {
     try {
       await invoke("install_rclone", {
         scoopBucketSource: settings.scoop_bucket_source,
+        proxyUrl: settings.proxy_url,
       });
       addLog("success", t("log.rcloneInstalledOk"), "drivers");
       toast.success(t("toast.rcloneInstalled"));
@@ -172,7 +173,9 @@ export function Settings() {
     setInstallingDrivers(true);
     addLog("info", t("log.fetchingWinfsp"), "drivers");
     try {
-      const version = await invoke<string>("download_and_launch_winfsp_installer");
+      const version = await invoke<string>("download_and_launch_winfsp_installer", {
+        proxyUrl: settings.proxy_url,
+      });
       addLog("success", t("log.winfspDownloaded", { version }), "drivers");
       addLog("info", t("log.winfspWizard"), "drivers");
       toast.success(t("toast.winfspLaunched", { version }));
@@ -233,6 +236,7 @@ export function Settings() {
     try {
       const result = await invoke<string>("check_driver_updates", {
         scoopBucketSource: settings.scoop_bucket_source,
+        proxyUrl: settings.proxy_url,
       });
       addLog("success", `✓ ${result}`, "drivers");
       toast.info(result);
@@ -983,6 +987,45 @@ export function Settings() {
                 <option value="gitee">{t("settings.scoop.gitee")}</option>
               </select>
             </div>
+          </Card>
+
+          {/* Proxy (driver installs / WinFsp download / rclone mount & upload) */}
+          <Card className="p-6">
+            <h2 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-2">
+              <Globe size={18} weight="duotone" className="text-accent-amber" />
+              {t("settings.proxy.section")}
+            </h2>
+            <div className="flex items-center justify-between py-1">
+              <div>
+                <div className="text-[13px] font-medium text-text-primary mb-0.5">
+                  {t("settings.proxy.label")}
+                </div>
+                <div className="text-[11px] text-text-tertiary">
+                  {t("settings.proxy.toggleHint")}
+                </div>
+              </div>
+              <Toggle
+                enabled={Boolean(settings.proxy_url?.trim())}
+                onChange={(val) => update({ proxy_url: val ? settings.proxy_url : "" })}
+              />
+            </div>
+            {Boolean(settings.proxy_url?.trim()) && (
+              <div className="mt-3 space-y-1.5">
+                <label className="block text-[13px] font-medium text-text-secondary">
+                  {t("settings.proxy.address")}
+                </label>
+                <input
+                  type="text"
+                  value={settings.proxy_url}
+                  onChange={(e) => update({ proxy_url: e.target.value })}
+                  placeholder={t("settings.proxy.addressPlaceholder")}
+                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-blue/50 font-mono"
+                />
+                <p className="text-[11px] text-text-tertiary">
+                  {t("settings.proxy.addressHint")} {t("settings.proxy.schemeHint")}
+                </p>
+              </div>
+            )}
           </Card>
 
           {/* Troubleshooting */}

@@ -513,6 +513,15 @@
       "hint": "De dónde descarga rclone al instalar o actualizar los drivers. GitHub aloja el bucket principal de Scoop (oficial, predeterminado). Gitee es una plataforma de Git popular entre los desarrolladores de China continental; aloja una copia del bucket sincronizada por la comunidad para usarla cuando GitHub es lento o inaccesible. Gitee NO es un espejo de GitHub: el contenido de su bucket se sincroniza de forma independiente y puede estar desactualizado o faltarle paquetes.",
       "github": "GitHub (oficial)",
       "gitee": "Gitee (sincronizado por la comunidad)"
+    },
+    "proxy": {
+      "section": "Proxy",
+      "label": "Usar proxy",
+      "toggleHint": "Se aplica a la instalación/actualización de drivers (Scoop, WinFsp), la descarga de arranque de Scoop y las operaciones de montaje/carga de rclone.",
+      "address": "Dirección del proxy",
+      "addressPlaceholder": "http://127.0.0.1:7890",
+      "addressHint": "p. ej. http://127.0.0.1:7890 o socks5://10.0.10.1:1080. Vacío = sin proxy.",
+      "schemeHint": "Si omites el esquema, se añadirá http:// automáticamente."
     }
   },
   "export": {
