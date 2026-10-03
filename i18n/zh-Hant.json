@@ -367,6 +367,7 @@
       "smb": "SMB / Samba 設定",
       "s3": "S3 設定",
       "auth": "驗證",
+      "type": "連接類型",
       "networkMode": "網路模式",
       "performanceProfile": "效能設定",
       "advancedCache": "進階快取設定"
@@ -457,6 +458,7 @@
     "cache": {
       "section": "VFS 快取目錄",
       "intro": "rclone 預設將檔案寫入快取到系統碟。指向空間更大的磁碟機，可避免複製大檔案（例如虛擬機器映像）時塞滿 C:\\。",
+      "placeholder": "%LOCALAPPDATA%\\rclone（預設）",
       "reset": "重設為預設"
     },
     "drivers": {
@@ -494,6 +496,7 @@
       "driveTitle": "資源管理器顯示磁碟機但無法連線：",
       "driveBody": "rclone 掛載程序已啟動但遠端連線失敗。請卸載後檢查憑證與伺服器位址，再重試。"
     },
+    "browse": "瀏覽...",
     "resetDefaults": "復為預設",
     "savedNote": "設定將自動儲存",
     "language": {

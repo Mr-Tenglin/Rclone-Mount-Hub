@@ -6,7 +6,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Bristopher/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > 本文件为英文 README 的中文翻译。原始英文见 [README.md](README.md)。
@@ -119,7 +119,7 @@ Rclone Mount Hub 让你只需一键，就能把远程存储 — NAS、Unraid、N
 
 ### 安装
 
-从 [Releases](https://github.com/Bristopher/Rclone-Mount-Hub/releases) 下载最新的 `Rclone Mount Hub_x.x.x_x64-setup.exe` 并运行。无需管理员权限。
+从 [Releases](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases) 下载最新的 `Rclone Mount Hub_x.x.x_x64-setup.exe` 并运行。无需管理员权限。
 
 首次启动时，应用会检查 rclone 和 WinFsp，并主动询问是否为你安装。
 
@@ -196,12 +196,23 @@ pnpm tauri build --bundles nsis   # 生产 NSIS 安装器
 - 加入轻量的 i18n 体系（`i18n/` 目录 + `src/lib/i18n.ts`），通过 Vite 的 `import.meta.glob`
   自动发现所有语言包。
 - 新增语言包：`i18n/en.json`（基础包）、`i18n/zh-Hans.json`、`i18n/zh-Hant.json`、
-  `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 每个 490 个词条，与英文基础包
-  完全键对齐。
+  `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 与英文基础包完全键对齐（每个 498 词条）。
 - 所有页面、Toast、日志、弹窗中的界面文案现在都经由 `t("...")` 路由。缺失的键
   回退到英文，再回退到键路径本身。
 - 设置 → 语言可让用户在 **跟随系统 / 简体中文 / English / 繁體中文 / 日本語 /
   Español / Русский** 间切换；选择会持久化到设置存储并即时生效（无需重启）。
+
+#### 驱动安装（Scoop）
+- Rclone 通过 Scoop 安装。新增 **Scoop 仓库源**设置（设置 → "Scoop 仓库源"）：
+  **GitHub**（官方 main 仓库，默认）或 **Gitee**（Gitee 平台上社区同步的副本，
+  适用于 GitHub 访问不畅的网络）。Gitee **不是** GitHub 的镜像 —— 其仓库内容
+  独立同步，可能滞后或缺少部分软件包。
+- 启动流程现在会**自动修复损坏的 Scoop `main` 仓库**（Scoop 0.6.0+ 出现的
+  "Failed to remove local 'main' bucket" / "'main' bucket not found" 故障），
+  而不是安装时静默失败。
+- 修复了安装 rclone 后驱动状态圆点不刷新的问题：rclone 检测现在通过
+  `powershell` 探测，刚装好的 Scoop shim 可被立即发现，尽管 app 进程的 PATH
+  是在启动时缓存的。
 
 #### 依赖对齐与构建工具
 - 将 `@tauri-apps/api` 升级到 **2.12**，并把 `@tauri-apps/plugin-dialog` /
@@ -216,7 +227,7 @@ pnpm tauri build --bundles nsis   # 生产 NSIS 安装器
 - `build-release.ps1` 生成：
   - `Rclone Mount Hub_<ver>_x64-setup.exe`（Velopack 安装器，支持原地更新）
   - `Rclone Mount Hub_<ver>_x64-Portable.exe`（单文件，随处可运行）
-- 更新源地址：`https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download`
+- 更新源地址：`https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases/latest/download`
 
 ---
 

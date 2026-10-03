@@ -367,6 +367,7 @@
       "smb": "Ajustes de SMB / Samba",
       "s3": "Ajustes de S3",
       "auth": "Autenticación",
+      "type": "Tipo de conexión",
       "networkMode": "Modo de red",
       "performanceProfile": "Perfil de rendimiento",
       "advancedCache": "Ajustes avanzados de caché"
@@ -457,6 +458,7 @@
     "cache": {
       "section": "Carpeta de caché VFS",
       "intro": "Por defecto, rclone cachea las escrituras de archivos en la unidad del SO. Señala esto a una unidad con más espacio para no llenar C:\\ al copiar archivos grandes (p. ej., imágenes de VM).",
+      "placeholder": "%LOCALAPPDATA%\\rclone (predeterminado)",
       "reset": "Restablecer a la predeterminada"
     },
     "drivers": {
@@ -494,6 +496,7 @@
       "driveTitle": "La unidad aparece en el Explorador pero no se conecta:",
       "driveBody": "El proceso de montaje de rclone se inició pero la conexión remota falló. Desmonta, comprueba credenciales y dirección del servidor, y vuelve a intentarlo."
     },
+    "browse": "Examinar...",
     "resetDefaults": "Restablecer valores predeterminados",
     "savedNote": "La configuración se guarda automáticamente",
     "language": {

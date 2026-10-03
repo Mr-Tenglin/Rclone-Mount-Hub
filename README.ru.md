@@ -6,7 +6,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Bristopher/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > Это русский перевод README. Английский оригинал: [README.md](README.md).
@@ -119,7 +119,7 @@ Rclone Mount Hub позволяет монтировать удалённое х
 
 ### Установка
 
-Скачайте последнюю `Rclone Mount Hub_x.x.x_x64-setup.exe` из [Releases](https://github.com/Bristopher/Rclone-Mount-Hub/releases) и запустите. Права администратора не нужны.
+Скачайте последнюю `Rclone Mount Hub_x.x.x_x64-setup.exe` из [Releases](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases) и запустите. Права администратора не нужны.
 
 При первом запуске приложение проверит rclone и WinFsp и предложит установить их.
 
@@ -196,13 +196,28 @@ pnpm tauri build --bundles nsis   # Продакшн-установщик NSIS
 - Добавлена лёгкая i18n-система (папка `i18n/` + `src/lib/i18n.ts`), которая автоматически
   обнаруживает все языковые пакеты через `import.meta.glob` Vite.
 - Новые языковые пакеты: `i18n/en.json` (базовый), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
-  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — по 490 терминов каждый, полностью
-  выровнены по ключам с английским базовым пакетом.
+  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — полностью выровнены по ключам
+  с английским базовым пакетом (по 498 терминов в каждом).
 - Все строки интерфейса во всех страницах, уведомлениях, журналах и модальных окнах теперь
   проходят через `t("...")`. Отсутствующие ключи падают на английский, затем на путь ключа.
 - Настройки → Язык позволяет выбрать **Системный / English / 简体中文 / 繁體中文 /
   日本語 / Español / Русский** или следовать системному языку отображения. Выбор
   сохраняется в хранилище настроек и применяется мгновенно (без перезапуска).
+
+#### Установка драйверов (Scoop)
+- Rclone устанавливается через Scoop. Добавлена настройка **источника бакета Scoop**
+  (Настройки → "Источник бакета Scoop"): **GitHub** (официальный основной бакет, по
+  умолчанию) или **Gitee** (синхронированная сообществом копия на платформе Gitee, для
+  сетей, где GitHub недоступен или работает медленно). Gitee — **не** зеркало GitHub:
+  содержимое его бакета синхронизируется отдельно и может отставать или не содержать
+  части пакетов.
+- Теперь при запуске **автоматически чинится повреждённый основной бакет Scoop**
+  (ошибка "Failed to remove local 'main' bucket" / "'main' bucket not found",
+  встречающаяся в Scoop 0.6.0+), а не молча падает при установке.
+- Исправлено отсутствие обновления индикатора статуса драйверов после установки
+  rclone: теперь rclone обнаруживается через `powershell`, так что только что
+  установленная заглушка Scoop находится сразу, хотя PATH процесса приложения
+  был закэширован при запуске.
 
 #### Выравнивание зависимостей и инструменты сборки
 - `@tauri-apps/api` обновлён до **2.12**, а `@tauri-apps/plugin-dialog` /
@@ -219,7 +234,7 @@ pnpm tauri build --bundles nsis   # Продакшн-установщик NSIS
 - `build-release.ps1` создаёт:
   - `Rclone Mount Hub_<ver>_x64-setup.exe` (Velopack-установщик, обновления на месте)
   - `Rclone Mount Hub_<ver>_x64-Portable.exe` (одиночный файл, работает где угодно)
-- URL источника обновлений: `https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download`
+- URL источника обновлений: `https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases/latest/download`
 
 ---
 

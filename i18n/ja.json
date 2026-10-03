@@ -367,6 +367,7 @@
       "smb": "SMB / Samba 設定",
       "s3": "S3 設定",
       "auth": "認証",
+      "type": "接続タイプ",
       "networkMode": "ネットワークモード",
       "performanceProfile": "パフォーマンスプロファイル",
       "advancedCache": "詳細なキャッシュ設定"
@@ -457,6 +458,7 @@
     "cache": {
       "section": "VFS キャッシュディレクトリ",
       "intro": "rclone は既定でファイル書き込みを OS ドライブにキャッシュします。C:\\ が埋まるのを避けるため、空き容量の多いドライブを指定してください（例: VM イメージのコピー時）。",
+      "placeholder": "%LOCALAPPDATA%\\rclone（既定）",
       "reset": "既定に戻す"
     },
     "drivers": {
@@ -494,6 +496,7 @@
       "driveTitle": "エクスプローラーに表示されるが接続できない場合:",
       "driveBody": "rclone マウントプロセスは開始したもののリモート接続が失敗しています。アンマウントし、認証情報とサーバーアドレスを確認して再試行してください。"
     },
+    "browse": "参照...",
     "resetDefaults": "既定値に戻す",
     "savedNote": "設定は自動保存されます",
     "language": {

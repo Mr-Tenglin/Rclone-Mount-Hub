@@ -401,7 +401,7 @@ export function AddConnection({ onNavigate }: AddConnectionProps = {}) {
           <Card className="p-6">
             <h2 className="text-base font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Cloud size={18} weight="duotone" className="text-accent-blue" />
-              Connection Type
+              {t("add.section.type")}
             </h2>
             <div className="grid grid-cols-5 gap-2">
               {REMOTE_TYPES.map((type) => {

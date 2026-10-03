@@ -367,6 +367,7 @@
       "smb": "SMB / Samba 设置",
       "s3": "S3 设置",
       "auth": "身份验证",
+      "type": "连接类型",
       "networkMode": "网络模式",
       "performanceProfile": "性能配置",
       "advancedCache": "高级缓存设置"
@@ -457,6 +458,7 @@
     "cache": {
       "section": "VFS 缓存目录",
       "intro": "rclone 默认将文件写入缓存到系统盘。指向空间更大的驱动器，可避免复制大文件（如虚拟机镜像）时塞满 C:\\。",
+      "placeholder": "%LOCALAPPDATA%\\rclone（默认）",
       "reset": "重置为默认"
     },
     "drivers": {
@@ -494,6 +496,7 @@
       "driveTitle": "资源管理器中显示驱动器但无法连接：",
       "driveBody": "rclone 挂载进程已启动但远程连接失败。请卸载后检查凭据和服务器地址，再重试。"
     },
+    "browse": "浏览...",
     "resetDefaults": "恢复默认",
     "savedNote": "设置将自动保存",
     "language": {

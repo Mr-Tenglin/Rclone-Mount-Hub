@@ -6,7 +6,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Versión](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Bristopher/Rclone-Mount-Hub/releases)
+[![Versión](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![Licencia](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > Este archivo es la traducción al español del README. El original en inglés: [README.md](README.md).
@@ -119,7 +119,7 @@ Tres conjuntos de flags de rclone preajustados, seleccionables por conexión:
 
 ### Instalación
 
-Descarga la última `Rclone Mount Hub_x.x.x_x64-setup.exe` de [Releases](https://github.com/Bristopher/Rclone-Mount-Hub/releases) y ejecútala. No necesita permisos de administrador.
+Descarga la última `Rclone Mount Hub_x.x.x_x64-setup.exe` de [Releases](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases) y ejecútala. No necesita permisos de administrador.
 
 Al primer arranque la app comprueba rclone y WinFsp y ofrece instalarlos.
 
@@ -196,13 +196,28 @@ Esta sección registra las actualizaciones notables aplicadas al proyecto, en or
 - Se ha añadido un sistema i18n ligero (carpeta `i18n/` + `src/lib/i18n.ts`) que descubre
   automáticamente todos los paquetes de idioma mediante `import.meta.glob` de Vite.
 - Nuevos paquetes de idioma: `i18n/en.json` (base), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
-  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — 490 claves de traducción cada uno,
-  totalmente alineadas por clave con el paquete base en inglés.
+  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — totalmente alineados por clave
+  con el paquete base en inglés (498 claves en cada uno).
 - Todas las cadenas de interfaz en cada página, toast, log y modal pasan ahora por
   `t("...")`. Las claves que faltan caen en inglés y, en último caso, en la ruta de la clave.
 - **Configuración → Idioma** permite elegir **Sistema / English / 简体中文 / 繁體中文 /
   日本語 / Español / Русский** o seguir el idioma de visualización del sistema. La opción
   se persiste en el almacén de ajustes y se aplica al instante (sin reiniciar).
+
+#### Instalación de drivers (Scoop)
+- Rclone se instala a través de Scoop. Se añade una configuración de **fuente del
+  bucket de Scoop** (Ajustes → «Fuente del bucket de Scoop»): **GitHub** (bucket
+  principal oficial, por defecto) o **Gitee** (una copia sincronizada por la comunidad
+  en la plataforma Gitee, para redes donde GitHub es lento o inaccesible). Gitee
+  **no** es un espejo de GitHub: el contenido de su bucket se sincroniza por separado
+  y puede estar desactualizado o faltarle paquetes.
+- El proceso de arranque ahora **repara automáticamente un bucket `main` de Scoop
+  dañado** (el fallo «Failed to remove local 'main' bucket» / «'main' bucket not
+  found» visto con Scoop 0.6.0+) antes de instalar, en lugar de fallar en silencio.
+- Corregido el que el indicador de estado de drivers no se actualizaba tras instalar
+  rclone: la detección de rclone ahora se hace a través de `powershell`, de modo que
+  un shim de Scoop recién instalado se encuentra de inmediato, aunque el PATH del
+  proceso de la aplicación se cacheó al arrancar.
 
 #### Alineación de dependencias y herramientas de compilación
 - `@tauri-apps/api` ha sido actualizado a **2.12** y `@tauri-apps/plugin-dialog` /
@@ -219,7 +234,7 @@ Esta sección registra las actualizaciones notables aplicadas al proyecto, en or
 - `build-release.ps1` produce:
   - `Rclone Mount Hub_<ver>_x64-setup.exe` (instalador de Velopack, actualizaciones in situ)
   - `Rclone Mount Hub_<ver>_x64-Portable.exe` (fichero único, se ejecuta en cualquier sitio)
-- URL de la fuente de actualizaciones: `https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download`
+- URL de la fuente de actualizaciones: `https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases/latest/download`
 
 ---
 

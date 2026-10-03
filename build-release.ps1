@@ -2,6 +2,10 @@
 $ErrorActionPreference = "Stop"
 $ProjectRoot = $PSScriptRoot
 
+# ── 本次发布默认版本号（直接运行 .\build-release.ps1 时沿用） ─────────────────
+# 改这一行即可固定下次发布版本；也可在运行时按提示输入其它版本覆盖。
+$DefaultVersion = "0.1.9"
+
 # ── Detect next version from existing Releases folders ───────────────────────
 $ReleasesDir = Join-Path $ProjectRoot "src-tauri\Releases"
 $suggestedVersion = "0.1.0"
@@ -23,9 +27,10 @@ if (Test-Path $ReleasesDir) {
 }
 
 # ── Prompt ────────────────────────────────────────────────────────────────────
-Write-Host "Suggested next version: v$suggestedVersion"
-$userInput = Read-Host "Press Enter to accept, or type a custom version (e.g. 0.2.0)"
-$version = if ($userInput.Trim() -ne "") { $userInput.Trim().TrimStart('v') } else { $suggestedVersion }
+Write-Host "Default release version:  v$DefaultVersion"
+Write-Host "Suggested next version:  v$suggestedVersion (auto-detected)"
+$userInput = Read-Host "Press Enter to use v$DefaultVersion, or type a custom version (e.g. 0.2.0)"
+$version = if ($userInput.Trim() -ne "") { $userInput.Trim().TrimStart('v') } else { $DefaultVersion }
 
 Write-Host ""
 Write-Host "Building v$version..." -ForegroundColor Cyan

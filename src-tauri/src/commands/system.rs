@@ -519,17 +519,29 @@ pub async fn open_rclone_web_ui(app: tauri::AppHandle) -> Result<(), String> {
 
 #[command]
 pub async fn get_driver_versions(app: tauri::AppHandle) -> Result<DriverVersions, String> {
-    // Check Rclone version
+    // Check Rclone version.
+    //
+    // NOTE: we probe via `powershell -Command "rclone version"` instead of
+    // spawning `rclone` directly. Windows caches the process PATH at startup,
+    // so right after `scoop install rclone` the new shim dir is not yet in
+    // our PATH — a direct spawn fails and the status dot stays red until the
+    // app is restarted. PowerShell re-reads the registry-merged PATH on
+    // each invocation, which is why the green dot only appeared after a
+    // full quit/restart.
     let (rclone_installed, rclone_version) = match app
         .shell()
-        .command("rclone")
-        .args(["version"])
+        .command("powershell")
+        .args([
+            "-NoProfile",
+            "-Command",
+            "if (Get-Command rclone -ErrorAction SilentlyContinue) { rclone version 2>&1 | Select-Object -First 1 } else { exit 1 }",
+        ])
         .output()
         .await
     {
         Ok(output) if output.status.success() => {
             let stdout = String::from_utf8_lossy(&output.stdout);
-            // Extract version from first line (e.g., "rclone v1.65.0")
+            // First line looks like "rclone v1.65.0"
             let version = stdout
                 .lines()
                 .next()

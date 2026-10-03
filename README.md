@@ -6,7 +6,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Bristopher/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 ---
@@ -117,7 +117,7 @@ Three tuned rclone flag presets selectable per connection:
 
 ### Install
 
-Download the latest `Rclone Mount Hub_x.x.x_x64-setup.exe` from [Releases](https://github.com/Bristopher/Rclone-Mount-Hub/releases) and run it. No admin rights needed.
+Download the latest `Rclone Mount Hub_x.x.x_x64-setup.exe` from [Releases](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases) and run it. No admin rights needed.
 
 On first launch the app checks for rclone and WinFsp and offers to install them for you.
 
@@ -194,13 +194,26 @@ This section tracks notable updates applied to the project, in reverse-chronolog
 - Added a lightweight i18n system (`i18n/` folder + `src/lib/i18n.ts`) that auto-discovers
   all locale packs via Vite's `import.meta.glob`.
 - New locale packs: `i18n/en.json` (base), `i18n/zh-Hans.json`, `i18n/zh-Hant.json`,
-  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — 490 translation keys each, fully
-  key-aligned with the English base.
-- All UI strings across every page, toast, log, and modal are now routed through
+  `i18n/ja.json`, `i18n/es.json`, `i18n/ru.json` — fully key-aligned with the English
+  base (498 keys each).
+- All UI strings across every page, toast, log, and modal are routed through
   `t("...")`. Missing keys fall back to English, then to the key path.
 - Settings → Language lets the user pick **System / English / 简体中文 / 繁體中文 /
   日本語 / Español / Русский**, or follow the system display language. The choice is
   persisted in the settings store and applied instantly (no restart).
+
+#### Driver installation (Scoop)
+- Rclone installs via Scoop. Added a **Scoop bucket source** setting (Settings →
+  "Scoop Bucket Source"): **GitHub** (official main bucket, default) or **Gitee**
+  (a community-synced copy on the Gitee platform, for networks where GitHub is
+  slow or unreachable). Gitee is **not** a mirror of GitHub — its bucket content
+  is synced separately and may lag or be missing some packages.
+- The bootstrap now **auto-repairs a broken Scoop `main` bucket** (the
+  "Failed to remove local 'main' bucket" / "'main' bucket not found" failure
+  seen with Scoop 0.6.0+) before installing, instead of failing silently.
+- Fixed the driver status dot not refreshing after installing rclone: rclone
+  detection now probes through `powershell` so a freshly-installed Scoop shim is
+  found immediately, even though the app process's PATH was cached at startup.
 
 #### Dependency alignment & build tooling
 - Upgraded `@tauri-apps/api` to **2.12** and aligned `@tauri-apps/plugin-dialog` /
@@ -218,7 +231,7 @@ This section tracks notable updates applied to the project, in reverse-chronolog
 - `build-release.ps1` produces:
   - `Rclone Mount Hub_<ver>_x64-setup.exe` (Velopack installer, in-place updates)
   - `Rclone Mount Hub_<ver>_x64-Portable.exe` (single-file, runs anywhere)
-- Update feed URL: `https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download`
+- Update feed URL: `https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases/latest/download`
 
 ---
 

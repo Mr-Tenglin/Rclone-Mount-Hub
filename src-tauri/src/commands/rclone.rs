@@ -108,15 +108,25 @@ pub fn kill_all_mounts() {
 
 #[command]
 pub async fn check_rclone_installed(app: tauri::AppHandle) -> Result<bool, String> {
+    // Probe through powershell so the freshly-installed Scoop shim is found
+    // even though our process PATH was cached at startup (same reason as
+    // get_driver_versions in system.rs).
     let output = app
         .shell()
-        .command("rclone")
-        .args(["version"])
+        .command("powershell")
+        .args([
+            "-NoProfile",
+            "-Command",
+            "if (Get-Command rclone -ErrorAction SilentlyContinue) { rclone version *>$null; $LASTEXITCODE -eq 0 } else { $false }",
+        ])
         .output()
         .await
         .map_err(|e| e.to_string())?;
 
-    Ok(output.status.success())
+    Ok(output.status.success()
+        && String::from_utf8_lossy(&output.stdout)
+            .trim()
+            .eq_ignore_ascii_case("True"))
 }
 
 #[command]

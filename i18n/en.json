@@ -367,6 +367,7 @@
       "smb": "SMB / Samba Settings",
       "s3": "S3 Settings",
       "auth": "Authentication",
+      "type": "Connection Type",
       "networkMode": "Network Mode",
       "performanceProfile": "Performance Profile",
       "advancedCache": "Advanced Cache Settings"
@@ -457,6 +458,7 @@
     "cache": {
       "section": "VFS Cache Directory",
       "intro": "Rclone caches file writes to your OS drive by default. Point this at a drive with more space to avoid filling up C:\\ when copying large files (e.g. VM images).",
+      "placeholder": "%LOCALAPPDATA%\\rclone (default)",
       "reset": "Reset to default"
     },
     "drivers": {
@@ -494,6 +496,7 @@
       "driveTitle": "Drive shows in Explorer but can't connect:",
       "driveBody": "The rclone mount process started but the remote connection failed. Unmount, check your credentials and server address, then try again."
     },
+    "browse": "Browse...",
     "resetDefaults": "Reset to Defaults",
     "savedNote": "Settings saved automatically",
     "language": {

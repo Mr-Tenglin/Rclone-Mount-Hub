@@ -6,7 +6,7 @@
 [![Tauri](https://img.shields.io/badge/built%20with-Tauri%202-ffc131?logo=tauri&logoColor=white)](https://tauri.app)
 [![React](https://img.shields.io/badge/frontend-React%2019-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Rust](https://img.shields.io/badge/backend-Rust-ce422b?logo=rust&logoColor=white)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Bristopher/Rclone-Mount-Hub/releases)
+[![Version](https://img.shields.io/badge/version-0.1.9-22c55e)](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-a855f7)](LICENSE)
 
 > このファイルは英語 README の日本語訳です。英語の原文：[README.md](README.md)。
@@ -119,7 +119,7 @@ Rclone Mount Hub は、NAS・Unraid・Nextcloud・SFTP・SMB・S3・FTP とい�
 
 ### インストール
 
-[Releases](https://github.com/Bristopher/Rclone-Mount-Hub/releases) から最新の `Rclone Mount Hub_x.x.x_x64-setup.exe` をダウンロードして実行。管理者権限は不要です。
+[Releases](https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases) から最新の `Rclone Mount Hub_x.x.x_x64-setup.exe` をダウンロードして実行。管理者権限は不要です。
 
 初回起動時にアプリが rclone と WinFsp をチェックし、インストールを提案します。
 
@@ -196,13 +196,26 @@ pnpm tauri build --bundles nsis   # 本番 NSIS インストーラ
 - 軽量な i18n システム（`i18n/` フォルダ + `src/lib/i18n.ts`）を追加しました。Vite の
   `import.meta.glob` を使って全ロケールパックを自動発見します。
 - 新規ロケールパック：`i18n/en.json`（ベース）、`i18n/zh-Hans.json`、`i18n/zh-Hant.json`、
-  `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 各 490 翻訳キー、英語ベースパックと
-  完全にキー一致。
+  `i18n/ja.json`、`i18n/es.json`、`i18n/ru.json` — 英語ベースパックと完全にキー一致
+  （各 498 キー）。
 - 全ページ、トースト、ログ、モーダルの UI 文字列はすべて `t("...")` 経由でルーティングされます。
   欠落キーは英語にフォールバックし、最終的にキーパス自体になります。
 - 設定 → 言語で **システム / English / 简体中文 / 繁體中文 / 日本語 / Español / Русский** を選択
   でき、またはシステム表示言語に追従できます。選択は設定ストアに永続化され、即座に反映されます
   （再起動不要）。
+
+#### ドライバのインストール（Scoop）
+- Rclone は Scoop 経由でインストールされます。**Scoop バケットソース**（設定 →
+  「Scoop バケットソース」）が追加されました：**GitHub**（公式 main バケット、既定）または
+  **Gitee**（Gitee プラットフォーム上のコミュニティ同期コピー。GitHub にアクセスしにくい
+  通信環境向け）。Gitee は GitHub のミラーではなく——そのバケットの内容は別途同期されるため、
+  遅れていたり一部のソフトが欠けていたりする可能性があります。
+- 起動処理が、インストール時に損壊した Scoop の `main` バケット（Scoop 0.6.0+ で見られる
+  「Failed to remove local 'main' bucket」/「'main' bucket not found」の失敗）を
+  **自動修復**するようになりました。
+- rclone 直後のドライバ状態インジケータが更新されない問題を修正：rclone の検出は
+  `powershell` 経由で行うため、起動時にキャッシュされたアプリのプロセス PATH とは関係なく、
+  直ちにインストールされたばかりの Scoop シムが見つかります。
 
 #### 依存関係の整合化とビルドツール
 - `@tauri-apps/api` を **2.12** にアップグレードし、`@tauri-apps/plugin-dialog` /
@@ -219,7 +232,7 @@ pnpm tauri build --bundles nsis   # 本番 NSIS インストーラ
 - `build-release.ps1` が以下を生成：
   - `Rclone Mount Hub_<ver>_x64-setup.exe`（Velopack インストーラ、インプレース更新）
   - `Rclone Mount Hub_<ver>_x64-Portable.exe`（単一ファイル、どこでも実行可能）
-- 更新フィード URL：`https://github.com/Bristopher/Rclone-Mount-Hub/releases/latest/download`
+- 更新フィード URL：`https://github.com/Mr-Tenglin/Rclone-Mount-Hub/releases/latest/download`
 
 ---
 

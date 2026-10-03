@@ -664,7 +664,7 @@ export function Settings() {
                   type="text"
                   value={settings.cache_dir}
                   onChange={(e) => update({ cache_dir: e.target.value })}
-                  placeholder="%LOCALAPPDATA%\\rclone (default)"
+                  placeholder={t("settings.cache.placeholder")}
                   className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent-blue/50 font-mono"
                 />
                 <Button variant="ghost" size="sm" onClick={handleBrowseCacheDir} className="gap-1.5 shrink-0">
