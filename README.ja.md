@@ -1,5 +1,7 @@
 # Rclone Mount Hub
 
+[🇬🇧 English](README.md) | [🇨🇳 中文](README.zh.md) | [🇷🇺 Русский](README.ru.md) | [🇪🇸 Español](README.es.md) | 🇯🇵 日本語
+
 > 洗練された Windows 11 デスクトップアプリ — rclone マウントの管理用。PowerShell スクリプトから始まり、フル GUI に成長した。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%2011%20x64-0078d4?logo=windows11&logoColor=white)](https://www.microsoft.com/windows/windows-11)

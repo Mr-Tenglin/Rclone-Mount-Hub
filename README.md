@@ -1,5 +1,7 @@
 # Rclone Mount Hub
 
+🇬🇧 English | [🇨🇳 中文](README.zh.md) | [🇷🇺 Русский](README.ru.md) | [🇪🇸 Español](README.es.md) | [🇯🇵 日本語](README.ja.md)
+
 > A polished Windows 11 desktop app for managing rclone mounts — born from a PowerShell script, grown into a full GUI.
 
 [![Platform](https://img.shields.io/badge/platform-Windows%2011%20x64-0078d4?logo=windows11&logoColor=white)](https://www.microsoft.com/windows/windows-11)

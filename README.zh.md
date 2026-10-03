@@ -1,5 +1,7 @@
 # Rclone Mount Hub
 
+[🇬🇧 English](README.md) | 🇨🇳 中文 | [🇷🇺 Русский](README.ru.md) | [🇪🇸 Español](README.es.md) | [🇯🇵 日本語](README.ja.md)
+
 > 一个精致的 Windows 11 桌面应用，用于管理 rclone 挂载 — 从一个 PowerShell 脚本起步，成长为完整的 GUI。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%2011%20x64-0078d4?logo=windows11&logoColor=white)](https://www.microsoft.com/windows/windows-11)
